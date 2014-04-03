@@ -30,7 +30,7 @@ chrome.storage.sync.get(function(res) {
 		chrome.storage.local.set(json, function() { console.log(lastURL, key, e); });
 
 		var server = "http://127.0.0.1:4568";
-		var keyArr = {character: 'a', count: 5};
+		var keyArr = {keystroke: {character: 'a', count: 5}};
 
 		jQuery.ajax({
 			type: "POST",
