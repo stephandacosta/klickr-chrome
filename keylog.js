@@ -17,17 +17,6 @@ chrome.storage.sync.get(function(res) {
 		chrome.storage.local.set(json, function() { console.log('new site'); });
 	}
 
-	var server = "http://127.0.0.1:4568";
-
-	var keyArr = {
-		a: 14,
-		b: 22,
-		c: 56,
-		d: 45,
-		backspace: 12,
-		space: 44
-	};
-
 	document.addEventListener('keydown', function (e) {
 		var now = utc();
 		key = getKey(e, res.allKeys);
@@ -40,7 +29,10 @@ chrome.storage.sync.get(function(res) {
 		}
 		chrome.storage.local.set(json, function() { console.log(lastURL, key, e); });
 
-		$.ajax({
+		var server = "http://127.0.0.1:4568";
+		var keyArr = {character: 'a', count: 5};
+
+		jQuery.ajax({
 			type: "POST",
 			url: server + '/keystrokes',
 			data: JSON.stringify(keyArr),

@@ -10,8 +10,13 @@
     "default_popup": "popup.html"
   },
 
+  "content_scripts": [{
+    "matches": ["http://*/*","https://*/*"],
+    "js": ["./libs/jquery-2.0.3.min.js"]
+  }],
+
   "background": {
-    "scripts": ["listener.js","libs/jquery-2.0.3.min.js"]
+    "scripts": ["listener.js"]
   },
 
   "permissions": [
