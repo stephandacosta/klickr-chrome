@@ -1,80 +1,89 @@
-console.log('Recorder initiated...');
+/* ---------------------------------------------------------- */
+/* Logger
+/* ---------------------------------------------------------- */
 
-var timer;
-var rate = 100;
-var mousePos;
-var output = [];
-var server = "http://127.0.0.1:4568";
+var Recorder = function(){
+  console.log('Initiating recorder...');
+  this.server = "http://127.0.0.1:4568";
+  this.rate = 100;
+  this.output = [];
+  this.mousePos = undefined;
+  this.actions = {
+    move: 'move'
+  };
 
-var action = {
-  move: 'move',
-  onclick: 'onclick',
-  ondblclick: 'ondblclick',
-  onmousedown: 'onmousedown',
-  onmouseover: 'onmouseover',
-  onmouseout: 'onmouseout',
-  onmouseup: 'onmouseup'
-};
-
-var handler = {};
-
-handler.mouseMove = function (event) {
-  event = event || window.event; // IE-ism
-  mousePos = {
-    x: event.clientX,
-    y: event.clientY
+  // Initialize recording
+  var self = this;
+  window.onmousemove = function(event){
+    self.mouseMove.apply(self, event);
   };
 };
 
-handler.action = function(name){
-  if (mousePos) {
-    output.push({a: name, x: mousePos.x, y: mousePos.y, t: Date.now()});
+window.Recorder = Recorder;
+
+Recorder.prototype.mouseMove = function (event) {
+  event = event || window.event; // IE
+  this.mousePos = {
+    x: event.pageX,
+    y: event.pageY
+  };
+};
+
+Recorder.prototype.log = function(name){
+  console.log(this.mousePos);
+  if (this.mousePos) {
+    console.log(name);
+    this.output.push({a: name, x: this.mousePos.x, y: this.mousePos.y, t: Date.now()});
   }
 };
 
-var send = function(output){
-  console.log('Listener: Sending output...', output);
+Recorder.prototype.start = function(){
+  console.log('Recorder: Started');
+  var self = this;
+
+  timer = setInterval(function(){
+    self.log(self.actions.move);
+  }, this.rate);
+};
+
+Recorder.prototype.stop = function(){
+  console.log('Recorder: Stopped');
+  clearInterval(timer);
+  recorder.send(this.output);
+  this.output = [];
+};
+
+Recorder.prototype.send = function(output){
+  console.log('Recorder: Push to server...', output);
   jQuery.ajax({
     type: "POST",
-    url: server + '/klicks',
+    url: this.server + '/klicks',
     data: JSON.stringify(output),
     contentType: 'application/json',
     success: function(data) {
-      console.log('Ajax: Success');
+      console.log('Recorder: Klick sent', data);
     },
     error: function(data){
-      console.log('Ajax: Failure');
+      console.log('Recorder: Klick send failed', data);
     }
   });
 };
 
-window.onmousemove = handler.mouseMove;
+/* ---------------------------------------------------------- */
+/* Init
+/* ---------------------------------------------------------- */
 
-var recorder = {};
-window.recorder = recorder;
+// Helper for routing actions
+var recorder = new Recorder();
 
-recorder.start = function(){
-  console.log('Recorder: Started');
-  timer = setInterval(function(){
-    handler.action(action.move);
-  }, rate);
-};
-
-recorder.stop = function(){
-  console.log('Recorder: Stopped');
-  clearInterval(timer);
-  console.log(output);
-  send(output);
-  output = [];
-};
-
-
-handler.startRecording = recorder.start;
-handler.stopRecording = recorder.stop;
-
+// Listens to messages from background
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-  if (handler.hasOwnProperty(request.action)){
-    handler[request.action]();
+  if (request.action === 'startRecording'){
+    recorder.start();
+    sendResponse({response: "done"});
+  } else if (request.action === 'stopRecording'){
+    recorder.stop();
     sendResponse({response: "done"});
   }
 });
+
