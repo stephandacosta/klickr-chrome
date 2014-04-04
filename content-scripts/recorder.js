@@ -27,7 +27,6 @@ handler.mouseMove = function (event) {
 };
 
 handler.action = function(name){
-  console.log(name, mousePos);
   if (mousePos) {
     output.push({a: name, x: mousePos.x, y: mousePos.y, t: Date.now()});
   }
@@ -37,7 +36,7 @@ var send = function(output){
   console.log('Listener: Sending output...', output);
   jQuery.ajax({
     type: "POST",
-    url: server + '/recording',
+    url: server + '/klicks',
     data: JSON.stringify(output),
     contentType: 'application/json',
     success: function(data) {
