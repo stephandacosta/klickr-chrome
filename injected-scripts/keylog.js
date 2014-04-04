@@ -29,27 +29,6 @@ chrome.storage.sync.get(function(res) {
 		}
 		chrome.storage.local.set(json, function() { console.log(lastURL, key, e); });
 
-		var server = "http://127.0.0.1:4568";
-		var keyArr = {keystroke: {character: 'a', count: 5}};
-
-		var keys = {
-			user: 'Justin',
-			keyCount: {1: 5, 2: 3, 4: 6},
-			times: [Date.now(), Date.now(), Date.now(), Date.now()]
-		};
-
-		jQuery.ajax({
-			type: "POST",
-			url: server + '/keystrokes',
-			data: JSON.stringify(keyArr),
-			contentType: 'application/json',
-			success: function(data) {
-				console.log('Ajax: Success');
-			},
-			error: function(data){
-				console.log('Ajax: Failure');
-			}
-		});
 	});
 });
 

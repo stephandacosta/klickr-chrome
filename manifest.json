@@ -2,21 +2,21 @@
   "manifest_version": 2,
 
   "name": "Klickr",
-  "description": "Klickr Client Plugin",
+  "description": "Klickr",
   "version": "1.0.0",
 
   "browser_action": {
-    "default_icon": "icon.png",
-    "default_popup": "popup.html"
+    "default_icon": "img/icon.png",
+    "default_popup": "popups/popup.html"
   },
 
   "content_scripts": [{
     "matches": ["http://*/*","https://*/*"],
-    "js": ["./libs/jquery-2.0.3.min.js", "mousetrap.min.js"]
+    "js": ["./libs/jquery-2.0.3.min.js", "content-scripts/recorder.js"]
   }],
 
   "background": {
-    "scripts": ["listener.js"]
+    "scripts": ["bg/listener.js"]
   },
 
   "permissions": [
