@@ -6,9 +6,9 @@ document.addEventListener('DOMContentLoaded', function () {
     chrome.tabs.create({url: "popups/options.html"});
   });
   $('#start').click(function() {
-    chrome.extension.getBackgroundPage().start();
+    chrome.extension.getBackgroundPage().startRecording();
   });
   $('#stop').click(function() {
-    chrome.extension.getBackgroundPage().stop();
+    chrome.extension.getBackgroundPage().stopRecording();
   });
 });

@@ -16,7 +16,7 @@
   }],
 
   "background": {
-    "scripts": ["bg/listener.js"]
+    "scripts": ["bg/background.js"]
   },
 
   "permissions": [

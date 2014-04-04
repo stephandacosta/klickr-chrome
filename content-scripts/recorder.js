@@ -1,9 +1,5 @@
 console.log('Recorder initiated...');
 
-chrome.extension.onRequest.addListener(function(request, sender, sendResponse){
-  console.log(request);
-});
-
 var timer;
 var rate = 100;
 var mousePos;
@@ -22,8 +18,7 @@ var action = {
 
 var handler = {};
 
-handler.init = function (event) {
-  console.log('Listener Handler: Initiated...');
+handler.mouseMove = function (event) {
   event = event || window.event; // IE-ism
   mousePos = {
     x: event.clientX,
@@ -32,7 +27,7 @@ handler.init = function (event) {
 };
 
 handler.action = function(name){
-  console.log(name);
+  console.log(name, mousePos);
   if (mousePos) {
     output.push({a: name, x: mousePos.x, y: mousePos.y, t: Date.now()});
   }
@@ -54,7 +49,7 @@ var send = function(output){
   });
 };
 
-window.onmousemove = handler.init;
+window.onmousemove = handler.mouseMove;
 
 var recorder = {};
 window.recorder = recorder;
@@ -73,3 +68,14 @@ recorder.stop = function(){
   send(output);
   output = [];
 };
+
+
+handler.startRecording = recorder.start;
+handler.stopRecording = recorder.stop;
+
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  if (handler.hasOwnProperty(request.action)){
+    handler[request.action]();
+    sendResponse({response: "done"});
+  }
+});
