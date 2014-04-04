@@ -42,12 +42,14 @@ Recorder.prototype.getUrl = function(){
 Recorder.prototype.addListeners = function(){
   var self = this;
   $('html').click(function(event){
-    self.log(event.type, event.pageX, event.pageY, event.timeStamp, event.target.outerHTML, undefined, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey);
+    console.log(event);
+    self.log(event.type, event.pageX, event.pageY, event.clientX, event.clientY, event.timeStamp, event.target.outerHTML, undefined, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey);
   });
   $('html').keypress(function(event){
+    console.log(event);
     console.log('Keypress', event);
     var charCode = event.which || event.keyCode;
-    self.log(event.type, event.pageX, event.pageY, event.timeStamp, event.target.outerHTML, charCode, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey);
+    self.log(event.type, event.pageX, event.pageY, event.clientX, event.clientY, event.timeStamp, event.target.outerHTML, charCode, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey);
   });
 };
 
@@ -64,24 +66,30 @@ Recorder.prototype.createKlick = function(){
 Recorder.prototype.mouseMove = function(event) {
   event = event || window.event; // IE
   this.mousePos = {
-    x: event.pageX,
-    y: event.pageY
+    pageX: event.pageX,
+    pageY: event.pageY,
+    clientX: event.clientX,
+    clientY: event.clientY
   };
 };
 
 /* Logs to output */
-Recorder.prototype.log = function(action, x, y, timestamp, target, charCode, altKey, ctrlKey, metaKey, shiftKey){
+Recorder.prototype.log = function(action, pageX, pageY, clientX, clientY, timestamp, target, charCode, altKey, ctrlKey, metaKey, shiftKey){
   if (this.mousePos){
   action = action || 'move';
-  x = x || this.mousePos.x;
-  y = y || this.mousePos.y;
+  pageX = pageX || this.mousePos.pageX;
+  pageY = pageY || this.mousePos.pageY;
+  clientX = clientX || this.mousePos.clientX;
+  clientY = clientY || this.mousePos.clientY;
   timestamp = timestamp || Date.now();
   this.klick.ticks.push({
     action: action,
-    x: x,
-    y: y,
+    pageX: pageX,
+    pageY: pageY,
+    clientX: clientX,
+    clientY: clientY,
     timestamp: timestamp,
-    target: target,
+    target: '',
     charCode: charCode,
     altKey: altKey,
     ctrlKey: ctrlKey,
@@ -148,11 +156,7 @@ $(function(){
     } else if (request.action === 'stopRecording'){
       recorder.stop();
       sendResponse({response: "done"});
-    } else if (request.action === 'playRecording'){
-      $('body').append('<div class="mouse" style="position:absolute; background: red; width: 15px; height:15px; border-radius: 7.5px; top: 100px; left:100px;"></div>');
-      playRecording();
     }
   });
 
 });
-

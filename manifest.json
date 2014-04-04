@@ -12,7 +12,12 @@
 
   "content_scripts": [{
     "matches": ["http://*/*","https://*/*"],
-    "js": ["bower_components/jquery/dist/jquery.min.js", "bower_components/d3/d3.min.js", "content-scripts/recorder.js"]
+    "js": [
+      "bower_components/jquery/dist/jquery.min.js",
+      "bower_components/d3/d3.min.js",
+      "content-scripts/recorder.js",
+      "content-scripts/player.js"
+    ]
   }],
 
   "background": {
