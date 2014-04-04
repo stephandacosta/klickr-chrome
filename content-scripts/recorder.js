@@ -1,10 +1,16 @@
-/* ---------------------------------------------------------- */
-/* Logger
+/* ------------------------------------------------------------------------------------*/
+/* RECORDER
+/* - Content script that records mouse movements and sends data to server
+/* - Exists on a page, has access to DOM elements, but not to window object
+/* - Communicates with background using events
 /* TODO: Send click, url, width, height
-/* ---------------------------------------------------------- */
+/* ------------------------------------------------------------------------------------*/
 
+/* ------------------------------------------------------------------------------------*/
+/* Recorder Class
+/* ------------------------------------------------------------------------------------*/
 var Recorder = function(){
-  console.log('Initiating recorder...');
+  console.log('Initializing recorder...');
   this.server = "http://127.0.0.1:4568";
   this.rate = 100;
   this.output = [];
@@ -22,7 +28,7 @@ var Recorder = function(){
 
 window.Recorder = Recorder;
 
-Recorder.prototype.mouseMove = function (event) {
+Recorder.prototype.mouseMove = function(event) {
   event = event || window.event; // IE
   this.mousePos = {
     x: event.pageX,
@@ -70,9 +76,9 @@ Recorder.prototype.send = function(output){
   });
 };
 
-/* ---------------------------------------------------------- */
+/* ------------------------------------------------------------------------------------*/
 /* Init
-/* ---------------------------------------------------------- */
+/* ------------------------------------------------------------------------------------*/
 
 // Helper for routing actions
 var recorder = new Recorder();

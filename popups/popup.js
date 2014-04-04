@@ -1,3 +1,5 @@
+/* Needs massive cleanup */
+
 document.addEventListener('DOMContentLoaded', function () {
   $('#viewerLink').click(function() {
     chrome.tabs.create({url: "popups/viewer.html"});
