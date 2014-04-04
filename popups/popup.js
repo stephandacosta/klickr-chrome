@@ -1,15 +1,17 @@
-/* Needs massive cleanup */
+$(function(){
 
-document.addEventListener('DOMContentLoaded', function () {
-  $('#viewerLink').click(function() {
+  $('#view').click(function() {
     chrome.tabs.create({url: "popups/viewer.html"});
   });
-  $('#optionsLink').click(function() {
+
+  $('#options').click(function() {
     chrome.tabs.create({url: "popups/options.html"});
   });
+
   $('#start').click(function() {
     chrome.extension.getBackgroundPage().startRecording();
   });
+
   $('#stop').click(function() {
     chrome.extension.getBackgroundPage().stopRecording();
   });

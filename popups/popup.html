@@ -2,24 +2,19 @@
 <html>
   <head>
     <title>Klickr</title>
-    <style>
-      body {
-        min-width: 200px;
-        overflow-x: hidden;
-      }
-    </style>
-    <link rel="stylesheet" href="../bower_components/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.css">
     <link rel="stylesheet" href="../styles/style.css">
     <script src="../bower_components/jquery/dist/jquery.js"></script>
     <script src="popup.js"></script>
   </head>
-  <body ng-controller="MainCtrl">
+  <body style="min-width: 200px; overflow-x: hidden;">
     <div>
       <ul class="nav nav-tabs nav-stacked">
+        <li><a href="#" id="klickr">Klickr</a></li>
         <li><a href="#" id="start">Start</a></li>
         <li><a href="#" id="stop">Stop</a></li>
-        <li><a href="#" id="viewerLink">View Keylog</a></li>
-        <li><a href="#" id="optionsLink">Options</a></li>
+        <li><a href="#" id="options">Options</a></li>
+        <li><a href="#" id="view">Keylog</a></li>
       </ul>
     </div>
   </body>

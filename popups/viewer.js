@@ -1,7 +1,11 @@
+/*
+ * TODO: MASSIVE CLEANUP
+ */
+
 var app = angular.module('app', ['truncate', 'ui.bootstrap']);
 
 function MainCtrl($scope) {
-  
+
   $scope.datepicker = new Date(new Date().setHours(0, 0, 0));
   $scope.maxDate = new Date();
 
@@ -17,7 +21,7 @@ function MainCtrl($scope) {
           if (key > 10000)
             min = key;
         }
-        if (key > start && key < end) { 
+        if (key > start && key < end) {
           $scope.logs.push([key, x[key].split('^~^')]);
         }
       }
@@ -44,6 +48,6 @@ function MainCtrl($scope) {
   $scope.opts = {
     backdropFade: true,
     dialogFade:true,
-    dialogClass: 'modal datepickerModal' 
+    dialogClass: 'modal datepickerModal'
   };
 }
