@@ -28,6 +28,16 @@ window.stopRecording = function(){
   });
 };
 
+// Background -> Recorder: Play recording
+window.playRecording = function(){
+  console.log('Background -> Recorder: Play recording');
+  chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+    chrome.tabs.sendMessage(tabs[0].id, {action: "playRecording"}, function(response) {
+      console.log(response.farewell);
+    });
+  });
+};
+
 /*
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo) {
   if (changeInfo.status === 'complete') {

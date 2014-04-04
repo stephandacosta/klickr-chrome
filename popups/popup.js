@@ -15,4 +15,9 @@ $(function(){
   $('#stop').click(function() {
     chrome.extension.getBackgroundPage().stopRecording();
   });
+
+  $('#play').click(function() {
+    chrome.extension.getBackgroundPage().playRecording();
+  });
+
 });

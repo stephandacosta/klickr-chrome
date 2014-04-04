@@ -71,6 +71,7 @@ Recorder.prototype.mouseMove = function(event) {
 
 /* Logs to output */
 Recorder.prototype.log = function(action, x, y, timestamp, target, charCode, altKey, ctrlKey, metaKey, shiftKey){
+  if (this.mousePos){
   action = action || 'move';
   x = x || this.mousePos.x;
   y = y || this.mousePos.y;
@@ -87,6 +88,7 @@ Recorder.prototype.log = function(action, x, y, timestamp, target, charCode, alt
     metaKey: metaKey,
     shiftKey: shiftKey
   });
+  }
 };
 
 /* Start recording */
@@ -146,6 +148,9 @@ $(function(){
     } else if (request.action === 'stopRecording'){
       recorder.stop();
       sendResponse({response: "done"});
+    } else if (request.action === 'playRecording'){
+      $('body').append('<div class="mouse" style="position:absolute; background: red; width: 15px; height:15px; border-radius: 7.5px; top: 100px; left:100px;"></div>');
+      playRecording();
     }
   });
 
