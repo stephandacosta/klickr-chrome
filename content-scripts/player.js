@@ -13,6 +13,7 @@ window.Player = Player;
     .transition()
     .duration(duration)
     .style({'top':  endY + 'px', 'left': endX + 'px'});
+    console.log('mouse moving');
   };
 
   // chains mouse moves together
@@ -22,11 +23,14 @@ window.Player = Player;
     yScale = yScale || 1;
     if ( index === arr.length ) {
       $('.mouse').detach();
+      console.log('movement finished');
     } else {
-      var xClientOrigin = (arr[index].pageX - arr[index].clientX) * xScale;
-      var yClientOrigin = (arr[index].pageY - arr[index].clientY) * yScale;
+      var xAdjusted = (arr[index].clientX * xScale);
+      var yAdjusted = (arr[index].clientY * yScale);
+      var xClientOrigin = (arr[index].pageX * xScale) - xAdjusted;
+      var yClientOrigin = (arr[index].pageY * yScale) - yAdjusted;
       //$(window).scrollLeft(xClientOrigin)  $(window).scrollTop(yClientOrigin);
-      this.move(arr[index].clientX, arr[index].clientY ,arr[index].t);
+      this.move(xAdjusted, yAdjusted ,arr[index].t);
       var that = this;
       setTimeout(function(){
         that.processData(arr, index+1);
@@ -42,6 +46,7 @@ window.Player = Player;
     var yScale = $(window).height() / data["height"];
     var movement = data["ticks"];
     movement[0].t = 0;
+    console.log('mouse y starting point: ', movement[0].pageY);
     $('body').append('<div class="mouse" style="position:absolute; background: red; width: 15px; height:15px; border-radius: 7.5px; top: '+movement[0].pageY+'px; left:'+movement[0].pageX+'px;"></div>');
     for (var i = 1; i < movement.length-1; i++){
       movement[i].t = movement[i]["timestamp"] - movement[i-1]["timestamp"];
@@ -49,13 +54,14 @@ window.Player = Player;
     this.processData(movement, 1, xScale, yScale);
   };
 
-  Player.prototype.getData = function(){
+  Player.prototype.getData = function(clickId){
     var that = this;
     $.ajax({
       url: 'http://127.0.0.1:4568/klicks/'+clickID,
       type: 'GET',
       contentType: 'application/json',
       success: function(data){
+        console.log(data);
         that.playRecording(data);
       }
     });
@@ -63,8 +69,9 @@ window.Player = Player;
 
   Player.prototype.playKlick = function(clickId){
     clickId = clickId || '';
+    console.log(clickId);
     //when ready for connection with server, uncomment getData and remove playRecording(test), as well as test
-    //this.getData();
+    //this.getData(clickId);
     this.playRecording(test);
   };
 
@@ -81,6 +88,7 @@ $(function(){
   // Listens to messages from background
   chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.action === 'playKlick'){
+      console.log('play button clicked');
       player.playKlick(request.id);
       sendResponse({response: "Player: Playing Klick..."});
     }
