@@ -17,7 +17,7 @@ $(function(){
   });
 
   $('#play').click(function() {
-    chrome.extension.getBackgroundPage().playRecording();
+    chrome.extension.getBackgroundPage().playKlick();
   });
 
 });

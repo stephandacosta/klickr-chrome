@@ -21,7 +21,10 @@
   }],
 
   "background": {
-    "scripts": ["bg/background.js"]
+    "scripts": [
+      "bg/helpers.js",
+      "bg/background.js"
+    ]
   },
 
   "permissions": [

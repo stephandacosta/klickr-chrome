@@ -33,21 +33,15 @@ var Recorder = function(){
 
 window.Recorder = Recorder;
 
-/* Gets URL from Background */
-Recorder.prototype.getUrl = function(){
-
-};
-
 /* Add other event listeners */
 Recorder.prototype.addListeners = function(){
   var self = this;
   $('html').click(function(event){
-    console.log(event);
+    // console.log(event);
     self.log(event.type, event.pageX, event.pageY, event.clientX, event.clientY, event.timeStamp, event.target.outerHTML, undefined, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey);
   });
   $('html').keypress(function(event){
-    console.log(event);
-    console.log('Keypress', event);
+    // console.log(event);
     var charCode = event.which || event.keyCode;
     self.log(event.type, event.pageX, event.pageY, event.clientX, event.clientY, event.timeStamp, event.target.outerHTML, charCode, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey);
   });
@@ -58,6 +52,8 @@ Recorder.prototype.createKlick = function(){
   return {
     width: window.innerWidth,
     height: window.innerHeight,
+    url: document.URL,
+    description: '',
     ticks: []
   };
 };
@@ -125,7 +121,7 @@ Recorder.prototype.stop = function(){
 /* Send output to server */
 Recorder.prototype.send = function(klick){
   console.log('Recorder: Push to server...', JSON.stringify(klick));
-  jQuery.ajax({
+  $.ajax({
     type: 'POST',
     url: this.server + '/klicks',
     data: JSON.stringify(klick),
@@ -152,10 +148,10 @@ $(function(){
   chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.action === 'startRecording'){
       recorder.start();
-      sendResponse({response: "done"});
+      sendResponse({response: "Recorder: Started recording"});
     } else if (request.action === 'stopRecording'){
       recorder.stop();
-      sendResponse({response: "done"});
+      sendResponse({response: "Recorder: Stopped recording"});
     }
   });
 
