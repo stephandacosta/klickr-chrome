@@ -57,7 +57,7 @@ window.Player = Player;
   Player.prototype.getData = function(clickId){
     var that = this;
     $.ajax({
-      url: 'http://127.0.0.1:4568/klicks/'+clickID,
+      url: 'http://jyek.cloudapp.net:3004/klicks/'+clickID,
       type: 'GET',
       contentType: 'application/json',
       success: function(data){
