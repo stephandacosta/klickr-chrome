@@ -121,7 +121,7 @@ Recorder.prototype.stop = function(){
 /* Send output to server */
 Recorder.prototype.send = function(klick){
   console.log('Recorder: Push to server...', JSON.stringify(klick));
-  jQuery.ajax({
+  $.ajax({
     type: 'POST',
     url: this.server + '/klicks',
     data: JSON.stringify(klick),
