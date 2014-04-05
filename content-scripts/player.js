@@ -69,10 +69,10 @@ $(function(){
 
   // Listens to messages from background
   chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    if (request.action === 'playRecording'){
-      playKlick(clickId);
+    if (request.action === 'playKlick'){
+      playKlick(request.id);
+      sendResponse({response: "Player: Playing Klick..."});
     }
   });
 
 });
-

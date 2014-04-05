@@ -148,10 +148,10 @@ $(function(){
   chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.action === 'startRecording'){
       recorder.start();
-      sendResponse({response: "done"});
+      sendResponse({response: "Recorder: Started recording"});
     } else if (request.action === 'stopRecording'){
       recorder.stop();
-      sendResponse({response: "done"});
+      sendResponse({response: "Recorder: Stopped recording"});
     }
   });
 
