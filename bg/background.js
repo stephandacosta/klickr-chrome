@@ -10,7 +10,7 @@ console.log('Background initiated...');
 
 window.hostname = '127.0.0.1:4568';
 
-// Background -> Recorder: Start recording
+/* Background -> Recorder: Start recording */
 window.startRecording = function(){
   console.log('Background -> Recorder: Start recording');
   chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
@@ -20,7 +20,7 @@ window.startRecording = function(){
   });
 };
 
-// Background -> Recorder: Stop recording
+/* Background -> Recorder: Stop recording */
 window.stopRecording = function(){
   console.log('Background -> Recorder: Stop recording');
   chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
@@ -30,7 +30,7 @@ window.stopRecording = function(){
   });
 };
 
-// Background -> Recorder: Play recording
+/* Background -> Recorder: Play recording */
 window.playKlick = function(){
   console.log('Background -> Recorder: Play recording');
   chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
@@ -40,6 +40,7 @@ window.playKlick = function(){
   });
 };
 
+/* Listener on tab updates */
 chrome.tabs.onUpdated.addListener(function(){
   chrome.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {
     console.log('Background: Tab update detected', tabs[0].url);
