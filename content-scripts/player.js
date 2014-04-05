@@ -63,6 +63,7 @@ window.Player = Player;
 
   Player.prototype.playKlick = function(clickId){
     clickId = clickId || '';
+    //when ready for connection with server, uncomment getData and remove playRecording(test), as well as test
     //this.getData();
     this.playRecording(test);
   };
@@ -80,7 +81,7 @@ $(function(){
   // Listens to messages from background
   chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.action === 'playKlick'){
-      playKlick(request.id);
+      player.playKlick(request.id);
       sendResponse({response: "Player: Playing Klick..."});
     }
   });
