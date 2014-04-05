@@ -49,9 +49,9 @@ chrome.tabs.onUpdated.addListener(function(){
     if (params.host.match(window.hostname)){
       console.log(params.hasOwnProperty('query'), params.query.hasOwnProperty('url'), params.query.hasOwnProperty('id'));
       if (params.query.hasOwnProperty('url') && params.query.hasOwnProperty('id')){
-        // chrome.tabs.update(tabs[0].id, {url: params.query.url});
-        console.log('Background: Play recording with url', params.query.url, 'and id', params.query.id);
-        window.playKlick(params.query.url, params.query.id);
+        console.log('Background: Play recording with url', decodeURIComponent(params.query.url), 'and id', params.query.id);
+        chrome.tabs.update(tabs[0].id, {url: decodeURIComponent(params.query.url)});
+        window.playKlick(params.query.id);
       }
     }
   });
