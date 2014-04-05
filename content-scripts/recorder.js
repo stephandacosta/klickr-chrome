@@ -33,21 +33,15 @@ var Recorder = function(){
 
 window.Recorder = Recorder;
 
-/* Gets URL from Background */
-Recorder.prototype.getUrl = function(){
-
-};
-
 /* Add other event listeners */
 Recorder.prototype.addListeners = function(){
   var self = this;
   $('html').click(function(event){
-    console.log(event);
+    // console.log(event);
     self.log(event.type, event.pageX, event.pageY, event.clientX, event.clientY, event.timeStamp, event.target.outerHTML, undefined, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey);
   });
   $('html').keypress(function(event){
-    console.log(event);
-    console.log('Keypress', event);
+    // console.log(event);
     var charCode = event.which || event.keyCode;
     self.log(event.type, event.pageX, event.pageY, event.clientX, event.clientY, event.timeStamp, event.target.outerHTML, charCode, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey);
   });
