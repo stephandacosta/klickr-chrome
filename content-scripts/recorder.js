@@ -58,6 +58,8 @@ Recorder.prototype.createKlick = function(){
   return {
     width: window.innerWidth,
     height: window.innerHeight,
+    url: document.URL,
+    description: '',
     ticks: []
   };
 };
