@@ -8,7 +8,7 @@
 /* ------------------------------------------------------------------------------------*/
 console.log('Background initiated...');
 
-window.hostname = 'jyek.cloudapp.net:3004';
+window.hostname = 'localhost:4568';
 window.id = '';
 
 /* Background -> Recorder: Start recording */
@@ -38,6 +38,16 @@ window.playKlick = function(id){
   if (id !== undefined) window.id = id;
   chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
     chrome.tabs.sendMessage(tabs[0].id, {action: "playKlick", id: id}, function(response) {
+      console.log(response);
+    });
+  });
+};
+
+/* Background -> Recorder: Start recording */
+window.openSaver = function(){
+  console.log('Background -> Saver: displaying');
+  chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+    chrome.tabs.sendMessage(tabs[0].id, {action: "openSaver"}, function(response) {
       console.log(response);
     });
   });
