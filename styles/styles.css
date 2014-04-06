@@ -4,8 +4,19 @@
 
 .saveBox {
   position: fixed;
-  background: rgb(136, 218, 149);
-  height: 300px;
-  width: 600px;
+  background: rgb(216, 226, 218);
   border-radius: 7.5px;
+}
+
+#description {
+  width : 200px;
+}
+
+.saveBox {
+  font-size:32px;
+  font-weight:bold;
+}
+
+.form-control{
+  padding-left: 20px;
 }

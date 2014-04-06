@@ -5,7 +5,18 @@
 
 var Saver= function(){
 
-this.node = $('<div class="saveBox"></div>');
+this.node = $('<div class="input-group saveBox"><span class="input-group-addon">Description</span><input type="text" class="form-control" placeholder="Description  "></div>');
+this.node.append(
+  '<p></p><p></p>'+
+  '<div class="btn-group">'+
+    '<ul class="dropdown-menu" role="menu">' +
+      '<li><a href="#">Action</a></li>' +
+      '<li><a href="#">Another action</a></li>' +
+      '<li><a href="#">Something else here</a></li>' +
+      '<li class="divider"></li>' +
+      '<li><a href="#">Separated link</a></li>' +
+    '</ul>'+
+  '</div>');
 
 var boxHeight = 300;
 var boxWidth = 600;
@@ -15,6 +26,10 @@ this.node.css("width", boxWidth);
 this.node.css("top", window.innerHeight/2 - boxHeight/2);
 this.node.css("left", Math.floor(window.innerWidth/2-(boxWidth/2)));
 
+// this.node.append($('<div class="input-group"><span class="input-group-addon">Description</span><input type="text" class="form-control" placeholder="Description  "></div>'));
+// this.node.append($('<p></p>'));
+// this.node.append($('<p class="saveBox">Description</p>'));
+// this.node.append($('<input id="description"></input>'));
 };
 
 window.Saver = Saver;
