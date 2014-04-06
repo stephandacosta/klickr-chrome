@@ -4,10 +4,8 @@
 
 .saveBox {
   position: fixed;
-  background: red;
-  height: 100px;
-  width: 100px;
-  top: 100px;
-  left: 100px;
+  background: rgb(136, 218, 149);
+  height: 300px;
+  width: 600px;
   border-radius: 7.5px;
 }

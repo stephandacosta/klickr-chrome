@@ -3,22 +3,24 @@
 /*
 /* ------------------------------------------------------------------------------------*/
 
-var Saver= function(X, Y){
+var Saver= function(){
 
-var boxWidth = 800;
-var boxHeight = 400;
+this.node = $('<div class="saveBox"></div>');
 
+var boxHeight = 300;
+var boxWidth = 600;
 
-this.node = $('<div class="saveBox" style="position:fixed; background: red; width: ' + boxWidth +'px; height: ' + boxHeight + 'px; border-radius: 7.5px; top: '+ Math.floor(window.innerHeight/2 - boxHeight/2) +'px; left:'+ Math.floor(window.innerWidth/2-boxWidth/2)+'px;"></div>');
-
-
+this.node.css("height", boxHeight);
+this.node.css("width", boxWidth);
+this.node.css("top", window.innerHeight/2 - boxHeight/2);
+this.node.css("left", Math.floor(window.innerWidth/2-(boxWidth/2)));
 
 };
 
 window.Saver = Saver;
 
 // moves mouse to given destination with duration
-  Saver.prototype.display = function (X, Y){
+  Saver.prototype.display = function (){
     console.log('windowwidth', window.innerWidth);
     $('body').append(this.node);
 
