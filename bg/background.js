@@ -53,6 +53,23 @@ window.openSaver = function(){
   });
 };
 
+
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  console.log('delete me after test: this is the request caught in background',request);
+  if (request.action === 'replay') {
+      console.log('background: replay');
+      sendResponse({response: "background: received replay message"});
+      //insert code here
+  } else if (request.action === 'save') {
+      console.log('background: save');
+      sendResponse({response: "background: received save message"});
+  } else if (request.action === 'share') {
+      console.log('background: share');
+      sendResponse({response: "background: received share message"});
+  }
+});
+
+
 /* Listener on tab updates */
 chrome.tabs.onUpdated.addListener(function(){
   chrome.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {
