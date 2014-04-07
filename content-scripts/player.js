@@ -67,14 +67,6 @@ window.Player = Player;
     });
   };
 
-  Player.prototype.playKlick = function(clickId){
-    clickId = clickId || '';
-    console.log(clickId);
-    //when ready for connection with server, uncomment getData and remove playRecording(test), as well as test
-    //this.getData(clickId);
-    this.playRecording(test);
-  };
-
 
 /* ------------------------------------------------------------------------------------*/
 /* Init
@@ -91,7 +83,16 @@ $(function(){
       console.log('play button clicked');
       player.playKlick(request.id);
       sendResponse({response: "Player: Playing Klick..."});
+    } 
+      //stephan code start
+      else if (request.action === 'playStagedKlick'){
+      console.log('replay button clicked');
+      console.log('staged klick: ', request.klick);
+      player.playRecording(request.klick);
+      // ##### playback is not working (version from saturday break-out)
+      sendResponse({response: "Player: Playing Staged Klick..."});
     }
+    //stephand code end
   });
 
 });
