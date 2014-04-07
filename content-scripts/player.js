@@ -21,8 +21,9 @@ window.Player = Player;
       $('.mouse').detach();
       console.log('movement finished');
     } else {
-      //$(window).scrollLeft(xClientOrigin)  $(window).scrollTop(yClientOrigin);
-      this.move(arr[index].clientX, arr[index].clientY ,arr[index].t);
+      $(window).scrollLeft(arr[index].pageX-arr[index].clientX);
+      $(window).scrollTop(arr[index].pageY-arr[index].clientY);
+      this.move(arr[index].pageX, arr[index].pageY ,arr[index].t);
       var that = this;
       setTimeout(function(){
         that.playRecording(arr, index+1);
@@ -39,6 +40,8 @@ window.Player = Player;
   //establishes the t value of the movement array
   Player.prototype.setMoveIntervals = function(movement){
     movement[0].t = 0;
+    var d = "2014-04-06T18:41:51.812Z";
+    console.log(d[20]+d[21]+d[22]);
     for (var i = 1; i < movement.length-1; i++){
       //movement[i].t = movement[i]["timestamp"] - movement[i-1]["timestamp"];
       movement[i].t = 1;
@@ -49,17 +52,15 @@ window.Player = Player;
 
   //scales x and y so different screen sizes will have the same display. also, checks where the window origin is on the page.
   Player.prototype.scaleXY = function(data){
-    var xScale = $(window).width() / data["width"] || 1;
-    var yScale = $(window).height() / data["height"] || 1;
-    console.log("my width: "+$(window).width() + ", former width: " + data["width"]);
-    console.log("x scale:"+xScale);
+    var xScale = $(window).width() / data.width || 1;
+    var yScale = $(window).height() / data.height || 1;
+    //console.log("my width: "+$(window).width() + ", former width: " + data["width"]);
+    //console.log("x scale:"+xScale);
     for(var i = 0; i < data.ticks.length; i++){
       data.ticks[i].clientX = data.ticks[i].clientX*xScale;
       data.ticks[i].clientY = data.ticks[i].clientY*yScale;
       data.ticks[i].pageX = data.ticks[i].pageX*xScale;
       data.ticks[i].pageY = data.ticks[i].pageY*yScale;
-      data.ticks[i].xClientOrigin = data.ticks[i].pageX-data.ticks[i].clientX;
-      data.ticks[i].yClientOrigin = data.ticks[i].pageY-data.ticks[i].clientY;
     }
     this.setMoveIntervals(data.ticks);
   };
