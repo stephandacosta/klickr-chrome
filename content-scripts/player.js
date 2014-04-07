@@ -11,7 +11,7 @@ window.Player = Player;
   Player.prototype.move = function (endX, endY, duration){
     d3.select('.mouse')
      .transition()
-     .duration(duration+1000)
+     .duration(duration)
      .style({'top':  endY + 'px', 'left': endX + 'px'});
   };
 
@@ -26,24 +26,28 @@ window.Player = Player;
       var that = this;
       setTimeout(function(){
         that.playRecording(arr, index+1);
-      }, arr[index].t +1000);
+      }, arr[index].t);
     }
   };
 
+  //places the mouse in the dom and gives the mouse's initial position and characteristics
   Player.prototype.placeMouse = function(movement){
     $('body').append('<div class="mouse" style="position:absolute; background: blue; width: 15px; z-index: 9999; height:15px; border-radius: 7.5px; top: '+movement[0].pageY+'px; left:'+movement[0].pageX+'px;"></div>');
     this.playRecording(movement, 1);
   };
 
+  //establishes the t value of the movement array
   Player.prototype.setMoveIntervals = function(movement){
     movement[0].t = 0;
     for (var i = 1; i < movement.length-1; i++){
-      movement[i].t = movement[i]["timestamp"] - movement[i-1]["timestamp"];
+      //movement[i].t = movement[i]["timestamp"] - movement[i-1]["timestamp"];
+      movement[i].t = 1;
     }
-    movement[movement.length-1].t = 100;
+    movement[movement.length-1].t = 1;
     this.placeMouse(movement);
   };
 
+  //scales x and y so different screen sizes will have the same display. also, checks where the window origin is on the page.
   Player.prototype.scaleXY = function(data){
     var xScale = $(window).width() / data["width"] || 1;
     var yScale = $(window).height() / data["height"] || 1;
@@ -60,6 +64,7 @@ window.Player = Player;
     this.setMoveIntervals(data.ticks);
   };
 
+  //submits an ajax request to the server based on a click id to get movement patterns back
   Player.prototype.getData = function(clickId){
     var that = this;
     $.ajax({
@@ -76,6 +81,7 @@ window.Player = Player;
     });
   };
 
+  //initiates the player methods
   Player.prototype.playKlick = function(clickId){
     clickId = clickId || '';
     this.getData(clickId);
