@@ -138,7 +138,17 @@ Recorder.prototype.send = function(klick){
   });
 };
 
-// Stephan code start
+// stephan code start
+/* Launch saver box */
+Recorder.prototype.displaySaverBox = function(klick){
+  console.log('Recorder: Open Saver Box');
+  chrome.runtime.sendMessage({action : "displaySaverBox"}, function(response){
+  console.log(response);
+  });
+};
+// stephan code end
+
+// stephan code start
 /*Stage output to extension backgroun for replay */
 Recorder.prototype.sendToBackground = function(klick){
   console.log('Recorder: Sending to background');
@@ -152,23 +162,7 @@ Recorder.prototype.sendToBackground = function(klick){
     // this.klick = this.createKlick();
   // }
 };
-// Stephan code end
-
-// stephan code start
-/* Launch saver box */
-
-Recorder.prototype.displaySaverBox = function(klick){
-  console.log('Recorder: Open Saver Box');
-  chrome.runtime.sendMessage({action : "displaySaverBox"}, function(response){
-  console.log(response);
-  });
-};
-
-
 // stephan code end
-
-
-
 
 
 /* ------------------------------------------------------------------------------------*/
@@ -189,6 +183,12 @@ $(function(){
       recorder.stop();
       sendResponse({response: "Recorder: Stopped recording"});
     }
+     // stephan code start
+     else if (request.action === 'saveKlick'){
+      recorder.send(request.klick);
+      sendResponse({response: "Recorder: Saved recording"});
+    }
+     // stephan code end
   });
 
 });

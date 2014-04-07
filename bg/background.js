@@ -28,6 +28,10 @@ window.stopRecording = function(){
     chrome.tabs.sendMessage(tabs[0].id, {action: "stopRecording"}, function(response) {
       console.log(response);
     });
+    // should the opening on saver box be promisified after recrding stop ?
+    chrome.tabs.sendMessage(tabs[0].id, {action: "openSaver"}, function(response) {
+      console.log(response);
+    });
   });
 };
 
@@ -43,7 +47,8 @@ window.playKlick = function(id){
   });
 };
 
-/* Background -> Recorder: Start recording */
+// stephan code start
+/* Background -> Recorder: Saver display */
 window.openSaver = function(){
   console.log('Background -> Saver: displaying');
   chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
@@ -52,7 +57,7 @@ window.openSaver = function(){
     });
   });
 };
-
+// stephan code end
 
 /* Listener on tab updates */
 chrome.tabs.onUpdated.addListener(function(){
@@ -85,6 +90,11 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       sendResponse({response: "background: received replay message"});
   } else if (request.action === 'save') {
       console.log('background: save');
+      chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+      chrome.tabs.sendMessage(tabs[0].id, {action: "saveKlick", klick: window.stagedKlick}, function(response) {
+        console.log(response);
+        });
+      });
       sendResponse({response: "background: received save message"});
   } else if (request.action === 'share') {
       console.log('background: share');
