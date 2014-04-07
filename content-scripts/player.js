@@ -9,70 +9,82 @@ window.Player = Player;
 
 // moves mouse to given destination with duration
   Player.prototype.move = function (endX, endY, duration){
-    d3.selectAll('.mouse')
-    .transition()
-    .duration(duration)
-    .style({'top':  endY + 'px', 'left': endX + 'px'});
-    console.log('mouse moving');
+    d3.select('.mouse')
+     .transition()
+     .duration(duration)
+     .style({'top':  endY + 'px', 'left': endX + 'px'});
   };
 
   // chains mouse moves together
-  Player.prototype.processData = function(arr, index, xScale, yScale){
-    index = index || 1;
-    xScale = xScale || 1;
-    yScale = yScale || 1;
+  Player.prototype.playRecording = function(arr, index, xScale, yScale){
     if ( index === arr.length ) {
       $('.mouse').detach();
       console.log('movement finished');
     } else {
-      var xAdjusted = (arr[index].clientX * xScale);
-      var yAdjusted = (arr[index].clientY * yScale);
-      var xClientOrigin = (arr[index].pageX * xScale) - xAdjusted;
-      var yClientOrigin = (arr[index].pageY * yScale) - yAdjusted;
       //$(window).scrollLeft(xClientOrigin)  $(window).scrollTop(yClientOrigin);
-      this.move(xAdjusted, yAdjusted ,arr[index].t);
+      this.move(arr[index].clientX, arr[index].clientY ,arr[index].t);
       var that = this;
       setTimeout(function(){
-        that.processData(arr, index+1);
-      }, arr[index].t );
+        that.playRecording(arr, index+1);
+      }, arr[index].t);
     }
   };
 
-  //test data *** need to be cleared out ******
-  var test ={"width":755,"height":618,"ticks":[{"action":"move","pageX":720,"pageY":274,"clientX":720,"clientY":230,"timestamp":1396654158484,"target":""},{"action":"move","pageX":653,"pageY":232,"clientX":653,"clientY":189,"timestamp":1396654158584,"target":""},{"action":"move","pageX":445,"pageY":417,"clientX":445,"clientY":373,"timestamp":1396654158684,"target":""},{"action":"move","pageX":288,"pageY":479,"clientX":288,"clientY":436,"timestamp":1396654158785,"target":""},{"action":"move","pageX":236,"pageY":246,"clientX":236,"clientY":202,"timestamp":1396654158886,"target":""},{"action":"move","pageX":403,"pageY":301,"clientX":403,"clientY":258,"timestamp":1396654158986,"target":""},{"action":"move","pageX":549,"pageY":489,"clientX":549,"clientY":446,"timestamp":1396654159087,"target":""},{"action":"move","pageX":717,"pageY":293,"clientX":717,"clientY":250,"timestamp":1396654159187,"target":""},{"action":"move","pageX":717,"pageY":293,"clientX":717,"clientY":250,"timestamp":1396654159288,"target":""},{"action":"move","pageX":717,"pageY":293,"clientX":717,"clientY":250,"timestamp":1396654159388,"target":""},{"action":"move","pageX":717,"pageY":293,"clientX":717,"clientY":250,"timestamp":1396654159488,"target":""},{"action":"move","pageX":717,"pageY":293,"clientX":717,"clientY":250,"timestamp":1396654159589,"target":""},{"action":"move","pageX":717,"pageY":293,"clientX":717,"clientY":250,"timestamp":1396654159689,"target":""},{"action":"move","pageX":717,"pageY":293,"clientX":717,"clientY":250,"timestamp":1396654159789,"target":""},{"action":"move","pageX":717,"pageY":293,"clientX":717,"clientY":250,"timestamp":1396654159889,"target":""},{"action":"move","pageX":717,"pageY":293,"clientX":717,"clientY":250,"timestamp":1396654159989,"target":""},{"action":"move","pageX":717,"pageY":293,"clientX":717,"clientY":250,"timestamp":1396654160089,"target":""},{"action":"move","pageX":717,"pageY":293,"clientX":717,"clientY":250,"timestamp":1396654160189,"target":""},{"action":"move","pageX":717,"pageY":293,"clientX":717,"clientY":250,"timestamp":1396654160290,"target":""},{"action":"move","pageX":717,"pageY":293,"clientX":717,"clientY":250,"timestamp":1396654160390,"target":""},{"action":"move","pageX":717,"pageY":293,"clientX":717,"clientY":250,"timestamp":1396654160490,"target":""},{"action":"move","pageX":717,"pageY":293,"clientX":717,"clientY":250,"timestamp":1396654160590,"target":""},{"action":"move","pageX":717,"pageY":293,"clientX":717,"clientY":250,"timestamp":1396654160691,"target":""}]};
+  //places the mouse in the dom and gives the mouse's initial position and characteristics
+  Player.prototype.placeMouse = function(movement){
+    $('body').append('<div class="mouse" style="position:absolute; background: blue; width: 15px; z-index: 9999; height:15px; border-radius: 7.5px; top: '+movement[0].pageY+'px; left:'+movement[0].pageX+'px;"></div>');
+    this.playRecording(movement, 1);
+  };
 
-  Player.prototype.playRecording = function(data){
-    var xScale = $(window).width() / data["width"];
-    var yScale = $(window).height() / data["height"];
-    var movement = data["ticks"];
+  //establishes the t value of the movement array
+  Player.prototype.setMoveIntervals = function(movement){
     movement[0].t = 0;
-    console.log('mouse y starting point: ', movement[0].pageY);
-    $('body').append('<div class="mouse" style="position:absolute; background: red; width: 15px; height:15px; border-radius: 7.5px; top: '+movement[0].pageY+'px; left:'+movement[0].pageX+'px;"></div>');
     for (var i = 1; i < movement.length-1; i++){
-      movement[i].t = movement[i]["timestamp"] - movement[i-1]["timestamp"];
+      //movement[i].t = movement[i]["timestamp"] - movement[i-1]["timestamp"];
+      movement[i].t = 1;
     }
-    this.processData(movement, 1, xScale, yScale);
+    movement[movement.length-1].t = 1;
+    this.placeMouse(movement);
   };
 
+  //scales x and y so different screen sizes will have the same display. also, checks where the window origin is on the page.
+  Player.prototype.scaleXY = function(data){
+    var xScale = $(window).width() / data["width"] || 1;
+    var yScale = $(window).height() / data["height"] || 1;
+    console.log("my width: "+$(window).width() + ", former width: " + data["width"]);
+    console.log("x scale:"+xScale);
+    for(var i = 0; i < data.ticks.length; i++){
+      data.ticks[i].clientX = data.ticks[i].clientX*xScale;
+      data.ticks[i].clientY = data.ticks[i].clientY*yScale;
+      data.ticks[i].pageX = data.ticks[i].pageX*xScale;
+      data.ticks[i].pageY = data.ticks[i].pageY*yScale;
+      data.ticks[i].xClientOrigin = data.ticks[i].pageX-data.ticks[i].clientX;
+      data.ticks[i].yClientOrigin = data.ticks[i].pageY-data.ticks[i].clientY;
+    }
+    this.setMoveIntervals(data.ticks);
+  };
+
+  //submits an ajax request to the server based on a click id to get movement patterns back
   Player.prototype.getData = function(clickId){
     var that = this;
     $.ajax({
-      url: 'http://jyek.cloudapp.net:3004/klicks/'+clickID,
+      url: 'http://jyek.cloudapp.net:3004/klicks/'+clickId,
       type: 'GET',
       contentType: 'application/json',
       success: function(data){
         console.log(data);
-        that.playRecording(data);
+        if(Array.isArray(data)){
+          data = data[data.length-1];
+        }
+        that.scaleXY(data);
       }
     });
   };
 
+  //initiates the player methods
   Player.prototype.playKlick = function(clickId){
     clickId = clickId || '';
-    console.log(clickId);
-    //when ready for connection with server, uncomment getData and remove playRecording(test), as well as test
-    //this.getData(clickId);
-    this.playRecording(test);
+    this.getData(clickId);
   };
 
 
