@@ -36,13 +36,6 @@ window.Recorder = Recorder;
 Recorder.prototype.addListeners = function(){
   var self = this;
   $('html').click(function(event){
-    // var target = $( event.target );
-    // if ( target.is( "a" ) ) {
-    //   alert("Clicked on an <a> tag");
-    //   alert($(event.target).attr('href'));
-    //   alert(typeof $(event.target).attr('href'));
-    // }
-
     self.log(event.type, event.pageX, event.pageY, event.clientX, event.clientY, event.timeStamp, event.target.outerHTML, undefined, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey);
   });
 
@@ -80,7 +73,7 @@ Recorder.prototype.mouseMove = function(event) {
 
 /* Logs to output */
 Recorder.prototype.log = function(action, pageX, pageY, clientX, clientY, timestamp, target, charCode, altKey, ctrlKey, metaKey, shiftKey){
-  if (this.mousePos){
+  if ( this.mousePos ) {
   action = action || 'move';
   pageX = pageX || this.mousePos.pageX;
   pageY = pageY || this.mousePos.pageY;
@@ -88,19 +81,19 @@ Recorder.prototype.log = function(action, pageX, pageY, clientX, clientY, timest
   clientY = clientY || this.mousePos.clientY;
   timestamp = timestamp || Date.now();
   this.klick.ticks.push({
-    action: action,
-    pageX: pageX,
-    pageY: pageY,
-    clientX: clientX,
-    clientY: clientY,
-    timestamp: timestamp,
-    target: '',
-    charCode: charCode,
-    altKey: altKey,
-    ctrlKey: ctrlKey,
-    metaKey: metaKey,
-    shiftKey: shiftKey
-  });
+      action: action,
+      pageX: pageX,
+      pageY: pageY,
+      clientX: clientX,
+      clientY: clientY,
+      timestamp: timestamp,
+      target: '',
+      charCode: charCode,
+      altKey: altKey,
+      ctrlKey: ctrlKey,
+      metaKey: metaKey,
+      shiftKey: shiftKey
+    });
   }
 };
 
