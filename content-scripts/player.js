@@ -84,15 +84,15 @@ $(function(){
       player.playKlick(request.id);
       sendResponse({response: "Player: Playing Klick..."});
     } 
-      //stephan code start
+      //STEPHAN CODE START
       else if (request.action === 'playStagedKlick'){
       console.log('replay button clicked');
       console.log('staged klick: ', request.klick);
       player.playRecording(request.klick);
-      // ##### playback is not working (version from saturday break-out)
+      // ##### PLAYBACK IS NOT WORKING ( VERSION FROM SATURDAY AFTERNOON)
       sendResponse({response: "Player: Playing Staged Klick..."});
     }
-    //stephand code end
+    //STEPHAN CODE END
   });
 
 });

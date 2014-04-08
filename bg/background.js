@@ -28,7 +28,7 @@ window.stopRecording = function(){
     chrome.tabs.sendMessage(tabs[0].id, {action: "stopRecording"}, function(response) {
       console.log(response);
     });
-    // should the opening on saver box be promisified after recrding stop ?
+    // SHOULD THE OPTENING OF SAVER BOX BE PROMISIFIED TO WAIT UNTIL RECORDING ACTUALY STOPS ?
     chrome.tabs.sendMessage(tabs[0].id, {action: "openSaver"}, function(response) {
       console.log(response);
     });
@@ -47,7 +47,7 @@ window.playKlick = function(id){
   });
 };
 
-// stephan code start
+// STEPHAN CODE START
 /* Background -> Recorder: Saver display */
 window.openSaver = function(){
   console.log('Background -> Saver: displaying');
@@ -57,7 +57,7 @@ window.openSaver = function(){
     });
   });
 };
-// stephan code end
+// STEPHAN CODE END
 
 /* Listener on tab updates */
 chrome.tabs.onUpdated.addListener(function(){
@@ -76,10 +76,11 @@ chrome.tabs.onUpdated.addListener(function(){
   });
 });
 
-// Stephan code start
+// STEPHAN CODE START
 // listener on saver box (replay, save, share) and recorder (stage)
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-  console.log('delete me after test: this is the request caught in background',request);
+
+  // Replay request: requests player to play staged recording
   if (request.action === 'replay') {
       console.log('background: replay');
       chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
@@ -88,6 +89,8 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         });
       });
       sendResponse({response: "background: processed replay message"});
+
+  // Save request : staged recording is sent to recorder to be pushed to server
   } else if (request.action === 'save') {
       console.log('background: save');
       window.stagedKlick.description = request.description;
@@ -97,14 +100,17 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         });
       });
       sendResponse({response: "background: processed save message"});
+
+  // Share request: NEEDS TO BE IMPLEMENTED 
   } else if (request.action === 'share') {
       console.log('background: share');
       sendResponse({response: "background: processed share message"});
+
+  // Stage request:  updates background staged recording with the one sent through inside the message
   } else if (request.action === 'stage') {
       console.log('background: stage');
-      console.log(request.klick);
       window.stagedKlick = request.klick;
       sendResponse({response: "background: processed stage message"});
   }
 });
-// Stephan code end
+// STEPHAN CODE END
