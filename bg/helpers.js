@@ -29,3 +29,11 @@ helpers.parseUrl = function(url){
 
   return params;
 };
+
+helpers.activeTabSendMessage = function (message, responseCallback) {
+  responseCallback = responseCallback || (function (response) { console.log(response); });
+
+  chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+    chrome.tabs.sendMessage(tabs[0].id, message, responseCallback);
+  });
+};
