@@ -24,7 +24,7 @@ window.startRecording = function(){
 window.stopRecording = function(){
   console.log('Background -> Recorder: Stop recording');
   helpers.activeTabSendMessage({action: "stopRecording"});
-  helpers.activeTabSendMessage({action: "openSaver"});
+  window.openSaver();
 };
 
 /* Background -> Recorder: Play recording
@@ -36,11 +36,7 @@ window.playKlick = function(id){
   console.log('Background -> Recorder: Play recording');
   id = id || window.id;
   if (id !== undefined) window.id = id;
-  chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-    chrome.tabs.sendMessage(tabs[0].id, {action: "playKlick", id: id}, function(response) {
-      console.log(response);
-    });
-  });
+  helpers.activeTabSendMessage({action: "playKlick", id: id});
 };
 
 /* Background -> Server: Send current klick object to the server to save */
@@ -63,11 +59,7 @@ window.send = function(klick){
 /* Background -> Recorder: Saver display */
 window.openSaver = function(){
   console.log('Background -> Saver: Displaying');
-  chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-    chrome.tabs.sendMessage(tabs[0].id, {action: "openSaver"}, function(response) {
-      console.log(response);
-    });
-  });
+  helpers.activeTabSendMessage({action: "openSaver"});
 };
 
 /* ------------------------------------------------------------------------------------*/
