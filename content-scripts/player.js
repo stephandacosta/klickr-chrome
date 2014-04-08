@@ -9,6 +9,8 @@ window.Player = Player;
 
 // moves mouse to given destination with duration
   Player.prototype.move = function (endX, endY, duration){
+    // Willson: it may be necessary to use something besides D3 here
+
     d3.select('.mouse')
      .transition()
      .duration(duration)
@@ -22,6 +24,10 @@ window.Player = Player;
       console.log('movement finished');
     } else {
       //$(window).scrollLeft(xClientOrigin)  $(window).scrollTop(yClientOrigin);
+
+      // Willson: the idea I have is to look at the current arr[index] and check that object's event.type.
+      // If the event.type is a 'click' event, then redirect to the event.target page first before continuing
+      // processing playRecording for arr[index + 1].
       this.move(arr[index].clientX, arr[index].clientY ,arr[index].t);
       var that = this;
       setTimeout(function(){

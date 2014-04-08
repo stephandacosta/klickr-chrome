@@ -37,7 +37,13 @@ window.Recorder = Recorder;
 Recorder.prototype.addListeners = function(){
   var self = this;
   $('html').click(function(event){
-    // console.log(event);
+    var target = $( event.target );
+    if ( target.is( "a" ) ) {
+      alert("Clicked on an <a> tag");
+      alert($(event.target).attr('href'));
+      alert(typeof $(event.target).attr('href'));
+    }
+
     self.log(event.type, event.pageX, event.pageY, event.clientX, event.clientY, event.timeStamp, event.target.outerHTML, undefined, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey);
   });
   $('html').keypress(function(event){
@@ -45,13 +51,17 @@ Recorder.prototype.addListeners = function(){
     var charCode = event.which || event.keyCode;
     self.log(event.type, event.pageX, event.pageY, event.clientX, event.clientY, event.timeStamp, event.target.outerHTML, charCode, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey);
   });
+
+  // Want to add another listener here for the event when a page changes its url
 };
 
 /* Creates a new Klick */
 Recorder.prototype.createKlick = function(){
-  return {
+  return { 
     width: window.innerWidth,
     height: window.innerHeight,
+
+    // Willson: it may make sense to move this url property into each of the objects in the ticks array
     url: document.URL,
     description: '',
     ticks: []
@@ -61,6 +71,10 @@ Recorder.prototype.createKlick = function(){
 /* Records cursor positions */
 Recorder.prototype.mouseMove = function(event) {
   event = event || window.event; // IE
+
+  // Willson: want to see mouseMove
+  console.log(e);
+
   this.mousePos = {
     pageX: event.pageX,
     pageY: event.pageY,
