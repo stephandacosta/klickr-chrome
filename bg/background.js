@@ -9,35 +9,29 @@
 /* ------------------------------------------------------------------------------------*/
 console.log('Background initiated...');
 
+/* CONFIGURATIONS */
 window.hostname = 'jy1.cloudapp.net';
-window.id = '';
+window.server = 'http://jy1.cloudapp.net:3000';
+window.id = ''; // klick object id (corresponds to _id in mongodb)
 
 /* Background -> Recorder: Start recording */
 window.startRecording = function(){
   console.log('Background -> Recorder: Start recording');
-  chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-    chrome.tabs.sendMessage(tabs[0].id, {action: "startRecording"}, function(response) {
-      console.log(response);
-    });
-  });
+  helpers.activeTabSendMessage({action: "startRecording"});
 };
 
 /* Background -> Recorder: Stop recording */
 window.stopRecording = function(){
   console.log('Background -> Recorder: Stop recording');
-  chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-    chrome.tabs.sendMessage(tabs[0].id, {action: "stopRecording"}, function(response) {
-      console.log(response);
-    });
-
-    // STEPHAN: Should the opening of the saver box be promisified to wait until recording actually stops?
-    chrome.tabs.sendMessage(tabs[0].id, {action: "openSaver"}, function(response) {
-      console.log(response);
-    });
-  });
+  helpers.activeTabSendMessage({action: "stopRecording"});
+  helpers.activeTabSendMessage({action: "openSaver"});
 };
 
-/* Background -> Recorder: Play recording */
+/* Background -> Recorder: Play recording
+ * This function can be called in one of two ways:
+ * 1) Via a link, in which case the _id is included in the url string
+ * 2) Via clicking the play button in popup.js, in which case the _id will be undefined 
+ */
 window.playKlick = function(id){
   console.log('Background -> Recorder: Play recording');
   id = id || window.id;
@@ -54,7 +48,7 @@ window.send = function(klick){
   console.log('Background -> Server: Push to server...', JSON.stringify(klick));
   $.ajax({
     type: 'POST',
-    url: "http://" + window.hostname + ':3000/klicks',
+    url: window.server + '/klicks',
     data: JSON.stringify(klick),
     contentType: 'application/json',
     success: function(data) {
@@ -107,16 +101,19 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       });
     });
     sendResponse({response: "Background: Processed replay message"});
+  
   // Save recording: staged recording is sent to recorder to be pushed to server
   } else if (request.action === 'save') {
     console.log('Background: Save recording');
     window.stagedKlick.description = request.description;
     window.send(window.stagedKlick); // Background.js should take care of saving the klick object and sending it to the server
     sendResponse({response: "background: processed save message"});
+  
   // Share recording: NEEDS TO BE IMPLEMENTED 
   } else if (request.action === 'share') {
     console.log('Background: Share recording');
     sendResponse({response: "background: processed share message"});
+  
   // Stage recording:  updates background with staged recording sent from recorder.js
   } else if (request.action === 'stage') {
     console.log('Background: Stage recording in background');
