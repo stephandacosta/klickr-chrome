@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "homepage": "https://github.com/jyek/klickr-chrome",
   "authors": [
-    "jyek <justinyek@gmail.com>"
+    "jyek <justinyek@gmail.com>",
+    "lramsey <lramsey177@gmail.com>"
   ],
   "license": "MIT",
   "private": true,

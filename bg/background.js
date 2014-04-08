@@ -8,7 +8,7 @@
 /* ------------------------------------------------------------------------------------*/
 console.log('Background initiated...');
 
-window.hostname = 'jyek.cloudapp.net:3004';
+window.hostname = 'jy1.cloudapp.net:3004';
 window.hostnameAlt = 'localhost:4568';
 window.id = '';
 
