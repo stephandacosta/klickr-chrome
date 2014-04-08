@@ -9,8 +9,6 @@ window.Player = Player;
 
 // moves mouse to given destination with duration
   Player.prototype.move = function (endX, endY, duration){
-    // Willson: it may be necessary to use something besides D3 here
-
     d3.select('.mouse')
      .transition()
      .duration(duration)
@@ -76,7 +74,7 @@ window.Player = Player;
   Player.prototype.getData = function(clickId){
     var that = this;
     $.ajax({
-      url: 'http://jyek.cloudapp.net:3004/klicks/'+clickId,
+      url: 'http://jy1.cloudapp.net:3000/klicks/'+clickId,
       type: 'GET',
       contentType: 'application/json',
       success: function(data){
