@@ -1,3 +1,24 @@
 .nav {
 	margin-bottom: 0px;
 }
+
+.saveBox {
+  position: fixed;
+  background: rgb(183, 243, 223);
+  border-radius: 7.5px;
+  font-size:25px;
+  font-weight:bold;
+  font: Arial;
+  border: 2px solid;
+}
+
+/*.btn{
+  width: 100px;
+  height: 50px;
+  font-size:20px;
+  font-weight: normal;
+  border: 2px solid;
+  border-radius: 15px;
+  background: white;
+}*/
+
