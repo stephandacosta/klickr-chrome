@@ -4,9 +4,9 @@
 
 .saveBox {
   position: fixed;
-  background: rgb(216, 219, 218);
+  background: rgb(183, 243, 223);
   border-radius: 7.5px;
-  font-size:15px;
+  font-size:25px;
   font-weight:bold;
   font: Arial;
   border: 2px solid;

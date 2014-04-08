@@ -5,8 +5,8 @@
 
 
 var Saver= function(){ 
-  var boxHeight = 120;
-  var boxWidth = 400;
+  var boxHeight = 125;
+  var boxWidth = 330;
   this.node = $('<div class="saveBox"></div>');
   this.buildHtml(boxHeight, boxWidth);
 };
@@ -18,6 +18,10 @@ Saver.prototype.display = function (){
   $('body').append(this.node);
 };
 
+Saver.prototype.hide = function (){
+  this.node.detach();
+};
+
 Saver.prototype.buildHtml = function (boxHeight, boxWidth){
   this.node.css("height", boxHeight);
   this.node.css("width", boxWidth);
@@ -26,7 +30,9 @@ Saver.prototype.buildHtml = function (boxHeight, boxWidth){
   this.node.css("left", Math.floor(window.innerWidth/2-(boxWidth/2)));
 
 
-  this.node.append('<input type="text" placeholder="Enter Description">');
+  this.node.append('<button type="button" id="close" style="font-size:20px; color=grey; float: right; margin-right: 5px; border: 0.5px solid;">X</button>');
+  this.node.append('<p>Klikr.io</p>');
+
 
   var menu = ['Replay', 'Save', 'Share'];
 
@@ -40,12 +46,16 @@ Saver.prototype.buildHtml = function (boxHeight, boxWidth){
     $btn.css('float', 'left');
     $btn.css('margin-left', 5);
     $btn.css('margin-right', 5);
+    $btn.css('margin-top', 10);
     // $btn.css.css('border', 2);
     // $btn.css.css('border-radius', 15);
     // $btn.css.css('background', white);
     // $btn.text('Replay');
     this.node.append($btn);
   }
+
+  this.node.append('<input type="text" id="desc" placeholder="Enter Description" style="visibility:hidden">');
+  this.node.append('<button type="button" id="sendToServer" style="visibility:hidden">Submit</button>');
 
 };
 
@@ -73,15 +83,29 @@ $(function(){
       });
 
       $('#save').click(function() {
-        chrome.runtime.sendMessage({action: "save"}, function(response){
+        $('#desc').css('visibility', 'visible');
+        $('#sendToServer').css('visibility', 'visible');
+      });
+
+      $('#sendToServer').click(function() {
+        var description = $('#desc').val();
+        console.log("Description:", description);
+        chrome.runtime.sendMessage({action: "save", description: description}, function(response){
           console.log(response);
         });
+        $('#desc').css('visibility', 'hidden');
+        $('#sendToServer').css('visibility', 'hidden');
+        $('#save').attr("disabled", "disabled");
       });
 
       $('#share').click(function() {
         chrome.runtime.sendMessage({action: "share"}, function(response){
           console.log(response);
         });
+      });
+
+      $('#close').click(function() {
+        saver.hide();
       });
 
     }

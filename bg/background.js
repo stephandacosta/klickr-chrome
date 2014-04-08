@@ -87,23 +87,24 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
           console.log(response);
         });
       });
-      sendResponse({response: "background: received replay message"});
+      sendResponse({response: "background: processed replay message"});
   } else if (request.action === 'save') {
       console.log('background: save');
+      window.stagedKlick.description = request.description;
       chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
       chrome.tabs.sendMessage(tabs[0].id, {action: "saveKlick", klick: window.stagedKlick}, function(response) {
         console.log(response);
         });
       });
-      sendResponse({response: "background: received save message"});
+      sendResponse({response: "background: processed save message"});
   } else if (request.action === 'share') {
       console.log('background: share');
-      sendResponse({response: "background: received share message"});
+      sendResponse({response: "background: processed share message"});
   } else if (request.action === 'stage') {
       console.log('background: stage');
       console.log(request.klick);
       window.stagedKlick = request.klick;
-      sendResponse({response: "background: received stage message"});
+      sendResponse({response: "background: processed stage message"});
   }
 });
 // Stephan code end
