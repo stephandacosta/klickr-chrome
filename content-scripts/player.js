@@ -15,18 +15,20 @@ window.Player = Player;
      .style({'top':  endY + 'px', 'left': endX + 'px'});
   };
 
-  // chains mouse moves together
-  Player.prototype.playRecording = function(arr, index, xScale, yScale){
-    if ( index === arr.length ) {
+  // chains mouse moves together. also adds the scrolling logic. the pageX and pageY values of the movement object at index are passed to move.
+  // function operates recursively, waiting the duration of the prior move in a setTimeout before calling the next move.
+  Player.prototype.playRecording = function(movement, index){
+    if ( index === movement.length ) {
       $('.mouse').detach();
       console.log('movement finished');
     } else {
-      //$(window).scrollLeft(xClientOrigin)  $(window).scrollTop(yClientOrigin);
-      this.move(arr[index].clientX, arr[index].clientY ,arr[index].t);
+      $(window).scrollLeft(movement[index].pageX-movement[index].clientX);
+      $(window).scrollTop(movement[index].pageY-movement[index].clientY);
+      this.move(movement[index].pageX, movement[index].pageY ,movement[index].t);
       var that = this;
       setTimeout(function(){
-        that.playRecording(arr, index+1);
-      }, arr[index].t);
+        that.playRecording(movement, index+1);
+      }, movement[index].t);
     }
   };
 
@@ -36,30 +38,26 @@ window.Player = Player;
     this.playRecording(movement, 1);
   };
 
-  //establishes the t value of the movement array
+  //uses Date.parse to turn the timestamp value from a date to an integer.  Also establishes the t value of the movement array.
   Player.prototype.setMoveIntervals = function(movement){
     movement[0].t = 0;
+    movement[0].timestamp = Date.parse(movement[0].timestamp);
     for (var i = 1; i < movement.length-1; i++){
-      //movement[i].t = movement[i]["timestamp"] - movement[i-1]["timestamp"];
-      movement[i].t = 1;
+      movement[i].timestamp = Date.parse(movement[i].timestamp);
+      movement[i].t = movement[i].timestamp - movement[i-1].timestamp;
     }
-    movement[movement.length-1].t = 1;
     this.placeMouse(movement);
   };
 
-  //scales x and y so different screen sizes will have the same display. also, checks where the window origin is on the page.
+  //scales clientX, clientY, pageX, and pageY so different screen sizes will have the same display.
   Player.prototype.scaleXY = function(data){
-    var xScale = $(window).width() / data["width"] || 1;
-    var yScale = $(window).height() / data["height"] || 1;
-    console.log("my width: "+$(window).width() + ", former width: " + data["width"]);
-    console.log("x scale:"+xScale);
+    var xScale = $(window).width() / data.width || 1;
+    var yScale = $(window).height() / data.height || 1;
     for(var i = 0; i < data.ticks.length; i++){
       data.ticks[i].clientX = data.ticks[i].clientX*xScale;
       data.ticks[i].clientY = data.ticks[i].clientY*yScale;
       data.ticks[i].pageX = data.ticks[i].pageX*xScale;
       data.ticks[i].pageY = data.ticks[i].pageY*yScale;
-      data.ticks[i].xClientOrigin = data.ticks[i].pageX-data.ticks[i].clientX;
-      data.ticks[i].yClientOrigin = data.ticks[i].pageY-data.ticks[i].clientY;
     }
     this.setMoveIntervals(data.ticks);
   };
