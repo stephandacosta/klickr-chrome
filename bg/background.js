@@ -8,7 +8,7 @@
 /* ------------------------------------------------------------------------------------*/
 console.log('Background initiated...');
 
-window.hostname = 'jyek.cloudapp.net:3004';
+window.hostname = 'localhost:4568';
 window.id = '';
 
 /* Background -> Recorder: Start recording */
@@ -28,6 +28,10 @@ window.stopRecording = function(){
     chrome.tabs.sendMessage(tabs[0].id, {action: "stopRecording"}, function(response) {
       console.log(response);
     });
+    // SHOULD THE OPTENING OF SAVER BOX BE PROMISIFIED TO WAIT UNTIL RECORDING ACTUALY STOPS ?
+    chrome.tabs.sendMessage(tabs[0].id, {action: "openSaver"}, function(response) {
+      console.log(response);
+    });
   });
 };
 
@@ -42,6 +46,18 @@ window.playKlick = function(id){
     });
   });
 };
+
+// STEPHAN CODE START
+/* Background -> Recorder: Saver display */
+window.openSaver = function(){
+  console.log('Background -> Saver: displaying');
+  chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+    chrome.tabs.sendMessage(tabs[0].id, {action: "openSaver"}, function(response) {
+      console.log(response);
+    });
+  });
+};
+// STEPHAN CODE END
 
 /* Listener on tab updates */
 chrome.tabs.onUpdated.addListener(function(){
@@ -59,3 +75,42 @@ chrome.tabs.onUpdated.addListener(function(){
     }
   });
 });
+
+// STEPHAN CODE START
+// listener on saver box (replay, save, share) and recorder (stage)
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+
+  // Replay request: requests player to play staged recording
+  if (request.action === 'replay') {
+      console.log('background: replay');
+      chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        chrome.tabs.sendMessage(tabs[0].id, {action: "playStagedKlick", klick: window.stagedKlick}, function(response) {
+          console.log(response);
+        });
+      });
+      sendResponse({response: "background: processed replay message"});
+
+  // Save request : staged recording is sent to recorder to be pushed to server
+  } else if (request.action === 'save') {
+      console.log('background: save');
+      window.stagedKlick.description = request.description;
+      chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+      chrome.tabs.sendMessage(tabs[0].id, {action: "saveKlick", klick: window.stagedKlick}, function(response) {
+        console.log(response);
+        });
+      });
+      sendResponse({response: "background: processed save message"});
+
+  // Share request: NEEDS TO BE IMPLEMENTED 
+  } else if (request.action === 'share') {
+      console.log('background: share');
+      sendResponse({response: "background: processed share message"});
+
+  // Stage request:  updates background staged recording with the one sent through inside the message
+  } else if (request.action === 'stage') {
+      console.log('background: stage');
+      window.stagedKlick = request.klick;
+      sendResponse({response: "background: processed stage message"});
+  }
+});
+// STEPHAN CODE END

@@ -114,6 +114,9 @@ Recorder.prototype.stop = function(){
     this.isRecording = false;
     clearInterval(timer);
     this.send(this.klick);
+    //stephan code start
+    this.sendToBackground(this.klick);
+    // stephan code end
     this.klick = this.createKlick();
   }
 };
@@ -135,6 +138,33 @@ Recorder.prototype.send = function(klick){
   });
 };
 
+// STEPHAN CODE START
+/* Launch saver box */
+Recorder.prototype.displaySaverBox = function(klick){
+  console.log('Recorder: Open Saver Box');
+  chrome.runtime.sendMessage({action : "displaySaverBox"}, function(response){
+  console.log(response);
+  });
+};
+// STEPHAN CODE END
+
+// STEPHAN CODE START
+/*Stage output to extension backgroun for replay */
+Recorder.prototype.sendToBackground = function(klick){
+  console.log('Recorder: Sending to background');
+  // ** commented code needs to be inserted if overriding the current send to server function ***
+  // if (this.isRecording){
+  //   this.isRecording = false;
+  //   clearInterval(timer);
+  chrome.runtime.sendMessage({action : "stage", klick: klick}, function(response){
+    console.log(response);
+  });
+    // this.klick = this.createKlick();
+  // }
+};
+// STEPHAN CODE END
+
+
 /* ------------------------------------------------------------------------------------*/
 /* Init
 /* ------------------------------------------------------------------------------------*/
@@ -153,6 +183,13 @@ $(function(){
       recorder.stop();
       sendResponse({response: "Recorder: Stopped recording"});
     }
+     // STEPHAN CODE START
+     // post request triggered by user clicking on 'save' in saver box via background
+     else if (request.action === 'saveKlick'){
+      recorder.send(request.klick);
+      sendResponse({response: "Recorder: Saved recording"});
+    }
+     // STEPHAN CODE END
   });
 
 });
