@@ -51,6 +51,7 @@ window.Player = Player;
 
   //scales clientX, clientY, pageX, and pageY so different screen sizes will have the same display.
   Player.prototype.scaleXY = function(data){
+    console.log('played klick', data);
     var xScale = $(window).width() / data.width || 1;
     var yScale = $(window).height() / data.height || 1;
     for(var i = 0; i < data.ticks.length; i++){
@@ -101,8 +102,14 @@ $(function(){
       console.log('play button clicked');
       player.playKlick(request.id);
       sendResponse({response: "Player: Playing Klick..."});
+    } else if (request.action === 'playStagedKlick'){
+      console.log('replay button clicked');
+      console.log('staged klick: ', request.klick);
+      player.scaleXY(request.klick);
+      // ##### CHECK PLAYBACK WORKING
+      sendResponse({response: "Player: Playing Staged Klick..."});
     }
   });
 
 });
->>>>>>> 177891834fb2c1c401e3175250c2ee7486767fe2
+
