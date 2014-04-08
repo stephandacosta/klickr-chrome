@@ -22,6 +22,7 @@ window.Player = Player;
   // chains mouse moves together. also adds the scrolling logic. the pageX and pageY values of the movement object at index are passed to move.
   // function operates recursively, waiting the duration of the prior move in a setTimeout before calling the next move.
   Player.prototype.playRecording = function(movement, index){
+    //maybe try removing setTimeout
     if ( index === movement.length ) {
       $('.mouse').detach();
       console.log('movement finished');
@@ -45,12 +46,18 @@ window.Player = Player;
   //uses Date.parse to turn the timestamp value from a date to an integer.  Also establishes the t value of the movement array.
   Player.prototype.setMoveIntervals = function(movement){
     movement[0].t = 0;
-    movement[0].timestamp = Date.parse(movement[0].timestamp);
     for (var i = 1; i < movement.length-1; i++){
-      movement[i].timestamp = Date.parse(movement[i].timestamp);
       movement[i].t = movement[i].timestamp - movement[i-1].timestamp;
     }
     this.placeMouse(movement);
+  };
+
+  //changes the iso date object in timestamp to an integer of the Date.now() format
+  Player.prototype.parseDate = function(movement){
+    for(var i = 0; i < movement.length; i++){
+      movement[i].timestamp = Date.parse(movement[i].timestamp);
+    }
+    setMoveIntervals(movement);
   };
 
   //scales clientX, clientY, pageX, and pageY so different screen sizes will have the same display.
