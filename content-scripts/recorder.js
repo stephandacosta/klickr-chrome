@@ -13,7 +13,7 @@
 var Recorder = function(){
   console.log('Initializing recorder...');
   this.server = "http://jyek.cloudapp.net:3004";
-  this.rate = 100;
+  this.rate = 10;
   this.mousePos = undefined;
   this.isRecording = false;
 
