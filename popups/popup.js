@@ -9,6 +9,9 @@ $(function(){
   });
 
   $('#start').click(function() {
+    // window.close will automatically close the browser action window
+    // so that mouse movements can be detected by recorder.js
+    window.close();
     chrome.extension.getBackgroundPage().startRecording();
   });
 
