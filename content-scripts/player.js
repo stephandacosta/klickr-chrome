@@ -8,16 +8,21 @@ var Player = function(){};
 window.Player = Player;
 
 // moves mouse to given destination with duration
-  Player.prototype.move = function (endX, endY, duration){
-    d3.select('.mouse')
-     .transition()
-     .duration(duration)
-     .style({'top':  endY + 'px', 'left': endX + 'px'});
+  Player.prototype.move = function (endX, endY, duration, action){
+    if(action === 'move'){
+      d3.select('.mouse')
+       .transition()
+       .duration(duration)
+       .style({'top':  endY + 'px', 'left': endX + 'px'});
+    } else if(action === 'click'){
+
+    }
   };
 
   // chains mouse moves together. also adds the scrolling logic. the pageX and pageY values of the movement object at index are passed to move.
   // function operates recursively, waiting the duration of the prior move in a setTimeout before calling the next move.
   Player.prototype.playRecording = function(movement, index){
+    //maybe try removing setTimeout
     if ( index === movement.length ) {
       $('.mouse').detach();
       console.log('movement finished');
@@ -30,8 +35,8 @@ window.Player = Player;
 
       $(window).scrollLeft(movement[index].pageX-movement[index].clientX);
       $(window).scrollTop(movement[index].pageY-movement[index].clientY);
-      this.move(movement[index].pageX, movement[index].pageY ,movement[index].t);
-
+      this.move(movement[index].pageX, movement[index].pageY ,movement[index].t, movement[index].action);
+      
       var that = this;
       setTimeout(function(){
         that.playRecording(movement, index+1);
@@ -48,12 +53,18 @@ window.Player = Player;
   //uses Date.parse to turn the timestamp value from a date to an integer.  Also establishes the t value of the movement array.
   Player.prototype.setMoveIntervals = function(movement){
     movement[0].t = 0;
-    movement[0].timestamp = Date.parse(movement[0].timestamp);
     for (var i = 1; i < movement.length-1; i++){
-      movement[i].timestamp = Date.parse(movement[i].timestamp);
       movement[i].t = movement[i].timestamp - movement[i-1].timestamp;
     }
     this.placeMouse(movement);
+  };
+
+  //changes the iso date object in timestamp to an integer of the Date.now() format
+  Player.prototype.parseDate = function(movement){
+    for(var i = 0; i < movement.length; i++){
+      movement[i].timestamp = Date.parse(movement[i].timestamp);
+    }
+    setMoveIntervals(movement);
   };
 
   //scales clientX, clientY, pageX, and pageY so different screen sizes will have the same display.
@@ -61,6 +72,8 @@ window.Player = Player;
     console.log('played klick', data);
     var xScale = $(window).width() / data.width || 1;
     var yScale = $(window).height() / data.height || 1;
+    data.width = $(window).width();
+    data.height = $(window).height();
     for(var i = 0; i < data.ticks.length; i++){
       data.ticks[i].clientX = data.ticks[i].clientX*xScale;
       data.ticks[i].clientY = data.ticks[i].clientY*yScale;
