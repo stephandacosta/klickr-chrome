@@ -101,7 +101,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       });
       sendResponse({response: "background: processed save message"});
 
-  // Share request: NEEDS TO BE IMPLEMENTED 
+  // Share request: NEEDS TO BE IMPLEMENTED
   } else if (request.action === 'share') {
       console.log('background: share');
       sendResponse({response: "background: processed share message"});
