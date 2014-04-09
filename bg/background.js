@@ -94,9 +94,6 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   // Stage recording: updates background with staged recording sent from recorder.js
   if (request.action === 'stage') {
     console.log('Background: Stage recording in background');
-    // Willson: check if window.stagedKlick is undefined
-    // if it is undefined, assign request.klick to it
-    // if it is not undefined, take request.klick.ticks and append it to window.stagedKlick.ticks
     window.stagedKlick = request.klick;
     sendResponse({response: "Background: Processed stage message"});
   }
