@@ -26,7 +26,7 @@ var Recorder = function(){
   // (cursor positions are logged using setInterval to prevent excessive logging)
   var self = this;
   window.onmousemove = function(event){
-    self.mouseMove.apply(self, event);
+    self.mouseMove.apply(self, [event]);
   };
 };
 
@@ -64,6 +64,8 @@ Recorder.prototype.createKlick = function(){
 /* Records cursor positions */
 Recorder.prototype.mouseMove = function(event) {
   event = event || window.event; // IE
+
+  // console.log("Within mouseMove: ", event);
 
   this.mousePos = {
     pageX: event.pageX,
