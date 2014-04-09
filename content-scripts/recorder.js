@@ -53,6 +53,8 @@ Recorder.prototype.createKlick = function(){
 
     // In order to enable multi-page functionality, we may need to move the url property
     // into each of the objects in the ticks array
+
+    // name this initialUrl?
     url: document.URL,
     description: '',
     ticks: []
@@ -81,6 +83,7 @@ Recorder.prototype.log = function(action, pageX, pageY, clientX, clientY, timest
   clientY = clientY || this.mousePos.clientY;
   timestamp = timestamp || Date.now();
   this.klick.ticks.push({
+      // currentUrl: document.URL,
       action: action,
       pageX: pageX,
       pageY: pageY,
@@ -124,7 +127,7 @@ Recorder.prototype.stop = function(){
 Recorder.prototype.displaySaverBox = function(klick){
   console.log('Recorder: Open saver box');
   chrome.runtime.sendMessage({action : "displaySaverBox"}, function(response){
-  console.log(response);
+    console.log(response);
   });
 };
 

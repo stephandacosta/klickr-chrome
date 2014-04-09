@@ -71,13 +71,11 @@ chrome.tabs.onUpdated.addListener(function(){
     console.log('Background: Tab update detected', tabs[0].url);
     var url = tabs[0].url;
     var params = window.helpers.parseUrl(url);
-    if (params.host.match(window.hostname)){
-      console.log(params.hasOwnProperty('query'), params.query.hasOwnProperty('url'), params.query.hasOwnProperty('id'));
-      if (params.query.hasOwnProperty('url') && params.query.hasOwnProperty('id')){
-        console.log('Background: Play recording with url', decodeURIComponent(params.query.url), 'and id', params.query.id);
-        chrome.tabs.update(tabs[0].id, {url: decodeURIComponent(params.query.url)});
-        window.playKlick(params.query.id);
-      }
+    if ( params.host.match(window.hostname) && params.query.hasOwnProperty('url') && params.query.hasOwnProperty('id') ){
+      // console.log(params.hasOwnProperty('query'), params.query.hasOwnProperty('url'), params.query.hasOwnProperty('id'));
+      console.log('Background: Play recording with url', decodeURIComponent(params.query.url), 'and id', params.query.id);
+      chrome.tabs.update(tabs[0].id, {url: decodeURIComponent(params.query.url)});
+      window.playKlick(params.query.id);
     }
   });
 });
@@ -89,7 +87,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if (request.action === 'stage') {
     console.log('Background: Stage recording in background');
     window.stagedKlick = request.klick;
-    sendResponse({response: "background: processed stage message"});
+    sendResponse({response: "Background: Processed stage message"});
   }
 
   // Replay recording: requests player to play staged recording
@@ -104,13 +102,13 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     console.log('Background: Save recording');
     window.stagedKlick.description = request.description;
     window.send(window.stagedKlick); // Background.js should take care of saving the klick object and sending it to the server
-    sendResponse({response: "background: processed save message"});
+    sendResponse({response: "Background: Processed save message"});
   }
 
   // Share recording: NEEDS TO BE IMPLEMENTED 
   else if (request.action === 'share') {
     console.log('Background: Share recording');
-    sendResponse({response: "background: processed share message"});
+    sendResponse({response: "Background: Processed share message"});
   }
 });
 
