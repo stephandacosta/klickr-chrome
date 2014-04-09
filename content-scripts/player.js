@@ -27,9 +27,16 @@ window.Player = Player;
       $('.mouse').detach();
       console.log('movement finished');
     } else {
+      //$(window).scrollLeft(xClientOrigin)  $(window).scrollTop(yClientOrigin);
+
+      // Willson: the idea I have is to look at the current arr[index] and check that object's event.type.
+      // If the event.type is a 'click' event, then redirect to the event.target page first before continuing
+      // processing playRecording for arr[index + 1].
+
       $(window).scrollLeft(movement[index].pageX-movement[index].clientX);
       $(window).scrollTop(movement[index].pageY-movement[index].clientY);
       this.move(movement[index].pageX, movement[index].pageY ,movement[index].t, movement[index].action);
+
       var that = this;
       setTimeout(function(){
         that.playRecording(movement, index+1);
@@ -80,7 +87,7 @@ window.Player = Player;
   Player.prototype.getData = function(clickId){
     var that = this;
     $.ajax({
-      url: 'http://jy1.cloudapp.net:3004/klicks/'+clickId,
+      url: 'http://jy1.cloudapp.net:3000/klicks/'+clickId,
       type: 'GET',
       contentType: 'application/json',
       success: function(data){

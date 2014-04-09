@@ -3,7 +3,6 @@
 /* - Content script that records mouse movements and sends data to server
 /* - Exists on a page, has access to DOM elements, but not to window object
 /* - Communicates with background using events
-/* TODO: Send click, url, width, height
 /* ------------------------------------------------------------------------------------*/
 
 /* ------------------------------------------------------------------------------------*/
@@ -12,15 +11,15 @@
 /* ------------------------------------------------------------------------------------*/
 var Recorder = function(){
   console.log('Initializing recorder...');
-  this.server = "http://jy1.cloudapp.net:3004";
+  this.server = "http://jy1.cloudapp.net:3000";
   this.rate = 10;
   this.mousePos = undefined;
   this.isRecording = false;
 
-  // Create empty klick
+  // Create empty klick object
   this.klick = this.createKlick();
 
-  // Add listners
+  // Add listeners
   this.addListeners();
 
   // Keep track of cursor positions
@@ -37,21 +36,25 @@ window.Recorder = Recorder;
 Recorder.prototype.addListeners = function(){
   var self = this;
   $('html').click(function(event){
-    // console.log(event);
     self.log(event.type, event.pageX, event.pageY, event.clientX, event.clientY, event.timeStamp, event.target.outerHTML, undefined, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey);
   });
+
   $('html').keypress(function(event){
-    // console.log(event);
     var charCode = event.which || event.keyCode;
     self.log(event.type, event.pageX, event.pageY, event.clientX, event.clientY, event.timeStamp, event.target.outerHTML, charCode, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey);
   });
 };
 
-/* Creates a new Klick */
+/* Creates a new Klick object */
 Recorder.prototype.createKlick = function(){
   return {
     width: window.innerWidth,
     height: window.innerHeight,
+
+    // In order to enable multi-page functionality, we may need to move the url property
+    // into each of the objects in the ticks array
+
+    // name this initialUrl?
     url: document.URL,
     description: '',
     ticks: []
@@ -61,6 +64,7 @@ Recorder.prototype.createKlick = function(){
 /* Records cursor positions */
 Recorder.prototype.mouseMove = function(event) {
   event = event || window.event; // IE
+
   this.mousePos = {
     pageX: event.pageX,
     pageY: event.pageY,
@@ -71,7 +75,7 @@ Recorder.prototype.mouseMove = function(event) {
 
 /* Logs to output */
 Recorder.prototype.log = function(action, pageX, pageY, clientX, clientY, timestamp, target, charCode, altKey, ctrlKey, metaKey, shiftKey){
-  if (this.mousePos){
+  if ( this.mousePos ) {
   action = action || 'move';
   pageX = pageX || this.mousePos.pageX;
   pageY = pageY || this.mousePos.pageY;
@@ -79,19 +83,20 @@ Recorder.prototype.log = function(action, pageX, pageY, clientX, clientY, timest
   clientY = clientY || this.mousePos.clientY;
   timestamp = timestamp || Date.now();
   this.klick.ticks.push({
-    action: action,
-    pageX: pageX,
-    pageY: pageY,
-    clientX: clientX,
-    clientY: clientY,
-    timestamp: timestamp,
-    target: '',
-    charCode: charCode,
-    altKey: altKey,
-    ctrlKey: ctrlKey,
-    metaKey: metaKey,
-    shiftKey: shiftKey
-  });
+      // currentUrl: document.URL,
+      action: action,
+      pageX: pageX,
+      pageY: pageY,
+      clientX: clientX,
+      clientY: clientY,
+      timestamp: timestamp,
+      target: '',
+      charCode: charCode,
+      altKey: altKey,
+      ctrlKey: ctrlKey,
+      metaKey: metaKey,
+      shiftKey: shiftKey
+    });
   }
 };
 
@@ -113,56 +118,26 @@ Recorder.prototype.stop = function(){
   if (this.isRecording){
     this.isRecording = false;
     clearInterval(timer);
-    this.send(this.klick);
-    //stephan code start
+    // Once the recorder stops recording, it will send the klick object to background.js to handle
     this.sendToBackground(this.klick);
-    // stephan code end
-    this.klick = this.createKlick();
   }
 };
 
-/* Send output to server */
-Recorder.prototype.send = function(klick){
-  console.log('Recorder: Push to server...', JSON.stringify(klick));
-  $.ajax({
-    type: 'POST',
-    url: this.server + '/klicks',
-    data: JSON.stringify(klick),
-    contentType: 'application/json',
-    success: function(data) {
-      console.log('Recorder: Klick sent', data);
-    },
-    error: function(data){
-      console.log('Recorder: Klick send failed', data);
-    }
-  });
-};
-
-// STEPHAN CODE START
 /* Launch saver box */
 Recorder.prototype.displaySaverBox = function(klick){
-  console.log('Recorder: Open Saver Box');
+  console.log('Recorder: Open saver box');
   chrome.runtime.sendMessage({action : "displaySaverBox"}, function(response){
-  console.log(response);
+    console.log(response);
   });
 };
-// STEPHAN CODE END
 
-// STEPHAN CODE START
-/*Stage output to extension backgroun for replay */
+/* Stage output to extension backgroun for replay */
 Recorder.prototype.sendToBackground = function(klick){
   console.log('Recorder: Sending to background');
-  // ** commented code needs to be inserted if overriding the current send to server function ***
-  // if (this.isRecording){
-  //   this.isRecording = false;
-  //   clearInterval(timer);
   chrome.runtime.sendMessage({action : "stage", klick: klick}, function(response){
     console.log(response);
   });
-    // this.klick = this.createKlick();
-  // }
 };
-// STEPHAN CODE END
 
 
 /* ------------------------------------------------------------------------------------*/
@@ -183,13 +158,6 @@ $(function(){
       recorder.stop();
       sendResponse({response: "Recorder: Stopped recording"});
     }
-     // STEPHAN CODE START
-     // post request triggered by user clicking on 'save' in saver box via background
-     else if (request.action === 'saveKlick'){
-      recorder.send(request.klick);
-      sendResponse({response: "Recorder: Saved recording"});
-    }
-     // STEPHAN CODE END
   });
 
 });

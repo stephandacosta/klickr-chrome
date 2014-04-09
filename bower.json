@@ -4,7 +4,8 @@
   "homepage": "https://github.com/jyek/klickr-chrome",
   "authors": [
     "jyek <justinyek@gmail.com>",
-    "lramsey <lramsey177@gmail.com>"
+    "lramsey <lramsey177@gmail.com>",
+    "wmock <willson.mock@gmail.com>"
   ],
   "license": "MIT",
   "private": true,
