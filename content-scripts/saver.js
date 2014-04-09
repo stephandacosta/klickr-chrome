@@ -13,7 +13,7 @@
 /* These actions trigger the background listeners to dispatch actions to recorder and player
 /********* NEED TO CHECK AFTER INTEGRATION IF POST METHOD CAN BE REFACTORED IN SAVER CLASS
 /* ------------------------------------------------------------------------------------*/
-var Saver= function(){ 
+var Saver = function (){ 
   var boxHeight = 125;  //Height of the saver control box
   var boxWidth = 330;  //Width of the saver control box
   this.node = $('<div class="saveBox"></div>');
@@ -46,7 +46,7 @@ Saver.prototype.buildHtml = function (boxHeight, boxWidth){
   this.node.append('<button type="button" id="close" style="font-size:20px; color=grey; float: right; margin-right: 5px; border: 0.5px solid;">X</button>');
 
   // klikr.io logo
-  this.node.append('<p>Klikr.io</p>');
+  this.node.append('<p>Klickr.io</p>');
 
   // main saver box control buttons
   var menu = ['Replay', 'Save', 'Share'];
