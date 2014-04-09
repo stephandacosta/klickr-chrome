@@ -27,6 +27,14 @@ window.stopRecording = function(){
   window.openSaver();
 };
 
+/* Background -> Recorder: Pause recording */
+// If you pause, you have to start back up first!
+// Start -> Pause -> Start -> Stop
+window.pauseRecording = function(){
+  console.log('Background -> Recorder: Pause recording');
+  helpers.activeTabSendMessage({action: "pauseRecording"});
+};
+
 /* Background -> Recorder: Play recording
  * This function can be called in one of two ways:
  * 1) Via a link, in which case the _id is included in the url string
@@ -86,6 +94,9 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   // Stage recording: updates background with staged recording sent from recorder.js
   if (request.action === 'stage') {
     console.log('Background: Stage recording in background');
+    // Willson: check if window.stagedKlick is undefined
+    // if it is undefined, assign request.klick to it
+    // if it is not undefined, take request.klick.ticks and append it to window.stagedKlick.ticks
     window.stagedKlick = request.klick;
     sendResponse({response: "Background: Processed stage message"});
   }

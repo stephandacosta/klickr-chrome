@@ -12,7 +12,7 @@
 var Recorder = function(){
   console.log('Initializing recorder...');
   this.server = "http://jy1.cloudapp.net:3000";
-  this.rate = 10;
+  this.rate = 1000;
   this.mousePos = undefined;
   this.isRecording = false;
 
@@ -108,9 +108,21 @@ Recorder.prototype.start = function(){
   if (!this.isRecording){
     var self = this;
     this.isRecording = true;
-    timer = setInterval(function(){
+    // Willson: made timer a property of the recorder object
+    this.timer = setInterval(function(){
       self.log();
     }, this.rate);
+  }
+};
+
+/* Recorder.prototype.pause
+ * Very similar to stop except don't send to background.
+ */
+Recorder.prototype.pause = function() {
+  console.log('Recorder: Paused');
+  if (this.isRecording) {
+    this.isRecording = false;
+    clearInterval(this.timer);
   }
 };
 
@@ -119,7 +131,8 @@ Recorder.prototype.stop = function(){
   console.log('Recorder: Stopped');
   if (this.isRecording){
     this.isRecording = false;
-    clearInterval(timer);
+    console.log(this.timer);
+    clearInterval(this.timer);
     // Once the recorder stops recording, it will send the klick object to background.js to handle
     this.sendToBackground(this.klick);
   }
@@ -156,7 +169,14 @@ $(function(){
     if (request.action === 'startRecording'){
       recorder.start();
       sendResponse({response: "Recorder: Started recording"});
-    } else if (request.action === 'stopRecording'){
+    }
+
+    else if (request.action === 'pauseRecording'){
+      recorder.pause();
+      sendResponse({response: "Recorder: Paused recording"});
+    }
+
+    else if (request.action === 'stopRecording'){
       recorder.stop();
       sendResponse({response: "Recorder: Stopped recording"});
     }
