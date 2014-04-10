@@ -121,6 +121,9 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     // need to modify code below to not use window.stagedKlick anymore
     // instead, need to first consolidate window.currentKlickObjects into one object and then
     // add the description property onto it
+
+    // need to add validation so that when save happens, the consolidated object's keys
+    // must be an array with length greater than 0
     window.stagedKlick.description = request.description;
     window.send(window.stagedKlick); // Background.js should take care of saving the klick object and sending it to the server
     

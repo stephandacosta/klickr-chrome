@@ -37,3 +37,26 @@ helpers.activeTabSendMessage = function (message, responseCallback) {
     chrome.tabs.sendMessage(tabs[0].id, message, responseCallback);
   });
 };
+
+helpers.consolidateKlickObjects = function (arrayOfKlicks) {
+  var len = arrayOfKlicks.length;
+  if (len === 0) {
+    return {};
+  } else if (len === 1) {
+    return arrayOfKlicks[0];
+  } else {
+    var newTicks = [];
+    for (var i = 0; i < arrayOfKlicks.length; i += 1) {
+      newTicks = newTicks.concat(arrayOfKlicks[i].ticks);
+    }
+
+    var result = {
+      width: arrayOfKlicks[0].width,
+      height: arrayOfKlicks[0].height,
+      description: arrayOfKlicks[0].description,
+      ticks: newTicks
+    };
+
+    return result;
+  }
+};
