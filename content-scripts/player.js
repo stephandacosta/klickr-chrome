@@ -15,6 +15,11 @@ window.Player = Player;
       .style({'top':  endY + 'px', 'left': endX + 'px'});
   };
 
+  Player.prototype.createNewKlick = function(movement, index){
+    movement = movement.slice(index);
+
+  };
+
   // chains mouse moves together. also adds the scrolling logic. the pageX and pageY values of the movement object at index are passed to move.
   // function operates recursively, waiting the duration of the prior move in a setTimeout before calling the next move.
   Player.prototype.playRecording = function(movement, index){
@@ -27,9 +32,9 @@ window.Player = Player;
       // Willson: the idea I have is to look at the current arr[index] and check that object's event.type.
       // If the event.type is a 'click' event, then redirect to the event.target page first before continuing
       // // processing playRecording for arr[index + 1].
-      // if(movement[index].action === 'urlChanged'){
-      //   window.location = event.target; //explore???
-      // }
+   //   if(movement[index].action === 'urlChanged'){
+     //   this.createNewKlick(movement, index);
+      //}
       $(window).scrollLeft(movement[index].pageX-movement[index].clientX);
       $(window).scrollTop(movement[index].pageY-movement[index].clientY);
       this.move(movement[index].pageX, movement[index].pageY ,movement[index].t, movement, index);
@@ -99,9 +104,17 @@ window.Player = Player;
   };
 
   //initiates the player methods
-  Player.prototype.playKlick = function(clickId){
-    clickId = clickId || '';
-    this.getData(clickId);
+  Player.prototype.playKlick = function(idOrKlick, action){
+    if(action === 'playKlick'){
+      console.log('play button clicked');
+      idOrKlick = idOrKlick || '';
+      this.getData(idOrKlick);
+    }
+
+    else if(action === 'playStagedKlick'){
+      console.log('replay button clicked');
+      this.scaleXY(idOrKlick);
+    }
   };
 
 
@@ -117,16 +130,12 @@ $(function(){
   // Listens to messages from background
   chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.action === 'playKlick'){
-      console.log('play button clicked');
-      player.playKlick(request.id);
+      player.playKlick(request.id, request.action);
       sendResponse({response: "Player: Playing Klick..."});
     }
 
     else if (request.action === 'playStagedKlick'){
-      console.log('replay button clicked');
-      console.log('staged klick: ', request.klick);
-      player.scaleXY(request.klick);
-      // ##### CHECK PLAYBACK WORKING
+      player.playKlick(request.klick, request.action);
       sendResponse({response: "Player: Playing Staged Klick..."});
     }
   });
