@@ -94,7 +94,8 @@ chrome.tabs.onUpdated.addListener(function(){
 
 // listener on saver box (replay, save, share) and recorder (stage)
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-  
+  var finalKlickObject;
+
   // Stage recording: updates background with staged recording sent from recorder.js
   if (request.action === 'stage') {
     console.log('Background: Stage recording in background');
@@ -110,7 +111,8 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     // need to modify code below to not use window.stagedKlick anymore
     // instead, the value of the "klick" property should be the object that results from
     // consolidating window.currentKlickObjects
-    helpers.activeTabSendMessage({action: "playStagedKlick", klick: window.stagedKlick});
+    finalKlickObject = helpers.consolidateKlickObjects(window.currentKlickObjects);
+    helpers.activeTabSendMessage({action: "playStagedKlick", klick: finalKlickObject});
     sendResponse({response: "Background: Processed replay message"});
   }
 
@@ -121,17 +123,21 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     // need to modify code below to not use window.stagedKlick anymore
     // instead, need to first consolidate window.currentKlickObjects into one object and then
     // add the description property onto it
+    finalKlickObject = helpers.consolidateKlickObjects(window.currentKlickObjects);
 
     // need to add validation so that when save happens, the consolidated object's keys
     // must be an array with length greater than 0
-    window.stagedKlick.description = request.description;
-    window.send(window.stagedKlick); // Background.js should take care of saving the klick object and sending it to the server
-    
-    // need to clear out window.currentKlickObjects to empty array
-    window.currentKlickObjects = [];
-    sendResponse({response: "Background: Processed save message"});
+    if (Object.keys(finalKlickObject).length > 0) {
+      finalKlickObject.description = request.description;
+      window.send(finalKlickObject);  // Background.js should take care of saving the klick object and sending it to the server
+      window.currentKlickObjects = [];  // need to clear out window.currentKlickObjects to empty array
+      sendResponse({response: "Background: Processed save message"});  
+    }
+    // window.stagedKlick.description = request.description;
+    // window.send(window.stagedKlick);
+    // window.currentKlickObjects = [];
+    // sendResponse({response: "Background: Processed save message"});
   }
-
   // Share recording: NEEDS TO BE IMPLEMENTED 
   // else if (request.action === 'share') {
   //   console.log('Background: Share recording');
