@@ -18,6 +18,7 @@ window.id = ''; // klick object id (corresponds to _id in mongodb)
 // he clicks save. Once he clicks save, will need to process each of the objects in this array
 // to produce one consolidated object to send to server.
 window.currentKlickObjects = [];
+window.nextKlick = false;
 
 /* Background -> Recorder: Start recording */
 window.startRecording = function(){
@@ -43,7 +44,7 @@ window.stopRecording = function(){
 /* Background -> Recorder: Play recording
  * This function can be called in one of two ways:
  * 1) Via a link, in which case the _id is included in the url string
- * 2) Via clicking the play button in popup.js, in which case the _id will be undefined 
+ * 2) Via clicking the play button in popup.js, in which case the _id will be undefined
  */
 window.playKlick = function(id){
   console.log('Background -> Recorder: Play recording');
@@ -103,7 +104,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     window.currentKlickObjects.push(request.klick);
     sendResponse({response: "Background: Processed stage message"});
   }
-
+  
   // Replay recording: requests player to play staged recording
   else if (request.action === 'replay') {
     console.log('Background: Replay recording');
@@ -138,6 +139,20 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     // window.currentKlickObjects = [];
     // sendResponse({response: "Background: Processed save message"});
   }
+
+  // in multi-page recording, used to store the next klick object that will be given after the page changes to a new url
+  else if (request.action === 'nextKlick') {
+    console.log('Background: Store recording in background');
+    window.nextKlick = request.klick;
+    sendResponse({response: "Background: Processed storage message"});
+  }
+  
+  // if the dom is ready and nextKlick is not false, then send the current page a new klick object to restart the player.
+  else if (request.action === 'domReady' && !!window.nextKlick){
+    helpers.activeTabSendMessage({action: "playNextKlick", klick: window.nextKlick});
+    sendResponse({response: "Background: Processed nextKlick message"});
+  }
+
   // Share recording: NEEDS TO BE IMPLEMENTED 
   // else if (request.action === 'share') {
   //   console.log('Background: Share recording');

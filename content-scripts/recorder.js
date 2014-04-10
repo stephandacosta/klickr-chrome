@@ -56,7 +56,7 @@ Recorder.prototype.addListeners = function(){
 
 /* Creates a new Klick object */
 Recorder.prototype.createKlick = function(){
-  return { 
+  return {
     width: window.innerWidth,
     height: window.innerHeight,
 
