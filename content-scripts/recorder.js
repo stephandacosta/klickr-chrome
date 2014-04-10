@@ -11,7 +11,8 @@
 /* ------------------------------------------------------------------------------------*/
 var Recorder = function(){
   console.log('Initializing recorder...');
-  this.server = "http://jy1.cloudapp.net:3000";
+  // this.server = "http://jy1.cloudapp.net:3000";
+  this.server = "http://localhost:4568";
   this.rate = 10;
   this.mousePos = undefined;
   this.isRecording = false;
@@ -39,12 +40,12 @@ Recorder.prototype.addListeners = function(){
   $('html').click(function(event){
     // Did the click happen on a <a> tag?
     if ($(event.target).is("a")) {
-      self.log("urlChanged", event.pageX, event.pageY, event.clientX, event.clientY, event.timeStamp, event.target.outerHTML, undefined, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey, document.url);
+      self.log("urlChanged", event.pageX, event.pageY, event.clientX, event.clientY, event.timeStamp, event.target.outerHTML, undefined, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey, document.URL);
       // need to trigger the stop function for this recorder object and send to background
       self.stop();
       // I'm counting on the fact that clicking on a link will render to a new page.
     } else {
-      self.log(event.type, event.pageX, event.pageY, event.clientX, event.clientY, event.timeStamp, event.target.outerHTML, undefined, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey, document.url);
+      self.log(event.type, event.pageX, event.pageY, event.clientX, event.clientY, event.timeStamp, event.target.outerHTML, undefined, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey, document.URL);
     }
   });
 
@@ -75,20 +76,22 @@ Recorder.prototype.mouseMove = function(event) {
     pageX: event.pageX,
     pageY: event.pageY,
     clientX: event.clientX,
-    clientY: event.clientY
+    clientY: event.clientY,
+    url: document.URL
   };
 };
 
 /* Logs to output */
 Recorder.prototype.log = function(action, pageX, pageY, clientX, clientY, timestamp, target, charCode, altKey, ctrlKey, metaKey, shiftKey, url){
   if ( this.mousePos ) {
-  action = action || 'move';
-  pageX = pageX || this.mousePos.pageX;
-  pageY = pageY || this.mousePos.pageY;
-  clientX = clientX || this.mousePos.clientX;
-  clientY = clientY || this.mousePos.clientY;
-  timestamp = timestamp || Date.now();
-  this.klick.ticks.push({
+    action = action || 'move';
+    pageX = pageX || this.mousePos.pageX;
+    pageY = pageY || this.mousePos.pageY;
+    clientX = clientX || this.mousePos.clientX;
+    clientY = clientY || this.mousePos.clientY;
+    timestamp = timestamp || Date.now();
+    url = url || document.URL;
+    this.klick.ticks.push({
       action: action,
       pageX: pageX,
       pageY: pageY,
