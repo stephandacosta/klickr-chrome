@@ -35,8 +35,18 @@ window.Recorder = Recorder;
 /* Add other event listeners */
 Recorder.prototype.addListeners = function(){
   var self = this;
+
   $('html').click(function(event){
-    self.log(event.type, event.pageX, event.pageY, event.clientX, event.clientY, event.timeStamp, event.target.outerHTML, undefined, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey);
+    // Did the click happen on a <a> tag?
+    if ($(event.target).is("a")) {
+      // alert("The typeof event.type is: " + typeof event.type); // confirmed that it's a string
+      self.log("urlChanged", event.pageX, event.pageY, event.clientX, event.clientY, event.timeStamp, event.target.outerHTML, undefined, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey, document.url);
+
+      // next step: send a message to background saying that url has changed
+      // need to trigger the stop function for this recorder object and send to background
+    } else {
+      self.log(event.type, event.pageX, event.pageY, event.clientX, event.clientY, event.timeStamp, event.target.outerHTML, undefined, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey, document.url);
+    }
   });
 
   $('html').keypress(function(event){
@@ -55,7 +65,7 @@ Recorder.prototype.createKlick = function(){
     // into each of the objects in the ticks array
 
     // name this initialUrl?
-    url: document.URL,
+    // url: document.URL,
     description: '',
     ticks: []
   };
@@ -76,7 +86,7 @@ Recorder.prototype.mouseMove = function(event) {
 };
 
 /* Logs to output */
-Recorder.prototype.log = function(action, pageX, pageY, clientX, clientY, timestamp, target, charCode, altKey, ctrlKey, metaKey, shiftKey){
+Recorder.prototype.log = function(action, pageX, pageY, clientX, clientY, timestamp, target, charCode, altKey, ctrlKey, metaKey, shiftKey, url){
   if ( this.mousePos ) {
   action = action || 'move';
   pageX = pageX || this.mousePos.pageX;
@@ -85,7 +95,6 @@ Recorder.prototype.log = function(action, pageX, pageY, clientX, clientY, timest
   clientY = clientY || this.mousePos.clientY;
   timestamp = timestamp || Date.now();
   this.klick.ticks.push({
-      // currentUrl: document.URL,
       action: action,
       pageX: pageX,
       pageY: pageY,
@@ -97,7 +106,8 @@ Recorder.prototype.log = function(action, pageX, pageY, clientX, clientY, timest
       altKey: altKey,
       ctrlKey: ctrlKey,
       metaKey: metaKey,
-      shiftKey: shiftKey
+      shiftKey: shiftKey,
+      url: url
     });
   }
 };
@@ -118,20 +128,22 @@ Recorder.prototype.start = function(){
 /* Recorder.prototype.pause
  * Very similar to stop except don't send to background.
  */
-Recorder.prototype.pause = function() {
-  console.log('Recorder: Paused');
-  if (this.isRecording) {
-    this.isRecording = false;
-    clearInterval(this.timer);
-  }
-};
+// Recorder.prototype.pause = function() {
+//   console.log('Recorder: Paused');
+//   if (this.isRecording) {
+//     this.isRecording = false;
+//     clearInterval(this.timer);
+//     // repeating stop right now
+//     // this.sendToBackground(this.klick);
+//   }
+// };
 
 /* Stop recording */
 Recorder.prototype.stop = function(){
   console.log('Recorder: Stopped');
   if (this.isRecording){
     this.isRecording = false;
-    console.log(this.timer);
+    // console.log(this.timer);
     clearInterval(this.timer);
     // Once the recorder stops recording, it will send the klick object to background.js to handle
     this.sendToBackground(this.klick);
