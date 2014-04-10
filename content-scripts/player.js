@@ -8,55 +8,67 @@ var Player = function(){};
 window.Player = Player;
 
 // moves mouse to given destination with duration
-  Player.prototype.move = function (endX, endY, duration, action){
-    if(action === 'move'){
-      d3.select('.mouse')
-       .transition()
-       .duration(duration)
-       .style({'top':  endY + 'px', 'left': endX + 'px'});
-    } else if(action === 'click'){
+  Player.prototype.move = function (endX, endY, duration){
+    d3.select('.mouse')
+      .transition()
+      .duration(duration)
+      .style({'top':  endY + 'px', 'left': endX + 'px'});
+  };
 
-    }
+  // this function is very similar to Recorder.sendToBackground.  sends the nextKlick message to background, passing data over as the klick.
+  Player.prototype.sendToBackground = function(data){
+    console.log('Player: Sending to background');
+    chrome.runtime.sendMessage({action : "nextKlick", klick: data});
+  };
+
+  // creates a new klick, starting from the indexes after a urlChanged event has happened.  calls the sendToBackground function and then redirects the page.
+  Player.prototype.createNewKlick = function(data, index){
+    data.ticks = data.ticks.slice(index+1);
+    this.sendToBackground(data);
+    window.location.href = data.ticks[0].url;
   };
 
   // chains mouse moves together. also adds the scrolling logic. the pageX and pageY values of the movement object at index are passed to move.
   // function operates recursively, waiting the duration of the prior move in a setTimeout before calling the next move.
-  Player.prototype.playRecording = function(movement, index){
-    //maybe try removing setTimeout
+  Player.prototype.playRecording = function(data, index){
+    var movement = data.ticks;
     if ( index === movement.length ) {
       $('.mouse').detach();
       console.log('movement finished');
     } else {
-      //$(window).scrollLeft(xClientOrigin)  $(window).scrollTop(yClientOrigin);
 
-      // Willson: the idea I have is to look at the current arr[index] and check that object's event.type.
-      // If the event.type is a 'click' event, then redirect to the event.target page first before continuing
-      // processing playRecording for arr[index + 1].
-
+      if(movement[index].action === 'urlChanged'){
+        this.createNewKlick(data, index);
+      }
       $(window).scrollLeft(movement[index].pageX-movement[index].clientX);
       $(window).scrollTop(movement[index].pageY-movement[index].clientY);
-      this.move(movement[index].pageX, movement[index].pageY ,movement[index].t, movement[index].action);
-
+      this.move(movement[index].pageX, movement[index].pageY ,movement[index].t, movement, index);
       var that = this;
       setTimeout(function(){
-        that.playRecording(movement, index+1);
+        that.playRecording(data, index+1);
       }, movement[index].t);
     }
   };
 
   //places the mouse in the dom and gives the mouse's initial position and characteristics
-  Player.prototype.placeMouse = function(movement){
+  Player.prototype.placeMouse = function(data){
+    var movement = data.ticks;
     $('body').append('<div class="mouse" style="position:absolute; background: blue; width: 15px; z-index: 9999; height:15px; border-radius: 7.5px; top: '+movement[0].pageY+'px; left:'+movement[0].pageX+'px;"></div>');
-    this.playRecording(movement, 1);
+    this.playRecording(data, 1);
   };
 
   //uses Date.parse to turn the timestamp value from a date to an integer.  Also establishes the t value of the movement array.
-  Player.prototype.setMoveIntervals = function(movement){
+  Player.prototype.setMoveIntervals = function(data){
+    var movement = data.ticks;
+    if(typeof movement[0].timestamp !== 'number'){
+      this.parseDate(movement);
+    }
     movement[0].t = 0;
     for (var i = 1; i < movement.length-1; i++){
       movement[i].t = movement[i].timestamp - movement[i-1].timestamp;
     }
-    this.placeMouse(movement);
+    data.ticks = movement;
+    this.placeMouse(data);
   };
 
   //changes the iso date object in timestamp to an integer of the Date.now() format
@@ -64,7 +76,6 @@ window.Player = Player;
     for(var i = 0; i < movement.length; i++){
       movement[i].timestamp = Date.parse(movement[i].timestamp);
     }
-    setMoveIntervals(movement);
   };
 
   //scales clientX, clientY, pageX, and pageY so different screen sizes will have the same display.
@@ -80,10 +91,11 @@ window.Player = Player;
       data.ticks[i].pageX = data.ticks[i].pageX*xScale;
       data.ticks[i].pageY = data.ticks[i].pageY*yScale;
     }
-    this.setMoveIntervals(data.ticks);
+    this.setMoveIntervals(data);
   };
 
   //submits an ajax request to the server based on a click id to get movement patterns back
+  // data passed along to every step in this refactor. movement (which is the ticks array) can be derived in the moment.
   Player.prototype.getData = function(clickId){
     var that = this;
     $.ajax({
@@ -100,10 +112,19 @@ window.Player = Player;
     });
   };
 
-  //initiates the player methods
-  Player.prototype.playKlick = function(clickId){
-    clickId = clickId || '';
-    this.getData(clickId);
+  //  initiates the player methods. if the action is playKlick, idOrKlick is an id, and get request the server.
+  //  otherwise, use the klick object and go straight to the playing.
+  Player.prototype.playKlick = function(idOrKlick, action){
+    if(action === 'playKlick'){
+      console.log('play button clicked');
+      idOrKlick = idOrKlick || '';
+      this.getData(idOrKlick);
+    }
+
+    else {
+      console.log('replay button clicked');
+      this.scaleXY(idOrKlick);
+    }
   };
 
 
@@ -119,17 +140,17 @@ $(function(){
   // Listens to messages from background
   chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.action === 'playKlick'){
-      console.log('play button clicked');
-      player.playKlick(request.id);
+      player.playKlick(request.id, request.action);
       sendResponse({response: "Player: Playing Klick..."});
-    } else if (request.action === 'playStagedKlick'){
-      console.log('replay button clicked');
-      console.log('staged klick: ', request.klick);
-      player.scaleXY(request.klick);
-      // ##### CHECK PLAYBACK WORKING
-      sendResponse({response: "Player: Playing Staged Klick..."});
+    }
+
+    else if (request.action === 'playStagedKlick' || request.action === 'playNextKlick'){
+      player.playKlick(request.klick, request.action);
+      sendResponse({response: "Player: Playing Klick..."});
     }
   });
+  
+  // sends message to background. if the next part of a multi-page click is stored, it will be sent to the player
+  chrome.runtime.sendMessage({action : "domReady"});
 
 });
-
