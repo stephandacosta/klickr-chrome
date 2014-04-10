@@ -8,15 +8,11 @@ var Player = function(){};
 window.Player = Player;
 
 // moves mouse to given destination with duration
-  Player.prototype.move = function (endX, endY, duration, action){
-    if(action === 'move'){
-      d3.select('.mouse')
-       .transition()
-       .duration(duration)
-       .style({'top':  endY + 'px', 'left': endX + 'px'});
-    } else if(action === 'click'){
-
-    }
+  Player.prototype.move = function (endX, endY, duration){
+    d3.select('.mouse')
+      .transition()
+      .duration(duration)
+      .style({'top':  endY + 'px', 'left': endX + 'px'});
   };
 
   // chains mouse moves together. also adds the scrolling logic. the pageX and pageY values of the movement object at index are passed to move.
@@ -27,16 +23,16 @@ window.Player = Player;
       $('.mouse').detach();
       console.log('movement finished');
     } else {
-      //$(window).scrollLeft(xClientOrigin)  $(window).scrollTop(yClientOrigin);
 
       // Willson: the idea I have is to look at the current arr[index] and check that object's event.type.
       // If the event.type is a 'click' event, then redirect to the event.target page first before continuing
-      // processing playRecording for arr[index + 1].
-
+      // // processing playRecording for arr[index + 1].
+      // if(movement[index].action === 'urlChanged'){
+      //   window.location = event.target; //explore???
+      // }
       $(window).scrollLeft(movement[index].pageX-movement[index].clientX);
       $(window).scrollTop(movement[index].pageY-movement[index].clientY);
-      this.move(movement[index].pageX, movement[index].pageY ,movement[index].t, movement[index].action);
-
+      this.move(movement[index].pageX, movement[index].pageY ,movement[index].t, movement, index);
       var that = this;
       setTimeout(function(){
         that.playRecording(movement, index+1);
@@ -52,6 +48,9 @@ window.Player = Player;
 
   //uses Date.parse to turn the timestamp value from a date to an integer.  Also establishes the t value of the movement array.
   Player.prototype.setMoveIntervals = function(movement){
+    if(typeof movement[0].timestamp !== 'number'){
+      this.parseDate(movement);
+    }
     movement[0].t = 0;
     for (var i = 1; i < movement.length-1; i++){
       movement[i].t = movement[i].timestamp - movement[i-1].timestamp;
@@ -64,7 +63,6 @@ window.Player = Player;
     for(var i = 0; i < movement.length; i++){
       movement[i].timestamp = Date.parse(movement[i].timestamp);
     }
-    setMoveIntervals(movement);
   };
 
   //scales clientX, clientY, pageX, and pageY so different screen sizes will have the same display.
@@ -122,7 +120,9 @@ $(function(){
       console.log('play button clicked');
       player.playKlick(request.id);
       sendResponse({response: "Player: Playing Klick..."});
-    } else if (request.action === 'playStagedKlick'){
+    }
+
+    else if (request.action === 'playStagedKlick'){
       console.log('replay button clicked');
       console.log('staged klick: ', request.klick);
       player.scaleXY(request.klick);
@@ -132,4 +132,3 @@ $(function(){
   });
 
 });
-
