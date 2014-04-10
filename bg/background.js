@@ -13,7 +13,13 @@ console.log('Background initiated...');
 window.hostname = 'jy1.cloudapp.net';
 window.server = 'http://jy1.cloudapp.net:3000';
 window.id = ''; // klick object id (corresponds to _id in mongodb)
+
+// This array will consist of all the Klick objects that a user sends to background before
+// he clicks save. Once he clicks save, will need to process each of the objects in this array
+// to produce one consolidated object to send to server.
+window.currentKlickObjects = [];
 window.nextKlick = false;
+
 /* Background -> Recorder: Start recording */
 window.startRecording = function(){
   console.log('Background -> Recorder: Start recording');
@@ -26,6 +32,14 @@ window.stopRecording = function(){
   helpers.activeTabSendMessage({action: "stopRecording"});
   window.openSaver();
 };
+
+/* Background -> Recorder: Pause recording */
+// If you pause, you have to start back up first!
+// Start -> Pause -> Start -> Stop
+// window.pauseRecording = function(){
+//   console.log('Background -> Recorder: Pause recording');
+//   helpers.activeTabSendMessage({action: "pauseRecording"});
+// };
 
 /* Background -> Recorder: Play recording
  * This function can be called in one of two ways:
@@ -72,7 +86,6 @@ chrome.tabs.onUpdated.addListener(function(){
     var url = tabs[0].url;
     var params = window.helpers.parseUrl(url);
     if ( params.host.match(window.hostname) && params.query.hasOwnProperty('url') && params.query.hasOwnProperty('id') ){
-      // console.log(params.hasOwnProperty('query'), params.query.hasOwnProperty('url'), params.query.hasOwnProperty('id'));
       console.log('Background: Play recording with url', decodeURIComponent(params.query.url), 'and id', params.query.id);
       chrome.tabs.update(tabs[0].id, {url: decodeURIComponent(params.query.url)});
       window.playKlick(params.query.id);
@@ -82,33 +95,49 @@ chrome.tabs.onUpdated.addListener(function(){
 
 // listener on saver box (replay, save, share) and recorder (stage)
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  var finalKlickObject;
 
   // Stage recording: updates background with staged recording sent from recorder.js
   if (request.action === 'stage') {
     console.log('Background: Stage recording in background');
-    window.stagedKlick = request.klick;
+    // Append the klick object coming from recorder.js to the currentKlickObjects
+    window.currentKlickObjects.push(request.klick);
     sendResponse({response: "Background: Processed stage message"});
   }
   
   // Replay recording: requests player to play staged recording
   else if (request.action === 'replay') {
     console.log('Background: Replay recording');
-    helpers.activeTabSendMessage({action: "playStagedKlick", klick: window.stagedKlick});
+
+    // need to modify code below to not use window.stagedKlick anymore
+    // instead, the value of the "klick" property should be the object that results from
+    // consolidating window.currentKlickObjects
+    finalKlickObject = helpers.consolidateKlickObjects(window.currentKlickObjects);
+    helpers.activeTabSendMessage({action: "playStagedKlick", klick: finalKlickObject});
     sendResponse({response: "Background: Processed replay message"});
   }
 
   // Save recording: staged recording is sent to recorder to be pushed to server
   else if (request.action === 'save') {
     console.log('Background: Save recording');
-    window.stagedKlick.description = request.description;
-    window.send(window.stagedKlick); // Background.js should take care of saving the klick object and sending it to the server
-    sendResponse({response: "Background: Processed save message"});
-  }
 
-  // Share recording: NEEDS TO BE IMPLEMENTED
-  else if (request.action === 'share') {
-    console.log('Background: Share recording');
-    sendResponse({response: "Background: Processed share message"});
+    // need to modify code below to not use window.stagedKlick anymore
+    // instead, need to first consolidate window.currentKlickObjects into one object and then
+    // add the description property onto it
+    finalKlickObject = helpers.consolidateKlickObjects(window.currentKlickObjects);
+
+    // need to add validation so that when save happens, the consolidated object's keys
+    // must be an array with length greater than 0
+    if (Object.keys(finalKlickObject).length > 0) {
+      finalKlickObject.description = request.description;
+      window.send(finalKlickObject);  // Background.js should take care of saving the klick object and sending it to the server
+      window.currentKlickObjects = [];  // need to clear out window.currentKlickObjects to empty array
+      sendResponse({response: "Background: Processed save message"});  
+    }
+    // window.stagedKlick.description = request.description;
+    // window.send(window.stagedKlick);
+    // window.currentKlickObjects = [];
+    // sendResponse({response: "Background: Processed save message"});
   }
 
   // in multi-page recording, used to store the next klick object that will be given after the page changes to a new url
@@ -124,9 +153,9 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     sendResponse({response: "Background: Processed nextKlick message"});
   }
 
+  // Share recording: NEEDS TO BE IMPLEMENTED 
+  // else if (request.action === 'share') {
+  //   console.log('Background: Share recording');
+  //   sendResponse({response: "Background: Processed share message"});
+  // }
 });
-
-// We want the background.js file to store the current klick object.
-// When the stop recording button is clicked, then background.js will send the klick object to the server and clear the klick object.
-// Whenever a tick object is created, it is pushed to the tick property of the klick object in background.js
-// var currentKlickObject;
