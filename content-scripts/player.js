@@ -15,18 +15,17 @@ window.Player = Player;
       .style({'top':  endY + 'px', 'left': endX + 'px'});
   };
 
-  // this function identical to Recorder.sendToBackground. can factor out later
+  // this function is very similar to Recorder.sendToBackground.  sends the nextKlick message to background, passing data over as the klick.
   Player.prototype.sendToBackground = function(data){
-    console.log('Recorder: Sending to background');
-    chrome.runtime.sendMessage({action : "stage", klick: data}, function(response){
-      console.log(response);
-    });
+    console.log('Player: Sending to background');
+    chrome.runtime.sendMessage({action : "nextKlick", klick: data});
   };
 
-
+  // creates a new klick, starting from the indexes after a urlChanged event has happened.  calls the sendToBackground function and then redirects the page.
   Player.prototype.createNewKlick = function(data, index){
-    data.ticks = data.ticks.slice(index);
+    data.ticks = data.ticks.slice(index+1);
     this.sendToBackground(data);
+    window.location.href = data.ticks[0].url;
   };
 
   // chains mouse moves together. also adds the scrolling logic. the pageX and pageY values of the movement object at index are passed to move.
@@ -113,7 +112,8 @@ window.Player = Player;
     });
   };
 
-  //initiates the player methods
+  //  initiates the player methods. if the action is playKlick, idOrKlick is an id, and get request the server.
+  //  otherwise, use the klick object and go straight to the playing.
   Player.prototype.playKlick = function(idOrKlick, action){
     if(action === 'playKlick'){
       console.log('play button clicked');
@@ -121,7 +121,7 @@ window.Player = Player;
       this.getData(idOrKlick);
     }
 
-    else if(action === 'playStagedKlick'){
+    else {
       console.log('replay button clicked');
       this.scaleXY(idOrKlick);
     }
@@ -144,10 +144,13 @@ $(function(){
       sendResponse({response: "Player: Playing Klick..."});
     }
 
-    else if (request.action === 'playStagedKlick'){
+    else if (request.action === 'playStagedKlick' || request.action === 'playNextKlick'){
       player.playKlick(request.klick, request.action);
-      sendResponse({response: "Player: Playing Staged Klick..."});
+      sendResponse({response: "Player: Playing Klick..."});
     }
   });
+  
+  // sends message to background. if the next part of a multi-page click is stored, it will be sent to the player
+  chrome.runtime.sendMessage({action : "domReady"});
 
 });

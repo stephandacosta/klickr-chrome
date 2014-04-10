@@ -13,7 +13,7 @@ console.log('Background initiated...');
 window.hostname = 'jy1.cloudapp.net';
 window.server = 'http://jy1.cloudapp.net:3000';
 window.id = ''; // klick object id (corresponds to _id in mongodb)
-
+window.nextKlick = false;
 /* Background -> Recorder: Start recording */
 window.startRecording = function(){
   console.log('Background -> Recorder: Start recording');
@@ -89,7 +89,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     window.stagedKlick = request.klick;
     sendResponse({response: "Background: Processed stage message"});
   }
-
+  
   // Replay recording: requests player to play staged recording
   else if (request.action === 'replay') {
     console.log('Background: Replay recording');
@@ -110,6 +110,20 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     console.log('Background: Share recording');
     sendResponse({response: "Background: Processed share message"});
   }
+
+  // in multi-page recording, used to store the next klick object that will be given after the page changes to a new url
+  else if (request.action === 'nextKlick') {
+    console.log('Background: Store recording in background');
+    window.nextKlick = request.klick;
+    sendResponse({response: "Background: Processed storage message"});
+  }
+  
+  // if the dom is ready and nextKlick is not false, then send the current page a new klick object to restart the player.
+  else if (request.action === 'domReady' && !!window.nextKlick){
+    helpers.activeTabSendMessage({action: "playNextKlick", klick: window.nextKlick});
+    sendResponse({response: "Background: Processed nextKlick message"});
+  }
+
 });
 
 // We want the background.js file to store the current klick object.
