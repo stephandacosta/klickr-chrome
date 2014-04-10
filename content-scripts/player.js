@@ -99,7 +99,8 @@ window.Player = Player;
   Player.prototype.getData = function(clickId){
     var that = this;
     $.ajax({
-      url: 'http://jy1.cloudapp.net:3000/klicks/'+clickId,
+      // url: 'http://jy1.cloudapp.net:3000/klicks/'+clickId,
+      url: 'http://localhost:4568/klicks/'+clickId,
       type: 'GET',
       contentType: 'application/json',
       success: function(data){
