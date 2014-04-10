@@ -15,15 +15,17 @@ $(function(){
     chrome.extension.getBackgroundPage().startRecording();
   });
 
-  $('#pause').click(function() {
-    chrome.extension.getBackgroundPage().pauseRecording();
-  });
+  // $('#pause').click(function() {
+  //   chrome.extension.getBackgroundPage().pauseRecording();
+  // });
 
   $('#stop').click(function() {
+    window.close();
     chrome.extension.getBackgroundPage().stopRecording();
   });
 
   $('#play').click(function() {
+    window.close();
     chrome.extension.getBackgroundPage().playKlick();
   });
 

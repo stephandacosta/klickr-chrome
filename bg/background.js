@@ -10,8 +10,10 @@
 console.log('Background initiated...');
 
 /* CONFIGURATIONS */
-window.hostname = 'jy1.cloudapp.net';
-window.server = 'http://jy1.cloudapp.net:3000';
+window.hostname = 'localhost';
+window.server = 'http://localhost:4568';
+// window.hostname = 'jy1.cloudapp.net';
+// window.server = 'http://jy1.cloudapp.net:3000';
 window.id = ''; // klick object id (corresponds to _id in mongodb)
 
 // This array will consist of all the Klick objects that a user sends to background before
