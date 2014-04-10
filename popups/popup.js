@@ -15,6 +15,10 @@ $(function(){
     chrome.extension.getBackgroundPage().startRecording();
   });
 
+  $('#pause').click(function() {
+    chrome.extension.getBackgroundPage().pauseRecording();
+  });
+
   $('#stop').click(function() {
     chrome.extension.getBackgroundPage().stopRecording();
   });

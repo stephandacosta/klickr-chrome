@@ -35,8 +35,17 @@ window.Recorder = Recorder;
 /* Add other event listeners */
 Recorder.prototype.addListeners = function(){
   var self = this;
+
   $('html').click(function(event){
-    self.log(event.type, event.pageX, event.pageY, event.clientX, event.clientY, event.timeStamp, event.target.outerHTML, undefined, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey);
+    // Did the click happen on a <a> tag?
+    if ($(event.target).is("a")) {
+      self.log("urlChanged", event.pageX, event.pageY, event.clientX, event.clientY, event.timeStamp, event.target.outerHTML, undefined, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey, document.url);
+      // need to trigger the stop function for this recorder object and send to background
+      self.stop();
+      // I'm counting on the fact that clicking on a link will render to a new page.
+    } else {
+      self.log(event.type, event.pageX, event.pageY, event.clientX, event.clientY, event.timeStamp, event.target.outerHTML, undefined, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey, document.url);
+    }
   });
 
   $('html').keypress(function(event){
@@ -53,9 +62,7 @@ Recorder.prototype.createKlick = function(){
 
     // In order to enable multi-page functionality, we may need to move the url property
     // into each of the objects in the ticks array
-
-    // name this initialUrl?
-    url: document.URL,
+    // url: document.URL,
     description: '',
     ticks: []
   };
@@ -64,9 +71,6 @@ Recorder.prototype.createKlick = function(){
 /* Records cursor positions */
 Recorder.prototype.mouseMove = function(event) {
   event = event || window.event; // IE
-
-  // console.log("Within mouseMove: ", event);
-
   this.mousePos = {
     pageX: event.pageX,
     pageY: event.pageY,
@@ -76,7 +80,7 @@ Recorder.prototype.mouseMove = function(event) {
 };
 
 /* Logs to output */
-Recorder.prototype.log = function(action, pageX, pageY, clientX, clientY, timestamp, target, charCode, altKey, ctrlKey, metaKey, shiftKey){
+Recorder.prototype.log = function(action, pageX, pageY, clientX, clientY, timestamp, target, charCode, altKey, ctrlKey, metaKey, shiftKey, url){
   if ( this.mousePos ) {
   action = action || 'move';
   pageX = pageX || this.mousePos.pageX;
@@ -85,7 +89,6 @@ Recorder.prototype.log = function(action, pageX, pageY, clientX, clientY, timest
   clientY = clientY || this.mousePos.clientY;
   timestamp = timestamp || Date.now();
   this.klick.ticks.push({
-      // currentUrl: document.URL,
       action: action,
       pageX: pageX,
       pageY: pageY,
@@ -97,7 +100,8 @@ Recorder.prototype.log = function(action, pageX, pageY, clientX, clientY, timest
       altKey: altKey,
       ctrlKey: ctrlKey,
       metaKey: metaKey,
-      shiftKey: shiftKey
+      shiftKey: shiftKey,
+      url: url
     });
   }
 };
@@ -108,18 +112,32 @@ Recorder.prototype.start = function(){
   if (!this.isRecording){
     var self = this;
     this.isRecording = true;
-    timer = setInterval(function(){
+    // Willson: made timer a property of the recorder object
+    this.timer = setInterval(function(){
       self.log();
     }, this.rate);
   }
 };
+
+/* Recorder.prototype.pause
+ * Very similar to stop except don't send to background.
+ */
+// Recorder.prototype.pause = function() {
+//   console.log('Recorder: Paused');
+//   if (this.isRecording) {
+//     this.isRecording = false;
+//     clearInterval(this.timer);
+//     // repeating stop right now
+//     // this.sendToBackground(this.klick);
+//   }
+// };
 
 /* Stop recording */
 Recorder.prototype.stop = function(){
   console.log('Recorder: Stopped');
   if (this.isRecording){
     this.isRecording = false;
-    clearInterval(timer);
+    clearInterval(this.timer);
     // Once the recorder stops recording, it will send the klick object to background.js to handle
     this.sendToBackground(this.klick);
   }
@@ -149,15 +167,23 @@ Recorder.prototype.sendToBackground = function(klick){
 $(function(){
 
   // Helper for routing actions
-  var recorder = new Recorder();
+  window.recorder = new Recorder();
 
   // Listens to messages from background
   chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.action === 'startRecording'){
-      recorder.start();
+      window.recorder.start();
       sendResponse({response: "Recorder: Started recording"});
-    } else if (request.action === 'stopRecording'){
-      recorder.stop();
+    }
+
+    // else if (request.action === 'pauseRecording'){
+    //   recorder.pause();
+    //   sendResponse({response: "Recorder: Paused recording"});
+    // }
+
+    else if (request.action === 'stopRecording'){
+      window.recorder.stop();
+      window.recorder = new Recorder(); // always have a new recorder object ready
       sendResponse({response: "Recorder: Stopped recording"});
     }
   });
