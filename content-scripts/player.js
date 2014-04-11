@@ -25,7 +25,9 @@ window.Player = Player;
   Player.prototype.createNewKlick = function(data, index){
     data.ticks = data.ticks.slice(index+1);
     this.sendToBackground(data);
-    window.location.href = data.ticks[0].url;
+    setTimeout(function(){
+      window.location.href = data.ticks[0].url;
+    }, 1000);
   };
 
   // chains mouse moves together. also adds the scrolling logic. the pageX and pageY values of the movement object at index are passed to move.
@@ -39,14 +41,15 @@ window.Player = Player;
 
       if(movement[index].action === 'urlChanged'){
         this.createNewKlick(data, index);
+      } else {
+        $(window).scrollLeft(movement[index].pageX-movement[index].clientX);
+        $(window).scrollTop(movement[index].pageY-movement[index].clientY);
+        this.move(movement[index].pageX, movement[index].pageY ,movement[index].t, movement, index);
+        var that = this;
+        setTimeout(function(){
+          that.playRecording(data, index+1);
+        }, movement[index].t);
       }
-      $(window).scrollLeft(movement[index].pageX-movement[index].clientX);
-      $(window).scrollTop(movement[index].pageY-movement[index].clientY);
-      this.move(movement[index].pageX, movement[index].pageY ,movement[index].t, movement, index);
-      var that = this;
-      setTimeout(function(){
-        that.playRecording(data, index+1);
-      }, movement[index].t);
     }
   };
 
@@ -58,16 +61,19 @@ window.Player = Player;
   };
 
   //uses Date.parse to turn the timestamp value from a date to an integer.  Also establishes the t value of the movement array.
+  // put movement[0].t === undefined so for multiple recordings, there would not be a lag between recordings
   Player.prototype.setMoveIntervals = function(data){
     var movement = data.ticks;
-    if(typeof movement[0].timestamp !== 'number'){
-      this.parseDate(movement);
+    if(movement[0].t === undefined){
+      if(typeof movement[0].timestamp !== 'number'){
+        this.parseDate(movement);
+      }
+      movement[0].t = 0;
+      for (var i = 1; i < movement.length-1; i++){
+        movement[i].t = movement[i].timestamp - movement[i-1].timestamp;
+      }
+      data.ticks = movement;
     }
-    movement[0].t = 0;
-    for (var i = 1; i < movement.length-1; i++){
-      movement[i].t = movement[i].timestamp - movement[i-1].timestamp;
-    }
-    data.ticks = movement;
     this.placeMouse(data);
   };
 
@@ -99,7 +105,8 @@ window.Player = Player;
   Player.prototype.getData = function(clickId){
     var that = this;
     $.ajax({
-      url: 'http://jy1.cloudapp.net:3000/klicks/'+clickId,
+      // url: 'http://jy1.cloudapp.net:3000/klicks/'+clickId,
+      url: 'http://localhost:4568/klicks/'+clickId,
       type: 'GET',
       contentType: 'application/json',
       success: function(data){
@@ -114,6 +121,7 @@ window.Player = Player;
 
   //  initiates the player methods. if the action is playKlick, idOrKlick is an id, and get request the server.
   //  otherwise, use the klick object and go straight to the playing.
+  // if action is playNextKlick, delay the play back for one second
   Player.prototype.playKlick = function(idOrKlick, action){
     if(action === 'playKlick'){
       console.log('play button clicked');
@@ -121,9 +129,17 @@ window.Player = Player;
       this.getData(idOrKlick);
     }
 
-    else {
+    else if (action === 'playStagedKlick'){
       console.log('replay button clicked');
       this.scaleXY(idOrKlick);
+    }
+
+    else if (action === 'playNextKlick'){
+      console.log('multi-page recording');
+      var that = this;
+      setTimeout(function(){
+        that.scaleXY(idOrKlick);
+      }, 1000);
     }
   };
 
