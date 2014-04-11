@@ -10,10 +10,10 @@
 console.log('Background initiated...');
 
 /* CONFIGURATIONS */
-window.hostname = 'localhost';
-window.server = 'http://localhost:4568';
-// window.hostname = 'jy1.cloudapp.net';
-// window.server = 'http://jy1.cloudapp.net:3000';
+window.hostname = 'klickr.io';
+window.server = 'http://www.klickr.io';
+// window.hostname = '127.0.0.1:4568';
+// window.server = 'http://127.0.0.1:4568';
 window.id = ''; // klick object id (corresponds to _id in mongodb)
 
 // This array will consist of all the Klick objects that a user sends to background before
@@ -106,7 +106,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     window.currentKlickObjects.push(request.klick);
     sendResponse({response: "Background: Processed stage message"});
   }
-  
+
   // Replay recording: requests player to play staged recording
   else if (request.action === 'replay') {
     console.log('Background: Replay recording');
@@ -134,7 +134,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       finalKlickObject.description = request.description;
       window.send(finalKlickObject);  // Background.js should take care of saving the klick object and sending it to the server
       window.currentKlickObjects = [];  // need to clear out window.currentKlickObjects to empty array
-      sendResponse({response: "Background: Processed save message"});  
+      sendResponse({response: "Background: Processed save message"});
     }
     // window.stagedKlick.description = request.description;
     // window.send(window.stagedKlick);
@@ -148,7 +148,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     window.nextKlick = request.klick;
     sendResponse({response: "Background: Processed storage message"});
   }
-  
+
   // if the dom is ready and nextKlick is not false, then send the current page a new klick object to restart the player.
   else if (request.action === 'domReady' && !!window.nextKlick){
     helpers.activeTabSendMessage({action: "playNextKlick", klick: window.nextKlick});
@@ -156,7 +156,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     sendResponse({response: "Background: Processed nextKlick message"});
   }
 
-  // Share recording: NEEDS TO BE IMPLEMENTED 
+  // Share recording: NEEDS TO BE IMPLEMENTED
   // else if (request.action === 'share') {
   //   console.log('Background: Share recording');
   //   sendResponse({response: "Background: Processed share message"});

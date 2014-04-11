@@ -100,17 +100,17 @@ window.Player = Player;
     this.setMoveIntervals(data);
   };
 
-  //submits an ajax request to the server based on a click id to get movement patterns back
+  // submits an ajax request to the server based on a click id to get movement patterns back
   // data passed along to every step in this refactor. movement (which is the ticks array) can be derived in the moment.
   Player.prototype.getData = function(clickId){
     var that = this;
     $.ajax({
-      // url: 'http://jy1.cloudapp.net:3000/klicks/'+clickId,
-      url: 'http://localhost:4568/klicks/'+clickId,
+      // url: 'http://127.0.0.1:4568/klicks/' + clickId,
+      url: 'http://klickr.io/klicks/' + clickId,
       type: 'GET',
       contentType: 'application/json',
       success: function(data){
-        console.log(data);
+        console.log('Player: Get Data', data, data.ticks);
         if(Array.isArray(data)){
           data = data[data.length-1];
         }
@@ -165,7 +165,7 @@ $(function(){
       sendResponse({response: "Player: Playing Klick..."});
     }
   });
-  
+
   // sends message to background. if the next part of a multi-page click is stored, it will be sent to the player
   chrome.runtime.sendMessage({action : "domReady"});
 

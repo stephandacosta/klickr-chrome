@@ -11,8 +11,8 @@
 /* ------------------------------------------------------------------------------------*/
 var Recorder = function(){
   console.log('Initializing recorder...');
-  // this.server = "http://jy1.cloudapp.net:3000";
-  this.server = "http://localhost:4568";
+  this.server = "http://www.klickr.io";
+  // this.server = "http://127.0.0.1:4568";
   this.rate = 10;
   this.mousePos = undefined;
   this.isRecording = false;
@@ -60,9 +60,6 @@ Recorder.prototype.createKlick = function(){
   return {
     width: window.innerWidth,
     height: window.innerHeight,
-
-    // In order to enable multi-page functionality, we may need to move the url property
-    // into each of the objects in the ticks array
     // url: document.URL,
     description: '',
     ticks: []
