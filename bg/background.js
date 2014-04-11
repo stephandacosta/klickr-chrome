@@ -152,6 +152,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   // if the dom is ready and nextKlick is not false, then send the current page a new klick object to restart the player.
   else if (request.action === 'domReady' && !!window.nextKlick){
     helpers.activeTabSendMessage({action: "playNextKlick", klick: window.nextKlick});
+    window.nextKlick = false;
     sendResponse({response: "Background: Processed nextKlick message"});
   }
 
