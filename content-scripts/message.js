@@ -1,8 +1,8 @@
 /* ------------------------------------------------------------------------------------*/
 /* Message Class
-/* - Used by both the recorder and player class
-/* - Produces <div> elements with text to display to the user
-/* - Will have functionality fade out
+/* - Used by both recorder and player class
+/* - Produces <div> element with text to display to user
+/* - Built-in functionality to fade out
 /* ------------------------------------------------------------------------------------*/
 
 var Message = function (text, duration, coords) {
