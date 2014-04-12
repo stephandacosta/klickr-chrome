@@ -39,15 +39,15 @@ window.Player = Player;
       console.log('movement finished');
     } else {
 
-      if(movement[index].action === 'urlChanged'){
+      if ( movement[index].action === 'urlChanged' ) {
         this.createNewKlick(data, index);
       } else {
-        $(window).scrollLeft(movement[index].pageX-movement[index].clientX);
-        $(window).scrollTop(movement[index].pageY-movement[index].clientY);
-        this.move(movement[index].pageX, movement[index].pageY ,movement[index].t, movement, index);
+        $(window).scrollLeft( movement[index].pageX - movement[index].clientX );
+        $(window).scrollTop( movement[index].pageY - movement[index].clientY );
+        this.move( movement[index].pageX, movement[index].pageY ,movement[index].t, movement, index );
         var that = this;
-        setTimeout(function(){
-          that.playRecording(data, index+1);
+        setTimeout(function () {
+          that.playRecording(data, index + 1);
         }, movement[index].t);
       }
     }
