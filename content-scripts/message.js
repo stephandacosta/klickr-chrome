@@ -5,8 +5,11 @@
 /* - Will have functionality to fade in and out
 /* ------------------------------------------------------------------------------------*/
 
-var Message = function () {
-  
+var makeMessage = function (text) {
+  var message = $("<div></div>");
+  message.text(text);
+
+  return message;
 };
 
 /* ------------------------------------------------------------------------------------*/
