@@ -5,20 +5,30 @@
 /* - Will have functionality to fade in and out
 /* ------------------------------------------------------------------------------------*/
 
-var makeMessage = function (text) {
+var makeMessage = function (text, duration, coords) {
   var $message = $("<div></div>");
   $message.text(text);
-  return $message;
-};
 
-var makeStartMessage = function (text, duration) {
-  var $message = makeMessage(text);
+  // set z-index to be high
+  $message.css('z-index', 2147483647);
+
   // append start message on screen
   $(document.body).append($message);
-  // center the start message on screen
-  $message.center();
+
+  if (coords === undefined) {
+    // place message in center, relative to viewport
+    $message.center();  
+  } else {
+    // place message relative to top and left of document
+    $message.css('position', 'absolute');
+    $message.css('top', coords.top + 'px');
+    $message.css('left', coords.left + 'px');
+  }
+
   // fadeOut the start message from screen
   $message.fadeOut(duration);
+  
+  return $message;
 };
 
 /* ------------------------------------------------------------------------------------*/
@@ -26,10 +36,10 @@ var makeStartMessage = function (text, duration) {
 /* ------------------------------------------------------------------------------------*/
 
 jQuery.fn.center = function () {
-  this.css("position","absolute");
-  this.css("top", Math.max(0, (($(window).height() - $(this).outerHeight()) / 2) + 
-                                                $(window).scrollTop()) + "px");
-  this.css("left", Math.max(0, (($(window).width() - $(this).outerWidth()) / 2) + 
-                                                $(window).scrollLeft()) + "px");
+  this.css('position','absolute');
+  this.css('top', Math.max(0, (($(window).height() - $(this).outerHeight()) / 2) + 
+                                                $(window).scrollTop()) + 'px');
+  this.css('left', Math.max(0, (($(window).width() - $(this).outerWidth()) / 2) + 
+                                                $(window).scrollLeft()) + 'px');
   return this;
 };
