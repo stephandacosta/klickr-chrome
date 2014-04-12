@@ -173,7 +173,10 @@ $(function(){
   chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.action === 'startRecording'){
       window.recorder.start();
-      makeMessage('Start Recording Now', 2000);
+      
+      var startMessage = new Message('Start Recording Now', 2000);
+      startMessage.showMessageOnScreen();
+
       sendResponse({response: "Recorder: Started recording"});
     }
 
@@ -184,7 +187,10 @@ $(function(){
 
     else if (request.action === 'stopRecording'){
       window.recorder.stop();
-      makeMessage('Stopped Recording Now', 2000);
+      
+      var stopMessage = new Message('Stopped Recording Now', 2000);
+      stopMessage.showMessageOnScreen();
+
       window.recorder = new Recorder(); // always have a new recorder object ready
       sendResponse({response: "Recorder: Stopped recording"});
     }

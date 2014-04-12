@@ -2,34 +2,31 @@
 /* Message Class
 /* - Used by both the recorder and player class
 /* - Produces <div> elements with text to display to the user
-/* - Will have functionality to fade in and out
+/* - Will have functionality fade out
 /* ------------------------------------------------------------------------------------*/
 
-var makeMessage = function (text, duration, coords) {
-  var $message = $("<div></div>");
-  $message.text(text);
+var Message = function (text, duration, coords) {
+  this.$message = $("<div></div>"); 
+  this.$message.text(text);
+  this.$message.css('z-index', 2147483647);
 
-  // set z-index to be high
-  $message.css('z-index', 2147483647);
+  this.showMessageOnScreen = function () {
+    if (coords === undefined) {
+      // place message in center, relative to viewport
+      this.$message.center();  
+    } else {
+      // place message relative to top and left of document
+      this.$message.css('position', 'absolute');
+      this.$message.css('top', coords.top + 'px');
+      this.$message.css('left', coords.left + 'px');
+    }
+    this.$message.fadeOut(duration);
+  };
 
-  // append start message on screen
-  $(document.body).append($message);
-
-  if (coords === undefined) {
-    // place message in center, relative to viewport
-    $message.center();  
-  } else {
-    // place message relative to top and left of document
-    $message.css('position', 'absolute');
-    $message.css('top', coords.top + 'px');
-    $message.css('left', coords.left + 'px');
-  }
-
-  // fadeOut the start message from screen
-  $message.fadeOut(duration);
-  
-  return $message;
+  // add this Message object's $message property onto DOM
+  $(document.body).append(this.$message);
 };
+
 
 /* ------------------------------------------------------------------------------------*/
 /* Init
