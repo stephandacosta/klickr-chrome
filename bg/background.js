@@ -9,11 +9,15 @@
 /* ------------------------------------------------------------------------------------*/
 console.log('Background initiated...');
 
-/* CONFIGURATIONS */
+/* ------------------------------------------------------------------------------------*/
+/* CONFIG
+/* ------------------------------------------------------------------------------------*/
+
+var Klickr = {};
+window.Klickr = Klickr;
+
 window.hostname = 'klickr.io';
 window.server = 'http://www.klickr.io';
-// window.hostname = '127.0.0.1:4568';
-// window.server = 'http://127.0.0.1:4568';
 window.id = ''; // klick object id (corresponds to _id in mongodb)
 
 // This array will consist of all the Klick objects that a user sends to background before
@@ -22,26 +26,125 @@ window.id = ''; // klick object id (corresponds to _id in mongodb)
 window.currentKlickObjects = [];
 window.nextKlick = false;
 
-/* Background -> Recorder: Start recording */
-window.startRecording = function(){
-  console.log('Background -> Recorder: Start recording');
-  helpers.activeTabSendMessage({action: "startRecording"});
+/* ------------------------------------------------------------------------------------*/
+/* RECORDER
+/* ------------------------------------------------------------------------------------*/
+
+var Recorder = function(){
+  this.isRecording = true;
+  this.createKlick();
+  this.addListeners();
+  helpers.activeTabSendMessage({action: 'startRecording'});
+};
+window.Recorder = Recorder;
+
+/* Creates a new Klick object */
+Recorder.prototype.createKlick = function(){
+  this.klick = {
+    url: document.URL,
+    description: '',
+    ticks: []
+  };
+  this.getWindowSize();
 };
 
-/* Background -> Recorder: Stop recording */
-window.stopRecording = function(){
-  console.log('Background -> Recorder: Stop recording');
+/* Add description */
+Recorder.prototype.addDescription = function(desc){
+  this.klick.description = desc;
+};
+
+/* Add listeners */
+Recorder.prototype.addListeners = function(){
+  var self = this;
+
+  chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    // Appends tick to Klick
+    if (request.action === 'appendTick') {
+      self.klick.ticks.push(request.tick);
+    }
+
+    // On change of URL, start recording again when recorder ready
+    else if (request.action === 'recorderReady') {
+      console.log('Recorder ready', request);
+      chrome.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {
+        console.log('Background Recorder: Active tab is', tabs[0].url);
+        if (self.isRecording && tabs[0].url === request.url){
+          console.log('Background Recorder: Start recording again');
+          helpers.activeTabSendMessage({action: 'startRecording'});
+        }
+      });
+    }
+  });
+
+};
+
+/* Gets inner width and height from active tab */
+Recorder.prototype.getWindowSize = function(){
+  var self = this;
+  helpers.activeTabSendMessage({action: 'getWindowSize'}, function(response){
+    self.klick.width = response.innerWidth;
+    self.klick.height = response.innerHeight;
+  });
+};
+
+/* Append tick to Klick object */
+Recorder.prototype.appendTick = function(tick){
+  this.klick.ticks.append(tick);
+};
+
+/* Append tick to Klick object */
+Recorder.prototype.stop = function(){
+  console.log('Background Recorder: Stopped', this);
   helpers.activeTabSendMessage({action: "stopRecording"});
   window.openSaver();
 };
 
-/* Background -> Recorder: Pause recording */
-// If you pause, you have to start back up first!
-// Start -> Pause -> Start -> Stop
-// window.pauseRecording = function(){
-//   console.log('Background -> Recorder: Pause recording');
-//   helpers.activeTabSendMessage({action: "pauseRecording"});
-// };
+/* Background -> Server: Send current klick object to the server to save */
+Recorder.prototype.send = function(){
+  console.log('Background Recorder -> Server: Push to server...', JSON.stringify(this.klick));
+  $.ajax({
+    type: 'POST',
+    url: window.server + '/klicks',
+    data: JSON.stringify(this.klick),
+    contentType: 'application/json',
+    success: function(data) {
+      console.log('Background -> Server: Klick sent', data);
+    },
+    error: function(data){
+      console.log('Background -> Server: Klick send failed', data);
+    }
+  });
+};
+
+/* ------------------------------------------------------------------------------------*/
+/* PLAYER
+/* ------------------------------------------------------------------------------------*/
+
+
+
+/* ------------------------------------------------------------------------------------*/
+/* SAVER
+/* ------------------------------------------------------------------------------------*/
+
+
+
+
+
+/* ------------------------------------------------------------------------------------*/
+/* POPUP METHODS
+/* ------------------------------------------------------------------------------------*/
+
+/* Background -> Recorder: Start recording */
+window.startRecording = function(){
+  console.log('Background: Start recording');
+  window.rec = new Recorder();
+};
+
+/* Background -> Recorder: Stop recording */
+window.stopRecording = function(){
+  console.log('Background: Stop recording');
+  window.rec.stop();
+};
 
 /* Background -> Recorder: Play recording
  * This function can be called in one of two ways:
@@ -53,23 +156,6 @@ window.playKlick = function(id){
   id = id || window.id;
   if (id !== undefined) window.id = id;
   helpers.activeTabSendMessage({action: "playKlick", id: id});
-};
-
-/* Background -> Server: Send current klick object to the server to save */
-window.send = function(klick){
-  console.log('Background -> Server: Push to server...', JSON.stringify(klick));
-  $.ajax({
-    type: 'POST',
-    url: window.server + '/klicks',
-    data: JSON.stringify(klick),
-    contentType: 'application/json',
-    success: function(data) {
-      console.log('Background -> Server: Klick sent', data);
-    },
-    error: function(data){
-      console.log('Background -> Server: Klick send failed', data);
-    }
-  });
 };
 
 /* Background -> Recorder: Saver display */
@@ -97,10 +183,16 @@ chrome.tabs.onUpdated.addListener(function(){
 
 // listener on saver box (replay, save, share) and recorder (stage)
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+
   var finalKlickObject;
 
+  // Sends server to content scripts
+  if (request.action === 'getServer') {
+    sendResponse({server: window.server});
+  }
+
   // Stage recording: updates background with staged recording sent from recorder.js
-  if (request.action === 'stage') {
+  else if (request.action === 'stage') {
     console.log('Background: Stage recording in background');
     // Append the klick object coming from recorder.js to the currentKlickObjects
     window.currentKlickObjects.push(request.klick);
@@ -122,24 +214,10 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   // Save recording: staged recording is sent to recorder to be pushed to server
   else if (request.action === 'save') {
     console.log('Background: Save recording');
-
-    // need to modify code below to not use window.stagedKlick anymore
-    // instead, need to first consolidate window.currentKlickObjects into one object and then
-    // add the description property onto it
-    finalKlickObject = helpers.consolidateKlickObjects(window.currentKlickObjects);
-
-    // need to add validation so that when save happens, the consolidated object's keys
-    // must be an array with length greater than 0
-    if (Object.keys(finalKlickObject).length > 0) {
-      finalKlickObject.description = request.description;
-      window.send(finalKlickObject);  // Background.js should take care of saving the klick object and sending it to the server
-      window.currentKlickObjects = [];  // need to clear out window.currentKlickObjects to empty array
-      sendResponse({response: "Background: Processed save message"});
-    }
-    // window.stagedKlick.description = request.description;
-    // window.send(window.stagedKlick);
-    // window.currentKlickObjects = [];
-    // sendResponse({response: "Background: Processed save message"});
+    window.rec.addDescription(request.description);
+    window.rec.send();
+    window.rec = undefined;
+    sendResponse({response: "Background: Processed save message"});
   }
 
   // in multi-page recording, used to store the next klick object that will be given after the page changes to a new url

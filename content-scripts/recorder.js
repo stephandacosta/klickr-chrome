@@ -11,27 +11,33 @@
 /* ------------------------------------------------------------------------------------*/
 var Recorder = function(){
   console.log('Initializing recorder...');
-  this.server = "http://www.klickr.io";
-  // this.server = "http://127.0.0.1:4568";
+  var self = this;
+  this.getServer();
   this.rate = 100;
   this.mousePos = undefined;
   this.isRecording = false;
-
-  // Create empty klick object
-  this.klick = this.createKlick();
-
-  // Add listeners
   this.addListeners();
 
   // Keep track of cursor positions
   // (cursor positions are logged using setInterval to prevent excessive logging)
-  var self = this;
   window.onmousemove = function(event){
     self.mouseMove.apply(self, [event]);
   };
+
+  // Tell background that you're ready
+  chrome.runtime.sendMessage({action: 'recorderReady', url: document.URL});
 };
 
 window.Recorder = Recorder;
+
+/* Gets the server from background */
+Recorder.prototype.getServer = function(){
+  var self = this;
+  chrome.runtime.sendMessage({action:'getServer'}, function(response){
+    self.server = response.server;
+    console.log('Recorder: Server is', self.server);
+  });
+};
 
 /* Add other event listeners */
 Recorder.prototype.addListeners = function(){
@@ -45,17 +51,6 @@ Recorder.prototype.addListeners = function(){
     var charCode = event.which || event.keyCode;
     self.log(event.type, event.pageX, event.pageY, event.clientX, event.clientY, event.timeStamp, event.target.outerHTML, charCode, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey);
   });
-};
-
-/* Creates a new Klick object */
-Recorder.prototype.createKlick = function(){
-  return {
-    width: window.innerWidth,
-    height: window.innerHeight,
-    // url: document.URL,
-    description: '',
-    ticks: []
-  };
 };
 
 /* Records cursor positions */
@@ -80,7 +75,8 @@ Recorder.prototype.log = function(action, pageX, pageY, clientX, clientY, timest
     clientY = clientY || this.mousePos.clientY;
     timestamp = timestamp || Date.now();
     url = url || document.URL;
-    this.klick.ticks.push({
+
+    var tick = {
       action: action,
       pageX: pageX,
       pageY: pageY,
@@ -94,7 +90,9 @@ Recorder.prototype.log = function(action, pageX, pageY, clientX, clientY, timest
       metaKey: metaKey,
       shiftKey: shiftKey,
       url: url
-    });
+    };
+
+    chrome.runtime.sendMessage({action: 'appendTick', tick: tick});
   }
 };
 
@@ -104,25 +102,11 @@ Recorder.prototype.start = function(){
   if (!this.isRecording){
     var self = this;
     this.isRecording = true;
-    // Willson: made timer a property of the recorder object
     this.timer = setInterval(function(){
       self.log();
     }, this.rate);
   }
 };
-
-/* Recorder.prototype.pause
- * Very similar to stop except don't send to background.
- */
-// Recorder.prototype.pause = function() {
-//   console.log('Recorder: Paused');
-//   if (this.isRecording) {
-//     this.isRecording = false;
-//     clearInterval(this.timer);
-//     // repeating stop right now
-//     // this.sendToBackground(this.klick);
-//   }
-// };
 
 /* Stop recording */
 Recorder.prototype.stop = function(){
@@ -130,27 +114,8 @@ Recorder.prototype.stop = function(){
   if (this.isRecording){
     this.isRecording = false;
     clearInterval(this.timer);
-    // Once the recorder stops recording, it will send the klick object to background.js to handle
-    this.sendToBackground(this.klick);
   }
 };
-
-/* Launch saver box */
-Recorder.prototype.displaySaverBox = function(klick){
-  console.log('Recorder: Open saver box');
-  chrome.runtime.sendMessage({action : "displaySaverBox"}, function(response){
-    console.log(response);
-  });
-};
-
-/* Stage output to extension backgroun for replay */
-Recorder.prototype.sendToBackground = function(klick){
-  console.log('Recorder: Sending to background');
-  chrome.runtime.sendMessage({action : "stage", klick: klick}, function(response){
-    console.log(response);
-  });
-};
-
 
 /* ------------------------------------------------------------------------------------*/
 /* Init
@@ -163,20 +128,20 @@ $(function(){
 
   // Listens to messages from background
   chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    console.log('Recorder: Request', request);
     if (request.action === 'startRecording'){
       window.recorder.start();
       sendResponse({response: "Recorder: Started recording"});
     }
 
-    // else if (request.action === 'pauseRecording'){
-    //   recorder.pause();
-    //   sendResponse({response: "Recorder: Paused recording"});
-    // }
-
     else if (request.action === 'stopRecording'){
       window.recorder.stop();
       window.recorder = new Recorder(); // always have a new recorder object ready
       sendResponse({response: "Recorder: Stopped recording"});
+    }
+
+    else if (request.action === 'getWindowSize'){
+      sendResponse({innerWidth: window.innerWidth, innerHeight: window.innerHeight});
     }
   });
 

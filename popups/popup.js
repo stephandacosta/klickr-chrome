@@ -1,14 +1,10 @@
 $(function(){
 
-  $('#view').click(function() {
-    chrome.tabs.create({url: "popups/viewer.html"});
+  $('.home').click(function() {
+    chrome.tabs.create({url: "http://www.klickr.io"});
   });
 
-  $('#options').click(function() {
-    chrome.tabs.create({url: "popups/options.html"});
-  });
-
-  $('#start').click(function() {
+  $('.start').click(function() {
     // window.close will automatically close the browser action window
     // so that mouse movements can be detected by recorder.js
     window.close();
@@ -19,12 +15,12 @@ $(function(){
   //   chrome.extension.getBackgroundPage().pauseRecording();
   // });
 
-  $('#stop').click(function() {
+  $('.stop').click(function() {
     window.close();
     chrome.extension.getBackgroundPage().stopRecording();
   });
 
-  $('#play').click(function() {
+  $('.play').click(function() {
     window.close();
     chrome.extension.getBackgroundPage().playKlick();
   });
