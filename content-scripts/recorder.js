@@ -173,6 +173,9 @@ $(function(){
   chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.action === 'startRecording'){
       window.recorder.start();
+
+      makeStartMessage('Start Recording Now', 2000);
+
       sendResponse({response: "Recorder: Started recording"});
     }
 
