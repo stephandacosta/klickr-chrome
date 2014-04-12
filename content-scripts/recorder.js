@@ -13,7 +13,7 @@ var Recorder = function(){
   console.log('Initializing recorder...');
   this.server = "http://www.klickr.io";
   // this.server = "http://127.0.0.1:4568";
-  this.rate = 10;
+  this.rate = 100;
   this.mousePos = undefined;
   this.isRecording = false;
 
@@ -38,15 +38,7 @@ Recorder.prototype.addListeners = function(){
   var self = this;
 
   $('html').click(function(event){
-    // Did the click happen on a <a> tag?
-    if ($(event.target).is("a")) {
-      self.log("urlChanged", event.pageX, event.pageY, event.clientX, event.clientY, event.timeStamp, event.target.outerHTML, undefined, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey, document.URL);
-      // need to trigger the stop function for this recorder object and send to background
-      self.stop();
-      // I'm counting on the fact that clicking on a link will render to a new page.
-    } else {
-      self.log(event.type, event.pageX, event.pageY, event.clientX, event.clientY, event.timeStamp, event.target.outerHTML, undefined, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey, document.URL);
-    }
+    self.log(event.type, event.pageX, event.pageY, event.clientX, event.clientY, event.timeStamp, event.target.outerHTML, undefined, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey, document.URL);
   });
 
   $('html').keypress(function(event){
@@ -95,7 +87,7 @@ Recorder.prototype.log = function(action, pageX, pageY, clientX, clientY, timest
       clientX: clientX,
       clientY: clientY,
       timestamp: timestamp,
-      target: '',
+      target: target,
       charCode: charCode,
       altKey: altKey,
       ctrlKey: ctrlKey,

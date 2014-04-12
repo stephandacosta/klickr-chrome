@@ -6,6 +6,8 @@
 var Player = function(){};
 
 window.Player = Player;
+window.pause = false;
+
 
 // moves mouse to given destination with duration
   Player.prototype.move = function (endX, endY, duration){
@@ -23,11 +25,21 @@ window.Player = Player;
 
   // creates a new klick, starting from the indexes after a urlChanged event has happened.  calls the sendToBackground function and then redirects the page.
   Player.prototype.createNewKlick = function(data, index){
+    var clickTarget = data.ticks[index].target;
     data.ticks = data.ticks.slice(index+1);
     this.sendToBackground(data);
-    setTimeout(function(){
-      window.location.href = data.ticks[0].url;
-    }, 1000);
+    //setTimeout(function(){
+      //$(clickTarget).click();
+    //}, 1000);
+  };
+
+  Player.prototype.findMatchingDomElement = function(target){
+    var tag = '';
+    for(var i = 1; i < target.length; i++){
+      if(target[i] !== ' '){
+        tag += target[i];
+      }
+    }
   };
 
   // chains mouse moves together. also adds the scrolling logic. the pageX and pageY values of the movement object at index are passed to move.
@@ -37,19 +49,36 @@ window.Player = Player;
     if ( index === movement.length ) {
       $('.mouse').detach();
       console.log('movement finished');
-    } else {
-
-      if(movement[index].action === 'urlChanged'){
-        this.createNewKlick(data, index);
-      } else {
+    } else if (window.pause){
+      var input = prompt('Place annotation here');
+      //movement[index].message = new Message(input, 2000, {top:movement[index].pageY, left:movement[index].pageX});
+      window.pause = false;
+      this.playRecording(data, index);
+    }
+      else {
+      if(movement[index].action === 'click'){
+        console.log('clicked: ', movement[index]);
+        if(movement[index].url !== movement[index+1].url){
+          this.createNewKlick(data, index);
+        }
+        $(movement[index].target).click();
+      } else if (movement[index].action === 'keypress'){
+        console.log(String.fromCharCode(movement[index].charCode));
+        //$(movement[index].target).val('hello world');
+        console.log(typeof movement[index].target);
+          //$(this).val(text + String.fromCharCode(movement[index].charCode));
+      } else if (movement[index].action === 'move'){
         $(window).scrollLeft(movement[index].pageX-movement[index].clientX);
         $(window).scrollTop(movement[index].pageY-movement[index].clientY);
         this.move(movement[index].pageX, movement[index].pageY ,movement[index].t, movement, index);
-        var that = this;
-        setTimeout(function(){
-          that.playRecording(data, index+1);
-        }, movement[index].t);
       }
+      if (!!movement[index].message){
+        //movement[index].message.showMessageOnScreen();
+      }
+      var that = this;
+      setTimeout(function(){
+        that.playRecording(data, index+1);
+      }, movement[index].t);
     }
   };
 
@@ -164,6 +193,11 @@ $(function(){
       player.playKlick(request.klick, request.action);
       sendResponse({response: "Player: Playing Klick..."});
     }
+    
+    else if (request.action === 'stop'){
+      window.pause = true;
+    }
+
   });
 
   // sends message to background. if the next part of a multi-page click is stored, it will be sent to the player
