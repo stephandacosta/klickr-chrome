@@ -143,4 +143,32 @@ Recorder.prototype.stop = function(){
 
 $(function(){
   window.recorder = new Recorder();
+
+  // Listens to messages from background
+  chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    console.log('Recorder: Request', request);
+    if (request.action === 'startRecording'){
+      window.recorder.start();
+
+      var startMessage = new Message('Start Recording Now', 2000);
+      startMessage.showMessageOnScreen();
+
+      sendResponse({response: "Recorder: Started recording"});
+    }
+
+    else if (request.action === 'stopRecording'){
+      window.recorder.stop();
+
+      var stopMessage = new Message('Stopped Recording Now', 2000);
+      stopMessage.showMessageOnScreen();
+
+      window.recorder = new Recorder(); // always have a new recorder object ready
+      sendResponse({response: "Recorder: Stopped recording"});
+    }
+
+    else if (request.action === 'getWindowSize'){
+      sendResponse({innerWidth: window.innerWidth, innerHeight: window.innerHeight});
+    }
+  });
+
 });
