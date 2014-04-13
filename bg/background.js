@@ -68,10 +68,16 @@ window.saveKlick = function(desc){
 window.id = ''; // klick object id (corresponds to _id in mongodb)
 window.nextKlick = false;
 
-/* Replay: Send pause message */
+/* Replay: Send replay message */
 window.replay = function(){
-  console.log('Background: Player pause');
-  helpers.activeTabSendMessage({action: 'pause'});
+  console.log('Background: Replay recording');
+  helpers.activeTabSendMessage({action: 'playStagedKlick', klick: window.rec.klick});
+};
+
+/* Pause: Send pause message */
+window.pause = function(){
+  console.log('Background: Pause recording');
+  helpers.activeTabSendMessage({action: 'pause', klick: window.rec.klick});
 };
 
 /* Background -> Recorder: Play recording
@@ -108,11 +114,13 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   }
 
   // Replay recording: requests player to play staged recording
-  else if (request.action === 'replay') {
-    console.log('Background: Replay recording');
-    helpers.activeTabSendMessage({action: 'playStagedKlick', klick: window.rec.klick});
-    sendResponse({response: "Background: Processed replay message"});
-  }
+
+  // Move this piece of code to the replay function
+  // else if (request.action === 'replay') {
+  //   console.log('Background: Replay recording');
+  //   helpers.activeTabSendMessage({action: 'playStagedKlick', klick: window.rec.klick});
+  //   sendResponse({response: "Background: Processed replay message"});
+  // }
 
   // Save recording: staged recording is sent to recorder to be pushed to server
   else if (request.action === 'save') {

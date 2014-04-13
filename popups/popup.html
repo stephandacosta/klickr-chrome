@@ -27,7 +27,8 @@
           <input ng-model="desc" type="text" class="form-control" placeholder="Name your Klick...">
         </div>
         <div class="form-group">
-          <button ng-click="replay()" type="button" class="btn btn-default">Replay</button>
+          <button ng-click="replay()" ng-hide="isPaused()" type="button" class="btn btn-default">Replay</button>
+          <button ng-click="pause()" ng-show="isPaused()" type="button" class="btn btn-default">Pause</button>
           <button ng-click="saveKlick()" type="button" class="btn btn-primary">Save</button>
           <button ng-click="" type="button" class="btn btn-default">Share</button>
         </div>

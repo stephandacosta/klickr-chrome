@@ -12,11 +12,14 @@ angular.module('KlickrChromeApp', [])
       return bg.rec !== undefined;
     };
 
+    $scope.isPaused = function(){
+      // return bg.rec !== undefined;
+    };
+
     $scope.canPlay = function(){
       return bg.id !== '';
     };
 
-    // on click handlers
     $scope.startRecording = function(){
       window.close();
       bg.startRecording();
@@ -34,6 +37,10 @@ angular.module('KlickrChromeApp', [])
 
     $scope.replay = function(){
       bg.replay();
+    };
+
+    $scope.pause = function(){
+      bg.pause();
     };
 
     $scope.saveKlick = function(){
