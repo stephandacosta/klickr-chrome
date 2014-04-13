@@ -19,7 +19,6 @@
       "content-scripts/message.js",
       "content-scripts/recorder.js",
       "content-scripts/player.js",
-      "content-scripts/saver.js"
     ]
   }],
 
@@ -31,10 +30,6 @@
       "bg/background.js"
     ]
   },
-
-  "web_accessible_resources": [
-    "content-scripts/views/saver.html"
-  ],
 
   "permissions": [
     "<all_urls>",
