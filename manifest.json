@@ -27,9 +27,14 @@
     "scripts": [
       "bower_components/jquery/dist/jquery.js",
       "bg/helpers.js",
+      "bg/bg-recorder.js",
       "bg/background.js"
     ]
   },
+
+  "web_accessible_resources": [
+    "content-scripts/views/saver.html",
+  ],
 
   "permissions": [
     "<all_urls>",
