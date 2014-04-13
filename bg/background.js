@@ -60,6 +60,11 @@ window.saveKlick = function(desc){
   window.rec = undefined;
 };
 
+/* Replay: Send pause message */
+window.replay = function(){
+  helpers.activeTabSendMessage({action: "pause"});
+};
+
 /* Background -> Recorder: Play recording
  * This function can be called in one of two ways:
  * 1) Via a link, in which case the _id is included in the url string
