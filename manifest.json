@@ -14,7 +14,7 @@
     "matches": ["http://*/*","https://*/*"],
     "css":["styles/content-styles.css"],
     "js": [
-      "bower_components/jquery/dist/jquery.min.js",
+      "bower_components/jquery/dist/jquery.js",
       "bower_components/d3/d3.min.js",
       "content-scripts/message.js",
       "content-scripts/recorder.js",
