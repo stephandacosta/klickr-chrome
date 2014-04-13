@@ -52,6 +52,14 @@ window.stopRecording = function(){
   window.rec.stop();
 };
 
+/* Save Klick */
+window.saveKlick = function(desc){
+  console.log('Background: Save recording');
+  window.rec.addDescription(desc);
+  window.rec.send();
+  window.rec = undefined;
+};
+
 /* Background -> Recorder: Play recording
  * This function can be called in one of two ways:
  * 1) Via a link, in which case the _id is included in the url string
