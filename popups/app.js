@@ -12,9 +12,9 @@ angular.module('KlickrChromeApp', [])
       return bg.rec !== undefined;
     };
 
-    $scope.isPaused = function(){
-      // return bg.rec !== undefined;
-    };
+    // $scope.isPaused = function(){
+    //   return bg.isPaused;
+    // };
 
     $scope.canPlay = function(){
       return bg.id !== '';
