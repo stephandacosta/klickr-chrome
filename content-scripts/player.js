@@ -6,6 +6,8 @@
 var Player = function(){};
 
 window.Player = Player;
+window.pause = false;
+
 
 // moves mouse to given destination with duration
   Player.prototype.move = function (endX, endY, duration){
@@ -27,8 +29,9 @@ window.Player = Player;
     this.sendToBackground(data);
     setTimeout(function(){
       window.location.href = data.ticks[0].url;
-    }, 1000);
+    }, 2000);
   };
+
 
   // chains mouse moves together. also adds the scrolling logic. the pageX and pageY values of the movement object at index are passed to move.
   // function operates recursively, waiting the duration of the prior move in a setTimeout before calling the next move.
@@ -37,19 +40,34 @@ window.Player = Player;
     if ( index === movement.length ) {
       $('.mouse').detach();
       console.log('movement finished');
-    } else {
-
-      if ( movement[index].action === 'urlChanged' ) {
-        this.createNewKlick(data, index);
-      } else {
-        $(window).scrollLeft( movement[index].pageX - movement[index].clientX );
-        $(window).scrollTop( movement[index].pageY - movement[index].clientY );
-        this.move( movement[index].pageX, movement[index].pageY ,movement[index].t, movement, index );
-        var that = this;
-        setTimeout(function () {
-          that.playRecording(data, index + 1);
-        }, movement[index].t);
+    } else if (window.pause){
+      var input = prompt('Place annotation here');
+      movement[index].message = new Message(input, 2000, {top:movement[index].pageY, left:movement[index].pageX});
+      window.pause = false;
+      this.playRecording(data, index);
+    }
+      else {
+      if(movement[index].action === 'click' || movement[index].action === 'keypress'){
+        if(movement[index].url !== movement[index+1].url){
+          this.createNewKlick(data, index);
+        } else if (movement[index].action === 'click'){
+          $($(movement[index].target.tagName)[movement[index].target.index]).trigger('click');
+        } else if (movement[index].action === 'keypress'){
+          var text = $($(movement[index].target.tagName)[movement[index].target.index]).val();
+          $($(movement[index].target.tagName)[movement[index].target.index]).val(text + String.fromCharCode(movement[index].charCode));
+        }
+      } else if (movement[index].action === 'move'){
+        $(window).scrollLeft(movement[index].pageX-movement[index].clientX);
+        $(window).scrollTop(movement[index].pageY-movement[index].clientY);
+        this.move(movement[index].pageX, movement[index].pageY, movement[index].t);
       }
+      if (!!movement[index].message){
+        movement[index].message.showMessageOnScreen();
+      }
+      var that = this;
+      setTimeout(function(){
+        that.playRecording(data, index+1);
+      }, movement[index].t);
     }
   };
 
@@ -86,7 +104,6 @@ window.Player = Player;
 
   //scales clientX, clientY, pageX, and pageY so different screen sizes will have the same display.
   Player.prototype.scaleXY = function(data){
-    console.log('played klick', data);
     var xScale = $(window).width() / data.width || 1;
     var yScale = $(window).height() / data.height || 1;
     data.width = $(window).width();
@@ -110,7 +127,6 @@ window.Player = Player;
       type: 'GET',
       contentType: 'application/json',
       success: function(data){
-        console.log('Player: Get Data', data, data.ticks);
         if(Array.isArray(data)){
           data = data[data.length-1];
         }
@@ -121,7 +137,7 @@ window.Player = Player;
 
   //  initiates the player methods. if the action is playKlick, idOrKlick is an id, and get request the server.
   //  otherwise, use the klick object and go straight to the playing.
-  // if action is playNextKlick, delay the play back for one second
+  //  if action is playNextKlick, delay the play back for one second
   Player.prototype.playKlick = function(idOrKlick, action){
     if(action === 'playKlick'){
       console.log('play button clicked');
@@ -164,6 +180,11 @@ $(function(){
       player.playKlick(request.klick, request.action);
       sendResponse({response: "Player: Playing Klick..."});
     }
+    
+    else if (request.action === 'pause'){
+      window.pause = true;
+    }
+
   });
 
   // sends message to background. if the next part of a multi-page click is stored, it will be sent to the player
