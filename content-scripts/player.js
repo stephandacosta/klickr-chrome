@@ -28,8 +28,8 @@ window.pause = false;
     data.ticks = data.ticks.slice(index+1);
     this.sendToBackground(data);
     setTimeout(function(){
-      window.location.href = data.ticks[0].url;
       window.location.reload();
+      window.location.href = data.ticks[0].url;
     }, 2000);
   };
 
@@ -150,12 +150,6 @@ window.pause = false;
     }
 
     else if (action === 'playStagedKlick'){
-      console.log('replay button clicked');
-      this.scaleXY(idOrKlick);
-    }
-
-    else if (action === 'playNextKlick'){
-      console.log('multi-page recording');
       var that = this;
       setTimeout(function(){
         that.scaleXY(idOrKlick);
@@ -172,7 +166,7 @@ $(function(){
 
   //helper for playing back mouse actions
   var player = new Player();
-
+  
   // Listens to messages from background
   chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.action === 'playKlick'){
@@ -180,7 +174,7 @@ $(function(){
       sendResponse({response: "Player: Playing Klick..."});
     }
 
-    else if (request.action === 'playStagedKlick' || request.action === 'playNextKlick'){
+    else if (request.action === 'playStagedKlick'){
       player.playKlick(request.klick, request.action);
       sendResponse({response: "Player: Playing Klick..."});
     }
