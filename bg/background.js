@@ -29,8 +29,9 @@ Klickr.server = 'http://www.klickr.io';
 // loading -> ready -> recording -> processing -> saving
 window.recorderStatus = 'loading';
 
-window.refreshRecorderStatus = function(){
-  if (window.recorderStatus === 'loading' || window.recorderStatus === 'ready' ){
+window.refreshRecorderStatus = function(forced){
+  if (forced === undefined) forced = false;
+  if (forced || (window.recorderStatus === 'loading' || window.recorderStatus === 'ready') ){
     chrome.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {
       console.log('Background: Tab updated', tabs[0].url, tabs[0].status);
       if (tabs[0].status === 'loading'){
@@ -67,8 +68,8 @@ window.stopRecording = function(){
 /* Background -> BgRecorder: Save Klick */
 window.saveKlick = function(desc){
   if (window.recorderStatus === 'processing'){
-    window.refreshRecorderStatus();
     console.log('Background: Save recording');
+    window.refreshRecorderStatus(true);
     window.rec.addDescription(desc);
     window.rec.send();
     window.rec = undefined;

@@ -3,9 +3,9 @@ angular.module('KlickrChromeApp', [])
   .controller('PopupCtrl', function ($scope) {
 
     var bg = chrome.extension.getBackgroundPage();
-    $scope.showSaver = false;
     $scope.showMessage = false;
     $scope.message = '';
+
     $scope.recorderStatus = bg.recorderStatus;
 
     $scope.canRecord = function(){
@@ -32,6 +32,7 @@ angular.module('KlickrChromeApp', [])
     };
 
     $scope.stopRecording = function(){
+      $scope.recorderStatus = 'processing';
       bg.stopRecording();
     };
 
@@ -48,16 +49,20 @@ angular.module('KlickrChromeApp', [])
       chrome.tabs.create({url: 'http://www.klickr.io'});
     };
 
-    $scope.saveKlick = function(){
-      console.log('Save Klick', $scope.desc);
+    $scope.save = function(){
+      console.log('Save', $scope.desc);
       if ($scope.desc === undefined || $scope.desc === ''){
-        $scope.errorMsg = 'Give your Klick a title..';
+        $scope.errorMsg = 'Give your Klick a name that packs punch';
       } else {
-        $scope.showSaver = false;
+        $scope.recorderStatus = 'saving';
         $scope.message = 'All\'s Good';
         $scope.showMessage = true;
         bg.saveKlick($scope.desc);
       }
+    };
+
+    $scope.delete = function(){
+
     };
 
   });
