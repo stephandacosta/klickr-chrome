@@ -32,11 +32,11 @@ window.pause = false;
     }, 2000);
   };
 
-
   // chains mouse moves together. also adds the scrolling logic. the pageX and pageY values of the movement object at index are passed to move.
   // function operates recursively, waiting the duration of the prior move in a setTimeout before calling the next move.
   Player.prototype.playRecording = function(data, index){
     var movement = data.ticks;
+
     if ( index === movement.length ) {
       $('.mouse').detach();
       console.log('movement finished');
@@ -47,19 +47,21 @@ window.pause = false;
       this.playRecording(data, index);
     }
       else {
-      if(movement[index].action === 'click' || movement[index].action === 'keypress'){
-        if(movement[index].url !== movement[index+1].url){
-          this.createNewKlick(data, index);
-        } else if (movement[index].action === 'click'){
-          $($(movement[index].target.tagName)[movement[index].target.index]).trigger('click');
+        if (movement[index].action === 'click'){
+          var $element = $($(movement[index].target.tagName)[movement[index].target.index]);
+          $element.trigger('click');
         } else if (movement[index].action === 'keypress'){
-          var text = $($(movement[index].target.tagName)[movement[index].target.index]).val();
-          $($(movement[index].target.tagName)[movement[index].target.index]).val(text + String.fromCharCode(movement[index].charCode));
-        }
-      } else if (movement[index].action === 'move'){
-        $(window).scrollLeft(movement[index].pageX-movement[index].clientX);
-        $(window).scrollTop(movement[index].pageY-movement[index].clientY);
-        this.move(movement[index].pageX, movement[index].pageY, movement[index].t);
+          var $element = $($(movement[index].target.tagName)[movement[index].target.index]);
+          var key = String.fromCharCode(movement[index].charCode);
+          var text = $element.val();
+          $element.val(text + key);
+        } else if (movement[index].action === 'move'){
+          $(window).scrollLeft(movement[index].pageX-movement[index].clientX);
+          $(window).scrollTop(movement[index].pageY-movement[index].clientY);
+          this.move(movement[index].pageX, movement[index].pageY, movement[index].t);
+      }
+      if (movement[index].url !== movement[index+1].url){
+        this.createNewKlick(data, index);
       }
       if (!!movement[index].message){
         movement[index].message.showMessageOnScreen();
