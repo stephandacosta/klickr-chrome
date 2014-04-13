@@ -28,19 +28,8 @@ window.pause = false;
     var clickTarget = data.ticks[index].target;
     data.ticks = data.ticks.slice(index+1);
     this.sendToBackground(data);
-    //setTimeout(function(){
-      //$(clickTarget).click();
-    //}, 1000);
   };
 
-  Player.prototype.findMatchingDomElement = function(target){
-    var tag = '';
-    for(var i = 1; i < target.length; i++){
-      if(target[i] !== ' '){
-        tag += target[i];
-      }
-    }
-  };
 
   // chains mouse moves together. also adds the scrolling logic. the pageX and pageY values of the movement object at index are passed to move.
   // function operates recursively, waiting the duration of the prior move in a setTimeout before calling the next move.
@@ -56,21 +45,19 @@ window.pause = false;
       this.playRecording(data, index);
     }
       else {
-      if(movement[index].action === 'click'){
-        console.log('clicked: ', movement[index]);
+      if(movement[index].action === 'click' || movement[index].action === 'keypress'){
         if(movement[index].url !== movement[index+1].url){
           this.createNewKlick(data, index);
+        } else if (movement[index].action === 'click'){
+          //$(movement[index].selector).click();  
+        } else if (movement[index].action === 'keypress'){
+        // var text = movement[index].selector.val();
+        // movement[index].selector.val(text + String.fromCharCode(movement[index].charCode));
         }
-        $(movement[index].target).click();
-      } else if (movement[index].action === 'keypress'){
-        console.log(String.fromCharCode(movement[index].charCode));
-        //$(movement[index].target).val('hello world');
-        console.log(typeof movement[index].target);
-          //$(this).val(text + String.fromCharCode(movement[index].charCode));
       } else if (movement[index].action === 'move'){
         $(window).scrollLeft(movement[index].pageX-movement[index].clientX);
         $(window).scrollTop(movement[index].pageY-movement[index].clientY);
-        this.move(movement[index].pageX, movement[index].pageY ,movement[index].t, movement, index);
+        this.move(movement[index].pageX, movement[index].pageY, movement[index].t);
       }
       if (!!movement[index].message){
         //movement[index].message.showMessageOnScreen();
@@ -113,6 +100,17 @@ window.pause = false;
     }
   };
 
+    // looks at the target and creates jquery selectors for that target
+  Player.prototype.createDomSelectors = function(data){
+    for(var i = 0; i < data.ticks.length; i++){
+      var target = data.ticks[i].target;
+      if(target[1] !== -1){
+        data.ticks[i].selector = $($(target.tagName)[target.index]);
+      }
+    }
+    this.setMoveIntervals(data);
+  };
+
   //scales clientX, clientY, pageX, and pageY so different screen sizes will have the same display.
   Player.prototype.scaleXY = function(data){
     console.log('played klick', data);
@@ -126,7 +124,7 @@ window.pause = false;
       data.ticks[i].pageX = data.ticks[i].pageX*xScale;
       data.ticks[i].pageY = data.ticks[i].pageY*yScale;
     }
-    this.setMoveIntervals(data);
+    this.createDomSelectors(data);
   };
 
   // submits an ajax request to the server based on a click id to get movement patterns back
@@ -194,7 +192,7 @@ $(function(){
       sendResponse({response: "Player: Playing Klick..."});
     }
     
-    else if (request.action === 'stop'){
+    else if (request.action === 'pause'){
       window.pause = true;
     }
 
