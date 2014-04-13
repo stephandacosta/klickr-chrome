@@ -109,8 +109,10 @@ BgRecorder.prototype.removeListeners = function(){
 BgRecorder.prototype.getWindowSize = function(){
   var self = this;
   helpers.activeTabSendMessage({action: 'getWindowSize'}, function(response){
-    self.klick.width = response.innerWidth;
-    self.klick.height = response.innerHeight;
+    if (response.innerWidth && response.innerHeight){
+      self.klick.width = response.innerWidth;
+      self.klick.height = response.innerHeight;
+    }
   });
 };
 
