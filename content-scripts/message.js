@@ -6,7 +6,14 @@
 /* ------------------------------------------------------------------------------------*/
 
 var Message = function (text, duration, coords) {
-  this.$message = $("<div></div>"); 
+  this.$message = $("<div></div>");
+  this.$message.css({
+    "background-color": "rgba(58, 73, 76, 0.7)",
+    "color": "white",
+    "border-radius": "5px",
+    "padding": "15px",
+    "font-size": "48px"
+  });
   this.$message.text(text);
   this.$message.css('z-index', 2147483647);
 
@@ -43,10 +50,33 @@ jQuery.fn.center = function () {
 
 $(function () {
   chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    var message;
+
     if (request.action === 'createMessage'){
-      var message = new Message(request.message, request.duration, request.coords);
+      message = new Message(request.message, request.duration, request.coords);
       message.showMessageOnScreen();
       sendResponse({response: "Message: Message has been displayed on screen"});
+    }
+
+    else if (request.action === 'showRecordMessage'){
+      console.log("showRecordMessage is received");
+      message = new Message(request.message);
+      message.$message.css({
+        "position": "fixed",
+        "bottom": 0,
+        "right": 0
+      });
+      $(document.body).append(message);
+      window.recordingMessage = message;
+      sendResponse({response: "Message: Message has been displayed on screen"});
+    }
+
+    else if (request.action === 'removeRecordMessage'){
+      if (window.recordingMessage !== undefined) {
+        console.log("removeRecordMessage is received");
+        window.recordingMessage.$message.fadeOut(3000);
+        sendResponse({response: "Message: Message has been displayed on screen"});  
+      }
     }
   });
 });
