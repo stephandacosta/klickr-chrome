@@ -14,45 +14,28 @@ console.log('Background initiated...');
 /* ------------------------------------------------------------------------------------*/
 
 var Klickr = {};
+window.Klickr = Klickr;
 
 Klickr.hostname = 'klickr.io';
 Klickr.server = 'http://www.klickr.io';
 
-// TODO: Refactor into player ?
-window.id = ''; // klick object id (corresponds to _id in mongodb)
-window.nextKlick = false;
-
 /* ------------------------------------------------------------------------------------*/
-/* PLAYER
+/* RECORDER
 /* ------------------------------------------------------------------------------------*/
 
-
-
-/* ------------------------------------------------------------------------------------*/
-/* SAVER
-/* ------------------------------------------------------------------------------------*/
-
-
-
-
-
-/* ------------------------------------------------------------------------------------*/
-/* INIT
-/* ------------------------------------------------------------------------------------*/
-
-/* Background -> Recorder: Start recording */
+/* Background -> BgRecorder: Start recording */
 window.startRecording = function(){
   console.log('Background: Start recording');
   window.rec = new BgRecorder();
 };
 
-/* Background -> Recorder: Stop recording */
+/* Background -> BgRecorder: Stop recording */
 window.stopRecording = function(){
   console.log('Background: Stop recording');
   window.rec.stop();
 };
 
-/* Save Klick */
+/* Background -> BgRecorder: Save Klick */
 window.saveKlick = function(desc){
   console.log('Background: Save recording');
   window.rec.addDescription(desc);
@@ -60,9 +43,18 @@ window.saveKlick = function(desc){
   window.rec = undefined;
 };
 
+/* ------------------------------------------------------------------------------------*/
+/* PLAYER
+/* ------------------------------------------------------------------------------------*/
+
+// TODO: Refactor into player ?
+window.id = ''; // klick object id (corresponds to _id in mongodb)
+window.nextKlick = false;
+
 /* Replay: Send pause message */
 window.replay = function(){
-  helpers.activeTabSendMessage({action: "pause"});
+  console.log('Background: Player pause');
+  helpers.activeTabSendMessage({action: 'pause'});
 };
 
 /* Background -> Recorder: Play recording
@@ -74,18 +66,8 @@ window.playKlick = function(id){
   console.log('Background -> Recorder: Play recording');
   id = id || window.id;
   if (id !== undefined) window.id = id;
-  helpers.activeTabSendMessage({action: "playKlick", id: id});
+  helpers.activeTabSendMessage({action: 'playKlick', id: id});
 };
-
-/* Background -> Recorder: Saver display */
-window.openSaver = function(){
-  console.log('Background -> Saver: Displaying');
-  helpers.activeTabSendMessage({action: "openSaver"});
-};
-
-/* ------------------------------------------------------------------------------------*/
-/* LISTENER LOGIC
-/* ------------------------------------------------------------------------------------*/
 
 chrome.tabs.onUpdated.addListener(function(){
   chrome.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {

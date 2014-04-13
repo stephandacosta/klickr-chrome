@@ -7,10 +7,16 @@ angular.module('KlickrChromeApp', [])
     $scope.showMessage = false;
     $scope.message = '';
 
-    $scope.toHome = function(){
-      chrome.tabs.create({url: "http://www.klickr.io"});
+    // truthy tests
+    $scope.isRecording = function(){
+      return bg.rec !== undefined;
     };
 
+    $scope.canPlay = function(){
+      return bg.id !== '';
+    };
+
+    // on click handlers
     $scope.startRecording = function(){
       window.close();
       bg.startRecording();
