@@ -39,13 +39,11 @@ angular.module('KlickrChromeApp', [])
       bg.replay();
     };
 
-<<<<<<< HEAD
     $scope.toHome = function(){
       chrome.tabs.create({url: 'http://www.klickr.io'});
-=======
+
     $scope.pause = function(){
       bg.pause();
->>>>>>> 4fbbc71d29be4d2a5ea24d8245916fcc77eecb93
     };
 
     $scope.saveKlick = function(){
