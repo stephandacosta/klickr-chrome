@@ -15,9 +15,9 @@
 
       <div class="header">
         <li ng-click="toHome()" class="home"></li>
-        <li><a ng-click="startRecording()" href="#"><i class="fa fa-circle"></i></a></li>
-        <li><a ng-click="stopRecording()" href="#"><i class="fa fa-stop"></i></a></li>
-        <li><a ng-click="playRecording()" href="#"><i class="fa fa-play"></i></a></li>
+        <li><a ng-click="startRecording()" ng-hide="isRecording()" href="#"><i class="fa fa-circle"></i></a></li>
+        <li><a ng-click="stopRecording()" ng-show="isRecording()" href="#"><i class="fa fa-stop"></i></a></li>
+        <li><a ng-click="playRecording()" ng-show="canPlay()" href="#"><i class="fa fa-play"></i></a></li>
         <div class="clearfix"></div>
       </div>
 
@@ -27,7 +27,7 @@
           <input ng-model="desc" type="text" class="form-control" placeholder="Name your Klick...">
         </div>
         <div class="form-group">
-          <button ng-click="playerPause()" type="button" class="btn btn-default">Replay</button>
+          <button ng-click="replay()" type="button" class="btn btn-default">Replay</button>
           <button ng-click="saveKlick()" type="button" class="btn btn-primary">Save</button>
           <button ng-click="" type="button" class="btn btn-default">Share</button>
         </div>
