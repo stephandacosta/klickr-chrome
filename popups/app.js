@@ -6,24 +6,32 @@ angular.module('KlickrChromeApp', [])
     $scope.showSaver = false;
     $scope.showMessage = false;
     $scope.message = '';
+    $scope.recorderStatus = bg.recorderStatus;
 
-    // truthy tests
-    $scope.isRecording = function(){
-      return bg.rec !== undefined;
+    $scope.canRecord = function(){
+      return $scope.recorderStatus === 'ready';
+    };
+
+    $scope.canStop = function(){
+      return $scope.recorderStatus === 'recording';
     };
 
     $scope.canPlay = function(){
       return bg.id !== '';
     };
 
+    $scope.showSaver = function(){
+      return $scope.recorderStatus === 'processing';
+    };
+
     // on click handlers
     $scope.startRecording = function(){
       window.close();
+      $scope.recorderStatus = 'recording';
       bg.startRecording();
     };
 
     $scope.stopRecording = function(){
-      $scope.showSaver = true;
       bg.stopRecording();
     };
 

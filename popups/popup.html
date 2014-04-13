@@ -15,9 +15,10 @@
 
       <div class="header">
         <li ng-click="toHome()" class="home"></li>
-        <li><a ng-click="startRecording()" ng-hide="isRecording()" href="#"><i class="fa fa-circle"></i></a></li>
-        <li><a ng-click="stopRecording()" ng-show="isRecording()" href="#"><i class="fa fa-stop"></i></a></li>
+        <li><a ng-click="startRecording()" ng-show="canRecord()" href="#"><i class="fa fa-circle"></i></a></li>
+        <li><a ng-click="stopRecording()" ng-show="canStop()" href="#"><i class="fa fa-stop"></i></a></li>
         <li><a ng-click="playRecording()" ng-show="canPlay()" href="#"><i class="fa fa-play"></i></a></li>
+        <li>{{ recorderStatus }}</li>
         <div class="clearfix"></div>
       </div>
 
