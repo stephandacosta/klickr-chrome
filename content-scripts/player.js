@@ -45,23 +45,21 @@ window.pause = false;
       movement[index].message = new Message(input, 2000, {top:movement[index].pageY, left:movement[index].pageX});
       window.pause = false;
       this.playRecording(data, index);
-    }
-      else {
-        if (movement[index].action === 'click'){
-          var $element = $($(movement[index].target.tagName)[movement[index].target.index]);
-          $element.trigger('click');
-        } else if (movement[index].action === 'keypress'){
-          var $element = $($(movement[index].target.tagName)[movement[index].target.index]);
-          var key = String.fromCharCode(movement[index].charCode);
-          var text = $element.val();
-          $element.val(text + key);
-        } else if (movement[index].action === 'move'){
-          $(window).scrollLeft(movement[index].pageX-movement[index].clientX);
-          $(window).scrollTop(movement[index].pageY-movement[index].clientY);
-          this.move(movement[index].pageX, movement[index].pageY, movement[index].t);
-      }
-      if (movement[index].url !== movement[index+1].url){
+    } else if (movement[index+1] !== undefined && movement[index].url !== movement[index+1].url){
         this.createNewKlick(data, index);
+    } else {
+      if (movement[index].action === 'click'){
+        var $element = $($(movement[index].target.tagName)[movement[index].target.index]);
+        $element.trigger('click');
+      } else if (movement[index].action === 'keypress'){
+        var $element = $($(movement[index].target.tagName)[movement[index].target.index]);
+        var key = String.fromCharCode(movement[index].charCode);
+        var text = $element.val();
+        $element.val(text + key);
+      } else if (movement[index].action === 'move'){
+        $(window).scrollLeft(movement[index].pageX-movement[index].clientX);
+        $(window).scrollTop(movement[index].pageY-movement[index].clientY);
+        this.move(movement[index].pageX, movement[index].pageY, movement[index].t);
       }
       if (!!movement[index].message){
         movement[index].message.showMessageOnScreen();
