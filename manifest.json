@@ -12,7 +12,7 @@
 
   "content_scripts": [{
     "matches": ["http://*/*","https://*/*"],
-    "css":["styles/styles.css"],
+    "css":["styles/content-styles.css"],
     "js": [
       "bower_components/jquery/dist/jquery.min.js",
       "bower_components/d3/d3.min.js",

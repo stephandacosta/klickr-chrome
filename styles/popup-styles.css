@@ -1,0 +1,64 @@
+/* ---------------------------------------------------------------------------- */
+/* General
+/* ---------------------------------------------------------------------------- */
+
+body {
+  min-width: 300px;
+  background-color: rgb(163,210,216);
+  overflow: hidden;
+}
+
+a:focus {
+  outline: none;
+}
+
+.wrap {
+  padding: 5px;
+}
+
+/* ---------------------------------------------------------------------------- */
+/* Header
+/* ---------------------------------------------------------------------------- */
+
+.header {
+  width: 100%;
+  padding: 5px;
+  border-radius: 8px;
+  list-style: none;
+}
+
+.home {
+  background: url('../img/icon.png') no-repeat;
+  cursor: pointer;
+  height: 32px;
+  width: 50px;
+  float: left;
+}
+
+.header > li {
+  line-height: 32px;
+  position: relative;
+  display: block;
+  float: left;
+}
+
+.header > li > a {
+  color: #3A494C;
+  position: relative;
+  border-radius: 5px;
+  padding: 10px 15px;
+  margin: auto 3px;
+}
+
+.header > li > a:hover {
+  text-decoration: none;
+  color: rgb(163,210,216);
+  background-color: #3A494C;
+}
+
+.content {
+  margin-top: 5px;
+  padding: 15px 5px 5px 5px;
+  background-color: #F0F1F0;
+  border-radius: 8px;
+}

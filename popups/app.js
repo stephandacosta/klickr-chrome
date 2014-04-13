@@ -4,6 +4,8 @@ angular.module('KlickrChromeApp', [])
 
     var bg = chrome.extension.getBackgroundPage();
     $scope.showSaver = false;
+    $scope.showMessage = false;
+    $scope.message = '';
 
     $scope.toHome = function(){
       chrome.tabs.create({url: "http://www.klickr.io"});
@@ -29,7 +31,15 @@ angular.module('KlickrChromeApp', [])
     };
 
     $scope.saveKlick = function(){
-      bg.saveKlick($scope.desc);
+      console.log('Save Klick', $scope.desc);
+      if ($scope.desc === undefined || $scope.desc === ''){
+        $scope.errorMsg = 'Give your Klick a title..';
+      } else {
+        $scope.showSaver = false;
+        $scope.message = 'All\'s Good';
+        $scope.showMessage = true;
+        bg.saveKlick($scope.desc);
+      }
     };
 
   });
