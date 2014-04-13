@@ -13,7 +13,16 @@
 /* These actions trigger the background listeners to dispatch actions to recorder and player
 /********* NEED TO CHECK AFTER INTEGRATION IF POST METHOD CAN BE REFACTORED IN SAVER CLASS
 /* ------------------------------------------------------------------------------------*/
-var Saver = function (){ 
+var Saver = function (){
+
+  // var xmlHttp = null;
+  // xmlHttp = new XMLHttpRequest();
+  // xmlHttp.open('GET', chrome.extension.getURL('content-scripts/views/saver.html'), false);
+  // xmlHttp.send(null);
+
+  // console.log(xmlHttp.responseText);
+  // $('body').append(xmlHttp.responseText);
+
   var boxHeight = 125;  //Height of the saver control box
   var boxWidth = 330;  //Width of the saver control box
   this.node = $('<div class="saveBox"></div>');

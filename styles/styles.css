@@ -1,8 +1,13 @@
 /* ---------------------------------------------------------------------------- */
+/* General
+/* ---------------------------------------------------------------------------- */
+
+
+/* ---------------------------------------------------------------------------- */
 /* Popup
 /* ---------------------------------------------------------------------------- */
 
-body {
+.klickr-popup-body {
   min-width: 400px;
 }
 
@@ -20,14 +25,31 @@ body {
 /* Save Box
 /* ---------------------------------------------------------------------------- */
 
-.saveBox {
-  position: fixed;
-  background: rgb(183, 243, 223);
-  border-radius: 7.5px;
-  font-size:25px;
-  font-weight:bold;
-  font: Arial;
-  border: 2px solid;
+.klickr-saver {
+
+}
+
+.klickr-btn {
+  float: left;
+  background: #FFFFFF;
+  color: #5E5E5E;
+  border-radius: 0.5em;
+  text-transform: uppercase;
+  display: block;
+  padding: 20px;
+  font-size: 1em;
+  margin: 0 auto;
+  text-align: center;
+  font-weight: 900;
+  transition: 0.5s all;
+  -webkit-transition: 0.5s all;
+  -moz-transition: 0.5s all;
+  -o-transition: 0.5s all;
+}
+
+.klickr-btn:hover{
+  background: #323232;
+  color:#FFF;
 }
 
 /*.btn{
