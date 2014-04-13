@@ -36,6 +36,10 @@ angular.module('KlickrChromeApp', [])
       bg.replay();
     };
 
+    $scope.toHome = function(){
+      chrome.tabs.create({url: 'http://www.klickr.io'});
+    };
+
     $scope.saveKlick = function(){
       console.log('Save Klick', $scope.desc);
       if ($scope.desc === undefined || $scope.desc === ''){
