@@ -8,23 +8,37 @@ var Editor = function () {
   this.currentRecorder = window.rec;
 
   // reference to current player in background
-  this.currentPlayer = null; // this will be the player object in bg-player.js
+  this.currentPlayer = null;
   this.isCurrentPlayerPaused = false;
-  
-  // a deep copy of the current recorder's klick object
+
+  // current index of the tick object within ticks array that is being paused on
+  this.currentIndex = window.currentIndex;
+
+  // create a deep copy of the current recorder's klick object using lo-dash
   this.currentKlickObject = _.cloneDeep(this.currentRecorder.getKlick());
 };
 
 Editor.prototype.pausePlayback = function () {
-  // uses the current player's pause function
-  this.currentPlayer.pause();
+  // this.currentPlayer.pause() returns an index within the ticks array where paused happen
+  this.currentIndex = this.currentPlayer.pause(); // return an index
+  this.isCurrentPlayerPaused = true;
 };
 
 Editor.prototype.resumePlayback = function () {
-  //
-  this.currentPlayer.resume();
+  // this.currentPlayer.resume() takes an index within ticks array to resume playback on
+  if (!this.isCurrentPlayerPaused) {
+    this.currentPlayer.resume(this.currentIndex);
+    this.isCurrentPlayerPaused = false;  
+  }
 };
 
 Editor.prototype.addAnnotations = function () {
   // add annotations to the current klick object and modify it in place
+  var message = window.prompt("Please enter the annotation you'd like to add.");
+  this.currentKlickObject.ticks[this.currentIndex].annotation = message;
+};
+
+// sends the modified klick object to bg-recorder
+Editor.prototype.updateKlick = function () {
+  this.currentRecorder.updateKlick(this.currentKlickObject);
 };
