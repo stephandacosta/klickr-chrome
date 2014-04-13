@@ -70,7 +70,7 @@ BgRecorder.prototype.appendTick = function(tick){
 
 /* Append tick to Klick object */
 BgRecorder.prototype.stop = function(){
-  helpers.activeTabSendMessage({action: "stopRecording"});
+  helpers.activeTabSendMessage({action: 'stopRecording'});
   helpers.activeTabSendMessage({
     action: 'createMessage',
     message: 'Stop Recording Now',

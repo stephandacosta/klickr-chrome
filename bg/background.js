@@ -111,7 +111,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   // Replay recording: requests player to play staged recording
   else if (request.action === 'replay') {
     console.log('Background: Replay recording');
-    helpers.activeTabSendMessage({action: "playStagedKlick", klick: window.rec.klick});
+    helpers.activeTabSendMessage({action: 'playStagedKlick', klick: window.rec.klick});
     sendResponse({response: "Background: Processed replay message"});
   }
 
