@@ -146,12 +146,6 @@ window.pause = false;
     }
 
     else if (action === 'playStagedKlick'){
-      console.log('replay button clicked');
-      this.scaleXY(idOrKlick);
-    }
-
-    else if (action === 'playNextKlick'){
-      console.log('multi-page recording');
       var that = this;
       setTimeout(function(){
         that.scaleXY(idOrKlick);
@@ -176,13 +170,13 @@ $(function(){
       sendResponse({response: "Player: Playing Klick..."});
     }
 
-    else if (request.action === 'playStagedKlick' || request.action === 'playNextKlick'){
+    else if (request.action === 'playStagedKlick'){
       player.playKlick(request.klick, request.action);
       sendResponse({response: "Player: Playing Klick..."});
     }
     
-    else if (request.action === 'pause'){
-      window.pause = true;
+    else if (request.action === 'pauseReplay'){
+      // window.pause = true;
     }
 
   });

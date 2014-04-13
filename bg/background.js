@@ -49,6 +49,8 @@ window.stopRecording = function(){
     console.log('Background: Stop recording');
     window.rec.stop();
     Klickr.recorderStatus = 'ready';
+
+    // window.isPaused = true;
   }
 };
 
@@ -66,18 +68,27 @@ window.saveKlick = function(desc){
 
 // TODO: Refactor into player ?
 window.id = ''; // klick object id (corresponds to _id in mongodb)
-window.nextKlick = false;
+window.stagedKlick = undefined;
 
 /* Replay: Send replay message */
 window.replay = function(){
+  // redirect to the first url in the ticks array
   console.log('Background: Replay recording');
-  helpers.activeTabSendMessage({action: 'playStagedKlick', klick: window.rec.klick});
+  if(req.klicks)
+  chrome.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {
+    window.stagedKlick = window.rec.klick;
+    chrome.tabs.update(tabs[0].id, {url: window.rec.klick.ticks[0].url});
+  });
+
+  // window.isPaused = false;
 };
 
 /* Pause: Send pause message */
 window.pause = function(){
   console.log('Background: Pause recording');
-  helpers.activeTabSendMessage({action: 'pause', klick: window.rec.klick});
+  helpers.activeTabSendMessage({action: 'pauseReplay', klick: window.rec.klick});
+
+  // window.isPaused = true;
 };
 
 /* Background -> Recorder: Play recording
@@ -134,15 +145,17 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   // in multi-page recording, used to store the next klick object that will be given after the page changes to a new url
   else if (request.action === 'nextKlick') {
     console.log('Background: Store recording in background');
-    window.nextKlick = request.klick;
+    window.stagedKlick = request.klick;
     sendResponse({response: "Background: Processed storage message"});
   }
 
   // if the dom is ready and nextKlick is not false, then send the current page a new klick object to restart the player.
-  else if (request.action === 'domReady' && !!window.nextKlick){
-    helpers.activeTabSendMessage({action: "playNextKlick", klick: window.nextKlick});
-    window.nextKlick = false;
-    sendResponse({response: "Background: Processed nextKlick message"});
+  else if (request.action === 'domReady'){
+    if (!!window.nextKlick){
+      helpers.activeTabSendMessage({action: "playNextKlick", klick: window.nextKlick});
+      window.nextKlick = false;
+      sendResponse({response: "Background: Processed nextKlick message"});
+    }
   }
 
 });
