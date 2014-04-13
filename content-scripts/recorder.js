@@ -45,12 +45,20 @@ Recorder.prototype.addListeners = function(){
   var self = this;
 
   $('html').click(function(event){
-    self.log(event.type, event.pageX, event.pageY, event.clientX, event.clientY, event.timeStamp, event.target.outerHTML, undefined, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey, document.URL);
+    var target = {};
+    target.tagName = event.target.tagName;
+    target.index = getIndexOf(target.tagName, event.target); 
+
+    self.log(event.type, event.pageX, event.pageY, event.clientX, event.clientY, event.timeStamp, target, undefined, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey, document.URL);
   });
 
   $('html').keypress(function(event){
+    var target = {};
+    target.tagName = event.target.tagName;
+    target.index = getIndexOf(target.tagName, event.target);
+
     var charCode = event.which || event.keyCode;
-    self.log(event.type, event.pageX, event.pageY, event.clientX, event.clientY, event.timeStamp, event.target.outerHTML, charCode, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey);
+    self.log(event.type, event.pageX, event.pageY, event.clientX, event.clientY, event.timeStamp, target, charCode, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey);
   });
 };
 
@@ -76,6 +84,7 @@ Recorder.prototype.log = function(action, pageX, pageY, clientX, clientY, timest
     clientY = clientY || this.mousePos.clientY;
     timestamp = timestamp || Date.now();
     url = url || document.URL;
+    target = target || ['', -1];
 
     var tick = {
       action: action,
@@ -116,6 +125,21 @@ Recorder.prototype.stop = function(){
     this.isRecording = false;
     clearInterval(this.timer);
   }
+};
+
+/* ------------------------------------------------------------------------------------*/
+/* Helper
+/* ------------------------------------------------------------------------------------*/
+var getIndexOf = function (tag, element) {
+  // expect 'tag' to be a string and 'element' to be a DOM element (not jQuery)
+  var index = -1;
+  var $allElementsWithTag = $(tag);
+  $allElementsWithTag.each(function (idx, el) {
+    if (el === element) {
+      index = idx;
+    }
+  });
+  return index;
 };
 
 /* ------------------------------------------------------------------------------------*/
