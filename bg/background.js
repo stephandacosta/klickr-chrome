@@ -53,6 +53,7 @@ window.startRecording = function(){
     console.log('Background: Start recording');
     window.recorderStatus = 'recording';
     window.rec = new BgRecorder();
+    helpers.activeTabSendMessage({action: 'showRecordMessage', message: 'Recording Now'});
   }
 };
 
@@ -62,6 +63,7 @@ window.stopRecording = function(){
     console.log('Background: Stop recording');
     window.recorderStatus = 'processing';
     window.rec.stop();
+    helpers.activeTabSendMessage({action: 'removeRecordMessage'});
   }
 };
 
@@ -70,10 +72,16 @@ window.saveKlick = function(desc){
   if (window.recorderStatus === 'processing'){
     console.log('Background: Save recording');
     window.refreshRecorderStatus(true);
+    window.editor.updateKlick();
     window.rec.addDescription(desc);
     window.rec.send();
     window.rec = undefined;
   }
+};
+
+window.delete = function () {
+  window.rec = undefined;
+  window.refreshRecorderStatus(true);
 };
 
 /* ------------------------------------------------------------------------------------*/
@@ -82,12 +90,20 @@ window.saveKlick = function(desc){
 
 // TODO: Refactor into player ?
 window.id = ''; // klick object id (corresponds to _id in mongodb)
-window.nextKlick = false;
+window.stagedKlick = undefined;
 
-/* Replay: Send pause message */
+/* Replay: Send replay message */
 window.replay = function(){
-  console.log('Background: Player pause');
-  helpers.activeTabSendMessage({action: 'pause'});
+  console.log("Background.js: replay");
+  window.editor = new Editor();
+  window.editor.resumePlayback();
+};
+
+/* Pause: Send pause message */
+window.pause = function(){
+  console.log("Background.js: pause");
+  console.log("window.editor is:", window.editor);
+  window.editor.pausePlayback();
 };
 
 /* Background -> Recorder: Play recording
@@ -124,11 +140,13 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   }
 
   // Replay recording: requests player to play staged recording
-  else if (request.action === 'replay') {
-    console.log('Background: Replay recording');
-    helpers.activeTabSendMessage({action: 'playStagedKlick', klick: window.rec.klick});
-    sendResponse({response: "Background: Processed replay message"});
-  }
+
+  // Move this piece of code to the replay function
+  // else if (request.action === 'replay') {
+  //   console.log('Background: Replay recording');
+  //   helpers.activeTabSendMessage({action: 'playStagedKlick', klick: window.rec.klick});
+  //   sendResponse({response: "Background: Processed replay message"});
+  // }
 
   // Save recording: staged recording is sent to recorder to be pushed to server
   else if (request.action === 'save') {
@@ -142,15 +160,17 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   // in multi-page recording, used to store the next klick object that will be given after the page changes to a new url
   else if (request.action === 'nextKlick') {
     console.log('Background: Store recording in background');
-    window.nextKlick = request.klick;
+    window.stagedKlick = request.klick;
     sendResponse({response: "Background: Processed storage message"});
   }
 
   // if the dom is ready and nextKlick is not false, then send the current page a new klick object to restart the player.
-  else if (request.action === 'domReady' && !!window.nextKlick){
-    helpers.activeTabSendMessage({action: "playNextKlick", klick: window.nextKlick});
-    window.nextKlick = false;
-    sendResponse({response: "Background: Processed nextKlick message"});
+  else if (request.action === 'domReady'){
+    if (!!window.nextKlick){
+      helpers.activeTabSendMessage({action: "playNextKlick", klick: window.nextKlick});
+      window.nextKlick = false;
+      sendResponse({response: "Background: Processed nextKlick message"});
+    }
   }
 
 });

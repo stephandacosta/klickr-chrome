@@ -5,6 +5,7 @@ angular.module('KlickrChromeApp', [])
     var bg = chrome.extension.getBackgroundPage();
     $scope.showMessage = false;
     $scope.message = '';
+    $scope.isPaused = true;
 
     $scope.recorderStatus = bg.recorderStatus;
 
@@ -42,7 +43,15 @@ angular.module('KlickrChromeApp', [])
     };
 
     $scope.replay = function(){
+      $scope.isPaused = !$scope.isPaused;
+      console.log("App.js: replay");
       bg.replay();
+    };
+
+    $scope.pause = function(){
+      $scope.isPaused = !$scope.isPaused;
+      console.log("App.js: pause");
+      bg.pause();
     };
 
     $scope.toHome = function(){
@@ -62,7 +71,8 @@ angular.module('KlickrChromeApp', [])
     };
 
     $scope.delete = function(){
-
+      bg.delete();
+      window.close();
     };
 
   });
