@@ -1,22 +1,45 @@
 /* ------------------------------------------------------------------------------------*/
 /* BACKGROUND RECORDER
+/* Consolidates ticks streamed from content script recorders into Klick object
 /* ------------------------------------------------------------------------------------*/
 
 var BgRecorder = function(){
+
+  // bind listeners so they can be removed later
+  this.bindUpdateActiveTab = helpers.bind(this.updateActiveTab, this);
+  this.bindMsgHandler = helpers.bind(this.msgHandler, this);
+
+  // init
   this.isRecording = true;
   this.createKlick();
-  this.initEventHandlers();
-  this.updateActiveTabUrl();
+  this.bindUpdateActiveTab();
+  this.addListeners();
+  this.msgStart();
+  helpers.activeTabSendMessage({action: 'startRecording'});
+
+};
+
+window.BgRecorder = BgRecorder;
+
+/* Display start recording message */
+BgRecorder.prototype.msgStart = function(){
   helpers.activeTabSendMessage({
     action: 'createMessage',
     message: 'Start Recording Now',
     duration: 2000,
     coords: undefined
   });
-  helpers.activeTabSendMessage({action: 'startRecording'});
 };
 
-window.BgRecorder = BgRecorder;
+/* Display stop recording message */
+BgRecorder.prototype.msgStop = function(){
+  helpers.activeTabSendMessage({
+    action: 'createMessage',
+    message: 'Stop Recording Now',
+    duration: 2000,
+    coords: undefined
+  });
+};
 
 /* Creates a new Klick object */
 BgRecorder.prototype.createKlick = function(){
@@ -34,37 +57,52 @@ BgRecorder.prototype.addDescription = function(desc){
 };
 
 /* Update active tab url */
-BgRecorder.prototype.updateActiveTabUrl = function(){
+BgRecorder.prototype.updateActiveTab = function(){
+  if (this.isRecording){
+    var self = this;
+
+    // update active tab and start its recording
+    chrome.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {
+      self.activeUrl = tabs[0].url;
+      self.activeTabId = tabs[0].id;
+      chrome.tabs.sendMessage(self.activeTabId, {action: 'startRecording'});
+      console.log('BgRecorder: Url changed on tab', self.activeTabId, 'with url', self.activeUrl);
+    });
+
+    // stop other tabs from recording
+    chrome.tabs.query({'lastFocusedWindow': false}, function(tabs){
+      for (var i = 0; i < tabs.length; i++){
+        chrome.tabs.sendMessage(tabs[i].id, {action: 'stopRecording'});
+      }
+    });
+  }
+};
+
+/* Handles messages from content scripts */
+BgRecorder.prototype.msgHandler = function(request, sender, sendResponse){
   var self = this;
-  chrome.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {
-    self.activeUrl = tabs[0].url;
-    console.log('BgRecorder: Url changed', self.activeUrl);
-  });
+
+  // appends tick to Klick
+  if (request.action === 'appendTick') {
+    self.appendTick(request.tick, sender.tab);
+  }
+
+  // when any recorder script is loaded, refresh the active tab
+  else if (request.action === 'recorderReady') {
+    self.bindUpdateActiveTab();
+  }
 };
 
 /* Add listeners */
-BgRecorder.prototype.initEventHandlers = function(){
-  var self = this;
+BgRecorder.prototype.addListeners = function(){
+  chrome.tabs.onUpdated.addListener(this.bindUpdateActiveTab);
+  chrome.runtime.onMessage.addListener(this.bindMsgHandler);
+};
 
-  chrome.tabs.onUpdated.addListener(function(){
-    self.updateActiveTabUrl();
-  });
-
-  chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    // Appends tick to Klick
-    if (request.action === 'appendTick') {
-      self.appendTick(request.tick);
-    }
-
-    // On change of URL, start recording again when recorder ready
-    else if (request.action === 'recorderReady') {
-      chrome.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {
-        if (self.isRecording && tabs[0].url === request.url){
-          helpers.activeTabSendMessage({action: 'startRecording'});
-        }
-      });
-    }
-  });
+/* Remove listeners */
+BgRecorder.prototype.removeListeners = function(){
+  chrome.tabs.onUpdated.removeListener(this.bindUpdateActiveTab);
+  chrome.runtime.onMessage.removeListener(this.bindMsgHandler);
 };
 
 /* Gets inner width and height from active tab */
@@ -77,29 +115,23 @@ BgRecorder.prototype.getWindowSize = function(){
 };
 
 /* Append tick to Klick object */
-BgRecorder.prototype.appendTick = function(tick){
-  // only accepts ticks from a single URL at one time
-  if (this.activeUrl === tick.url){
-    console.log('BgRecorder: Added', this.activeUrl, tick);
+BgRecorder.prototype.appendTick = function(tick, fromTab){
+  // if sent from active tab
+  if (this.isRecording && this.activeTabId === fromTab.id){
+    console.log('BgRecorder: Add', this.activeUrl, tick.url, tick.pageX, tick.pageY);
     this.klick.ticks.push(tick);
   } else {
-    console.log('BgRecorder: REJECTED', this.activeUrl, tick.url, tick);
+    // for debugging
+    console.log('BgRecorder: REJECT', this.activeUrl, tick.url, tick.pageX, tick.pageY);
   }
 };
 
 /* Append tick to Klick object */
 BgRecorder.prototype.stop = function(){
-  chrome.tabs.onUpdated.removeListener(this.updateActiveTabUrl);
-
-  helpers.activeTabSendMessage({action: 'stopRecording'});
-  helpers.activeTabSendMessage({
-    action: 'createMessage',
-    message: 'Stop Recording Now',
-    duration: 2000,
-    coords: undefined
-  });
-  this.sortTicks();
-  window.openSaver();
+  this.isRecording = false;
+  helpers.sendMessage({action: 'stopRecording'});
+  this.removeListeners();
+  this.msgStop();
 };
 
 /* Background -> Server: Send current klick object to the server to save */

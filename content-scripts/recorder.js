@@ -1,13 +1,6 @@
 /* ------------------------------------------------------------------------------------*/
 /* RECORDER
-/* - Content script that records mouse movements and sends data to server
-/* - Exists on a page, has access to DOM elements, but not to window object
-/* - Communicates with background using events
-/* ------------------------------------------------------------------------------------*/
-
-/* ------------------------------------------------------------------------------------*/
-/* Recorder Class
-/* Records a klick and sends to server
+/* Streams ticks to BgRecorder
 /* ------------------------------------------------------------------------------------*/
 
 var Recorder = function(){
@@ -27,7 +20,7 @@ var Recorder = function(){
   };
 
   // Tell background that you're ready
-  chrome.runtime.sendMessage({action: 'recorderReady', url: document.URL});
+  chrome.runtime.sendMessage({action: 'recorderReady'});
 };
 
 window.Recorder = Recorder;

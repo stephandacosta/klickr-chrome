@@ -30,12 +30,29 @@ helpers.parseUrl = function(url){
   return params;
 };
 
-helpers.activeTabSendMessage = function (message, responseCallback) {
-  responseCallback = responseCallback || (function (response) {
-    // console.log('Helpers: Received response', response);
-  });
+/* Sends message to last focused tab */
+helpers.activeTabSendMessage = function(message, responseCallback) {
+  responseCallback = responseCallback || function(){};
 
   chrome.tabs.query({active: true, lastFocusedWindow: true}, function(tabs) {
     chrome.tabs.sendMessage(tabs[0].id, message, responseCallback);
   });
+};
+
+/* Sends message to all tabs */
+helpers.sendMessage = function (message, responseCallback){
+  responseCallback = responseCallback || function(){};
+
+  chrome.tabs.query({}, function(tabs) {
+    for (var i = 0; i < tabs.length; i++){
+      chrome.tabs.sendMessage(tabs[i].id, message, responseCallback);
+    }
+  });
+};
+
+/* Bind function to context */
+helpers.bind = function(fn, context){
+  return function(){
+    return fn.apply(context, arguments);
+  };
 };
