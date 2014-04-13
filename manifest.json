@@ -33,7 +33,7 @@
   },
 
   "web_accessible_resources": [
-    "content-scripts/views/saver.html",
+    "content-scripts/views/saver.html"
   ],
 
   "permissions": [
