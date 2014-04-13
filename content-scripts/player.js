@@ -25,9 +25,11 @@ window.pause = false;
 
   // creates a new klick, starting from the indexes after a urlChanged event has happened.  calls the sendToBackground function and then redirects the page.
   Player.prototype.createNewKlick = function(data, index){
-    var clickTarget = data.ticks[index].target;
     data.ticks = data.ticks.slice(index+1);
     this.sendToBackground(data);
+    setTimeout(function(){
+      window.location.href = data.ticks[0].url;
+    }, 2000);
   };
 
 
@@ -40,7 +42,7 @@ window.pause = false;
       console.log('movement finished');
     } else if (window.pause){
       var input = prompt('Place annotation here');
-      //movement[index].message = new Message(input, 2000, {top:movement[index].pageY, left:movement[index].pageX});
+      movement[index].message = new Message(input, 2000, {top:movement[index].pageY, left:movement[index].pageX});
       window.pause = false;
       this.playRecording(data, index);
     }
@@ -49,10 +51,10 @@ window.pause = false;
         if(movement[index].url !== movement[index+1].url){
           this.createNewKlick(data, index);
         } else if (movement[index].action === 'click'){
-          //$(movement[index].selector).click();  
+          $($(movement[index].target.tagName)[movement[index].target.index]).trigger('click');
         } else if (movement[index].action === 'keypress'){
-        // var text = movement[index].selector.val();
-        // movement[index].selector.val(text + String.fromCharCode(movement[index].charCode));
+          var text = $($(movement[index].target.tagName)[movement[index].target.index]).val();
+          $($(movement[index].target.tagName)[movement[index].target.index]).val(text + String.fromCharCode(movement[index].charCode));
         }
       } else if (movement[index].action === 'move'){
         $(window).scrollLeft(movement[index].pageX-movement[index].clientX);
@@ -60,7 +62,7 @@ window.pause = false;
         this.move(movement[index].pageX, movement[index].pageY, movement[index].t);
       }
       if (!!movement[index].message){
-        //movement[index].message.showMessageOnScreen();
+        movement[index].message.showMessageOnScreen();
       }
       var that = this;
       setTimeout(function(){
@@ -100,20 +102,8 @@ window.pause = false;
     }
   };
 
-    // looks at the target and creates jquery selectors for that target
-  Player.prototype.createDomSelectors = function(data){
-    for(var i = 0; i < data.ticks.length; i++){
-      var target = data.ticks[i].target;
-      if(target[1] !== -1){
-        data.ticks[i].selector = $($(target.tagName)[target.index]);
-      }
-    }
-    this.setMoveIntervals(data);
-  };
-
   //scales clientX, clientY, pageX, and pageY so different screen sizes will have the same display.
   Player.prototype.scaleXY = function(data){
-    console.log('played klick', data);
     var xScale = $(window).width() / data.width || 1;
     var yScale = $(window).height() / data.height || 1;
     data.width = $(window).width();
@@ -124,7 +114,7 @@ window.pause = false;
       data.ticks[i].pageX = data.ticks[i].pageX*xScale;
       data.ticks[i].pageY = data.ticks[i].pageY*yScale;
     }
-    this.createDomSelectors(data);
+    this.setMoveIntervals(data);
   };
 
   // submits an ajax request to the server based on a click id to get movement patterns back
@@ -137,7 +127,6 @@ window.pause = false;
       type: 'GET',
       contentType: 'application/json',
       success: function(data){
-        console.log('Player: Get Data', data, data.ticks);
         if(Array.isArray(data)){
           data = data[data.length-1];
         }
@@ -148,7 +137,7 @@ window.pause = false;
 
   //  initiates the player methods. if the action is playKlick, idOrKlick is an id, and get request the server.
   //  otherwise, use the klick object and go straight to the playing.
-  // if action is playNextKlick, delay the play back for one second
+  //  if action is playNextKlick, delay the play back for one second
   Player.prototype.playKlick = function(idOrKlick, action){
     if(action === 'playKlick'){
       console.log('play button clicked');
