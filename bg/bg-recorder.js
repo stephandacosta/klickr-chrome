@@ -6,8 +6,15 @@ var BgRecorder = function(){
   this.isRecording = true;
   this.createKlick();
   this.initEventHandlers();
+  helpers.activeTabSendMessage({
+    action: 'createMessage',
+    message: 'Start Recording Now',
+    duration: 2000,
+    coords: undefined
+  });
   helpers.activeTabSendMessage({action: 'startRecording'});
 };
+
 window.BgRecorder = BgRecorder;
 
 /* Creates a new Klick object */
@@ -64,6 +71,12 @@ BgRecorder.prototype.appendTick = function(tick){
 /* Append tick to Klick object */
 BgRecorder.prototype.stop = function(){
   helpers.activeTabSendMessage({action: "stopRecording"});
+  helpers.activeTabSendMessage({
+    action: 'createMessage',
+    message: 'Stop Recording Now',
+    duration: 2000,
+    coords: undefined
+  });
   window.openSaver();
 };
 

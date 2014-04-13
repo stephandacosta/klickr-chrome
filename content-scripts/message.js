@@ -27,11 +27,7 @@ var Message = function (text, duration, coords) {
   $(document.body).append(this.$message);
 };
 
-
-/* ------------------------------------------------------------------------------------*/
-/* Init
-/* ------------------------------------------------------------------------------------*/
-
+// Modify jQuery to have a center function
 jQuery.fn.center = function () {
   this.css('position','absolute');
   this.css('top', Math.max(0, (($(window).height() - $(this).outerHeight()) / 2) + 
@@ -40,3 +36,18 @@ jQuery.fn.center = function () {
                                                 $(window).scrollLeft()) + 'px');
   return this;
 };
+
+/* ------------------------------------------------------------------------------------*/
+/* Init
+/* ------------------------------------------------------------------------------------*/
+
+$(function () {
+  chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    if (request.action === 'createMessage'){
+      var message = new Message(request.message, request.duration, request.coords);
+      message.showMessageOnScreen();
+      sendResponse({response: "Message: Message has been displayed on screen"});
+    }
+  });
+});
+
