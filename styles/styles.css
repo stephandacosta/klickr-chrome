@@ -13,20 +13,50 @@ a:focus {
 
 .popup-body {
   min-width: 400px;
+  overflow: hidden;
 }
 
 .header {
+  width: 100%;
+  float: left;
   padding: 5px;
-}
-
-.wrap {
-  padding: 5px;
+  background: rgb(163,210,216);
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  list-style: none;
 }
 
 .home {
   background: url('../img/icon.png') no-repeat;
+  cursor: pointer;
   height: 32px;
-  width: 32px;
+  width: 50px;
+  float: left;
+}
+
+.header > li {
+  line-height: 32px;
+  position: relative;
+  display: block;
+  float: left;
+}
+
+.header > li > a {
+  position: relative;
+  border-radius: 5px;
+  padding: 10px 15px;
+  margin: auto 5px;
+}
+
+.header > li > a:hover,
+.header > li > a:focus {
+  text-decoration: none;
+  color: rgb(163,210,216);
+  background-color: #3A494C;
+}
+
+.wrap {
+  padding: 5px;
 }
 
 /* ---------------------------------------------------------------------------- */

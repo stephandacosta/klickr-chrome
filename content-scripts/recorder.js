@@ -48,7 +48,7 @@ Recorder.prototype.addListeners = function(){
   $('html').click(function(event){
     var target = {};
     target.tagName = event.target.tagName;
-    target.index = getIndexOf(target.tagName, event.target); 
+    target.index = getIndexOf(target.tagName, event.target);
 
     self.log(event.type, event.pageX, event.pageY, event.clientX, event.clientY, event.timeStamp, target, undefined, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey, document.URL);
   });
