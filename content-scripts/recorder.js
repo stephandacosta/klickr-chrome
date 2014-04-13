@@ -166,5 +166,4 @@ var getIndexOf = function (tag, element) {
 
 $(function(){
   window.recorder = new Recorder();
-
 });

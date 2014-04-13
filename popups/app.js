@@ -24,6 +24,10 @@ angular.module('KlickrChromeApp', [])
       bg.playKlick();
     };
 
+    $scope.replay = function(){
+      bg.replay();
+    };
+
     $scope.saveKlick = function(){
       bg.saveKlick($scope.desc);
     };
