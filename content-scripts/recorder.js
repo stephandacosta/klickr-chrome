@@ -120,14 +120,15 @@ Recorder.prototype.log = function(action, pageX, pageY, clientX, clientY, timest
       url: url
     };
 
+    console.log('Send', tick);
     chrome.runtime.sendMessage({action: 'appendTick', tick: tick});
   }
 };
 
 /* Start recording */
 Recorder.prototype.start = function(){
-  console.log('Recorder: Started');
   if (!this.isRecording){
+    console.log('Recorder: Started');
     var self = this;
     this.isRecording = true;
     this.timer = setInterval(function(){
@@ -138,8 +139,8 @@ Recorder.prototype.start = function(){
 
 /* Stop recording */
 Recorder.prototype.stop = function(){
-  console.log('Recorder: Stopped');
   if (this.isRecording){
+    console.log('Recorder: Stopped');
     this.isRecording = false;
     clearInterval(this.timer);
   }

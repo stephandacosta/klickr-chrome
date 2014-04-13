@@ -46,7 +46,6 @@ BgRecorder.prototype.updateActiveTabUrl = function(){
 BgRecorder.prototype.initEventHandlers = function(){
   var self = this;
 
-  // Update URL for active tab when it changes
   chrome.tabs.onUpdated.addListener(function(){
     self.updateActiveTabUrl();
   });
@@ -54,7 +53,7 @@ BgRecorder.prototype.initEventHandlers = function(){
   chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     // Appends tick to Klick
     if (request.action === 'appendTick') {
-      self.klick.ticks.push(request.tick);
+      self.appendTick(request.tick);
     }
 
     // On change of URL, start recording again when recorder ready
@@ -66,7 +65,6 @@ BgRecorder.prototype.initEventHandlers = function(){
       });
     }
   });
-
 };
 
 /* Gets inner width and height from active tab */
@@ -82,12 +80,17 @@ BgRecorder.prototype.getWindowSize = function(){
 BgRecorder.prototype.appendTick = function(tick){
   // only accepts ticks from a single URL at one time
   if (this.activeUrl === tick.url){
-    this.klick.ticks.append(tick);
+    console.log('BgRecorder: Added', this.activeUrl, tick);
+    this.klick.ticks.push(tick);
+  } else {
+    console.log('BgRecorder: REJECTED', this.activeUrl, tick.url, tick);
   }
 };
 
 /* Append tick to Klick object */
 BgRecorder.prototype.stop = function(){
+  chrome.tabs.onUpdated.removeListener(this.updateActiveTabUrl);
+
   helpers.activeTabSendMessage({action: 'stopRecording'});
   helpers.activeTabSendMessage({
     action: 'createMessage',
@@ -95,6 +98,7 @@ BgRecorder.prototype.stop = function(){
     duration: 2000,
     coords: undefined
   });
+  this.sortTicks();
   window.openSaver();
 };
 
