@@ -3,30 +3,37 @@ angular.module('KlickrChromeApp', [])
   .controller('PopupCtrl', function ($scope) {
 
     var bg = chrome.extension.getBackgroundPage();
-    $scope.showSaver = false;
     $scope.showMessage = false;
     $scope.message = '';
+    $scope.isPaused = true;
 
-    // truthy tests
-    $scope.isRecording = function(){
-      return bg.rec !== undefined;
+    $scope.recorderStatus = bg.recorderStatus;
+
+    $scope.canRecord = function(){
+      return $scope.recorderStatus === 'ready';
     };
 
-    // $scope.isPaused = function(){
-    //   return bg.isPaused;
-    // };
+    $scope.canStop = function(){
+      return $scope.recorderStatus === 'recording';
+    };
 
     $scope.canPlay = function(){
       return bg.id !== '';
     };
 
+    $scope.showSaver = function(){
+      return $scope.recorderStatus === 'processing';
+    };
+
+    // on click handlers
     $scope.startRecording = function(){
       window.close();
+      $scope.recorderStatus = 'recording';
       bg.startRecording();
     };
 
     $scope.stopRecording = function(){
-      $scope.showSaver = true;
+      $scope.recorderStatus = 'processing';
       bg.stopRecording();
     };
 
@@ -36,23 +43,36 @@ angular.module('KlickrChromeApp', [])
     };
 
     $scope.replay = function(){
+      $scope.isPaused = !$scope.isPaused;
+      console.log("App.js: replay");
       bg.replay();
     };
 
     $scope.pause = function(){
+      $scope.isPaused = !$scope.isPaused;
+      console.log("App.js: pause");
       bg.pause();
     };
 
-    $scope.saveKlick = function(){
-      console.log('Save Klick', $scope.desc);
+    $scope.toHome = function(){
+      chrome.tabs.create({url: 'http://www.klickr.io'});
+    };
+
+    $scope.save = function(){
+      console.log('Save', $scope.desc);
       if ($scope.desc === undefined || $scope.desc === ''){
-        $scope.errorMsg = 'Give your Klick a title..';
+        $scope.errorMsg = 'Give your Klick a name that packs punch';
       } else {
-        $scope.showSaver = false;
+        $scope.recorderStatus = 'saving';
         $scope.message = 'All\'s Good';
         $scope.showMessage = true;
         bg.saveKlick($scope.desc);
       }
+    };
+
+    $scope.delete = function(){
+      bg.delete();
+      window.close();
     };
 
   });

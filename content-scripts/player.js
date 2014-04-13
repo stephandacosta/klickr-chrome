@@ -29,6 +29,7 @@ window.pause = false;
     this.sendToBackground(data);
     setTimeout(function(){
       window.location.href = data.ticks[0].url;
+      window.location.reload();
     }, 2000);
   };
 
@@ -40,6 +41,7 @@ window.pause = false;
     if ( index === movement.length ) {
       $('.mouse').detach();
       console.log('movement finished');
+      
     } else if (window.pause){
       var input = prompt('Place annotation here');
       movement[index].message = new Message(input, 2000, {top:movement[index].pageY, left:movement[index].pageX});
@@ -104,6 +106,8 @@ window.pause = false;
 
   //scales clientX, clientY, pageX, and pageY so different screen sizes will have the same display.
   Player.prototype.scaleXY = function(data){
+    console.log(data);
+    console.log('scaling in ' + document.URL);
     var xScale = $(window).width() / data.width || 1;
     var yScale = $(window).height() / data.height || 1;
     data.width = $(window).width();
