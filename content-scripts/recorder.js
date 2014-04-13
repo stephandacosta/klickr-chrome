@@ -9,6 +9,7 @@
 /* Recorder Class
 /* Records a klick and sends to server
 /* ------------------------------------------------------------------------------------*/
+
 var Recorder = function(){
   console.log('Initializing recorder...');
 
@@ -18,6 +19,7 @@ var Recorder = function(){
   this.mousePos = undefined;
   this.isRecording = false;
   this.addListeners();
+  this.initEventHandlers();
 
   // Keep track of cursor positions
   // (cursor positions are logged using setInterval to prevent excessive logging)
@@ -36,7 +38,6 @@ Recorder.prototype.getServer = function(){
   var self = this;
   chrome.runtime.sendMessage({action:'getServer'}, function(response){
     self.server = response.server;
-    console.log('Recorder: Server is', self.server);
   });
 };
 
@@ -51,6 +52,24 @@ Recorder.prototype.addListeners = function(){
   $('html').keypress(function(event){
     var charCode = event.which || event.keyCode;
     self.log(event.type, event.pageX, event.pageY, event.clientX, event.clientY, event.timeStamp, event.target.outerHTML, charCode, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey);
+  });
+};
+
+/* Listens to messages from background */
+Recorder.prototype.initEventHandlers = function() {
+  var self = this;
+
+  chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    // console.log('Recorder: Message received:', request);
+    if (request.action === 'startRecording'){
+      sendResponse({response: 'Recorder: Started'});
+      self.start();
+    } else if (request.action === 'stopRecording'){
+      sendResponse({response: 'Recorder: Stopped'});
+      self.stop();
+    } else if (request.action === 'getWindowSize'){
+      sendResponse({innerWidth: window.innerWidth, innerHeight: window.innerHeight});
+    }
   });
 };
 
@@ -123,27 +142,5 @@ Recorder.prototype.stop = function(){
 /* ------------------------------------------------------------------------------------*/
 
 $(function(){
-
-  // Helper for routing actions
   window.recorder = new Recorder();
-
-  // Listens to messages from background
-  chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    console.log('Recorder: Request', request);
-    if (request.action === 'startRecording'){
-      window.recorder.start();
-      sendResponse({response: "Recorder: Started recording"});
-    }
-
-    else if (request.action === 'stopRecording'){
-      window.recorder.stop();
-      window.recorder = new Recorder(); // always have a new recorder object ready
-      sendResponse({response: "Recorder: Stopped recording"});
-    }
-
-    else if (request.action === 'getWindowSize'){
-      sendResponse({innerWidth: window.innerWidth, innerHeight: window.innerHeight});
-    }
-  });
-
 });

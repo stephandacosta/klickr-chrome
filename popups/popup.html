@@ -6,10 +6,10 @@
     <link rel="stylesheet" href="../bower_components/font-awesome/css/font-awesome.css">
     <link rel="stylesheet" href="../styles/styles.css">
     <script src="../bower_components/jquery/dist/jquery.js"></script>
-    <script src="popup.js"></script>
+    <script src="app.js"></script>
   </head>
-  <body>
-    <div class="wrap">
+  <body ng-app="KlickrChrome" class="klickr-popup-body">
+    <div class="wrap" ng-controller="PopupCtrl">
       <ul class="nav navbar-default">
         <li><a href="#" class="home"></a></li>
         <li><a href="#" class="start"><i class="fa fa-circle"></i></a></li>
