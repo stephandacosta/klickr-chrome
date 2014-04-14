@@ -173,4 +173,8 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     }
   }
 
+  // if the dom is ready and window.recorderStatus = 'recording', then send message to message.js for action = showRecordMessage
+  else if (request.action === 'recorderReady' && window.recorderStatus === 'recording') {
+    helpers.activeTabSendMessage({action: 'showRecordMessage', message: 'Recording Now'});
+  }
 });
