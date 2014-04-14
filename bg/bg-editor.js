@@ -27,16 +27,14 @@ var Editor = function () {
  * within the ticks array of where pause is occurring. */
 Editor.prototype.pausePlayback = function () {
   console.log("In pausePlayback");
-  // this.currentIndex = this.currentPlayer.pause();
   this.currentPlayer.pause();
-
-  // console.log("About to enter addAnnotation");
-  // this.addAnnotations();
 };
 
 /* Control bg-player instance and invoke its resume function, which takes an index within
  * the ticks array to resume on. */
 Editor.prototype.resumePlayback = function () {
+  console.log("In resumePlayback");
+  console.log("The current player", this.currentPlayer);
   this.currentPlayer.resume(this.currentIndex);
 };
 
@@ -50,6 +48,7 @@ Editor.prototype.addAnnotations = function () {
     console.log("Added a new message");
     this.currentKlickObject.ticks[this.currentIndex].annotation = message;
   }
+  
   console.log("About to resumePlayback");
   this.resumePlayback();
 };
