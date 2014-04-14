@@ -15,8 +15,8 @@
 var Editor = function () {
   /* Configurations for each new Editor instance */
   
-  this.currentRecorder = window.rec; // reference to current recorder in background
-  this.currentPlayer = window.bgPlayer; // reference to current player in background
+  this.currentRecorder = window.rec; // reference to current recorder in background // NEED TO CONFIRM WITH JUSTIN THAT THIS ISNT UNDEFINED
+  this.currentPlayer = window.bgPlayer; // reference to current player in background // NEED TO CONFIRM WITH LUKE THAT THIS ISNT UNDEFINED
   this.currentIndex = 0; // Current tick object index within ticks array where playback should start at
   this.currentKlickObject = _.cloneDeep(this.currentRecorder.getKlick()); // Using lo-dash for _.cloneDeep
   this.isPaused = true; // when an editor is first created, the recording is not being played back - therefore it is initially paused
