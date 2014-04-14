@@ -64,7 +64,6 @@ window.stopRecording = function(){
     console.log('Background: Stop recording');
     window.recorderStatus = 'processing';
     window.rec.stop();
-    bgPlayer.buildKlickQueue(window.rec.klick);
     window.editor = new Editor();
     helpers.activeTabSendMessage({action: 'removeRecordMessage'});
   }

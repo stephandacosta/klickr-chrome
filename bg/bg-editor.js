@@ -20,6 +20,7 @@ var Editor = function () {
   this.currentIndex = 0; // Current tick object index within ticks array where playback should start at
   this.currentKlickObject = _.cloneDeep(this.currentRecorder.getKlick()); // Using lo-dash for _.cloneDeep
   this.addClickAndKeypressAnnotations(); // automatically add annotations for keypress and click events within ticks array
+  this.currentPlayer.buildKlickQueue(this.currentKlickObject);
   console.log("Current Klick:", this.currentKlickObject);
 };
 
