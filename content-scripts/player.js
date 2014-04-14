@@ -100,6 +100,7 @@ window.Player = Player;
 
   Player.prototype.pausePlay = function(index){
     chrome.runtime.sendMessage({action : "klickPaused", index:index});
+    console.log('Player is paused');
   };
 
   //places the mouse in the dom and gives the mouse's initial position and characteristics
@@ -151,7 +152,7 @@ window.Player = Player;
   
   Player.prototype.newPlayController = function(klick){
     this.formatKlick(klick);
-    this.playRecording(klick, 1);
+    this.playRecording(klick, 0);
   };
 
   Player.prototype.resumePlayController = function(klick, index){
@@ -172,7 +173,7 @@ $(function(){
 
   // Listens to messages from background
   chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    if (request.action === 'playKlick'){
+    if (request.action === 'play'){
       player.newPlay(request.klick);
       console.log('Playing Klick');
       sendResponse({response: "Player: Playing Klick..."});
