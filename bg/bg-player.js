@@ -37,7 +37,6 @@ BgPlayer.prototype.pause = function(){
 
 BgPlayer.prototype.resume = function(num){
   helpers.activeTabSendMessage({action: "resume", klick: this.stagedKlick, index: num});
-  sendResponse({response: "Background: Resume player"});
 };
 
 BgPlayer.prototype.playKlick = function(){
@@ -112,7 +111,6 @@ chrome.tabs.onUpdated.addListener(function(){
       chrome.tabs.update(tabs[0].id, {url: decodeURIComponent(params.query.url)});
       bgPlayer.id = params.query.id;
       bgPlayer.getKlick(bgPlayer.id);
-      console.log(bgPlayer.id);
     }
   });
 });
@@ -122,6 +120,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   // in multi-page recording, used to store the next klick object that will be given after the page changes to a new url
   if (request.action === 'klickFinished') {
     bgPlayer.klickQueueIndex++;
+    console.log(bgPlayer.klickQueueIndex);
     if (bgPlayer.klickQueueIndex < bgPlayer.klickQueue.length){
       bgPlayer.stagedKlick = bgPlayer.klickQueue[bgPlayer.klickQueueIndex];
       bgPlayer.redirect(bgPlayer.stagedKlick.ticks[0].url);
