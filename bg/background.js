@@ -63,6 +63,7 @@ window.stopRecording = function(){
     console.log('Background: Stop recording');
     window.recorderStatus = 'processing';
     window.rec.stop();
+    window.editor = new Editor();
     helpers.activeTabSendMessage({action: 'removeRecordMessage'});
   }
 };
@@ -71,11 +72,11 @@ window.stopRecording = function(){
 window.saveKlick = function(desc){
   if (window.recorderStatus === 'processing'){
     console.log('Background: Save recording');
-    window.refreshRecorderStatus(true);
     window.editor.updateKlick();
     window.rec.addDescription(desc);
     window.rec.send();
     window.rec = undefined;
+    window.refreshRecorderStatus(true);
   }
 };
 
@@ -95,7 +96,6 @@ window.stagedKlick = undefined;
 /* Replay: Send replay message */
 window.replay = function(){
   console.log("Background.js: replay");
-  window.editor = new Editor();
   window.editor.resumePlayback();
 };
 
