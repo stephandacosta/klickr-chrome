@@ -20,8 +20,11 @@ window.BgPlayer = BgPlayer;
 /* Replay: Send replay message */
 BgPlayer.prototype.replay = function(){
   // redirect to the first url in the ticks array
+  if(this.klickQueue.length === 0){
+    this.klickQueue = this.buildKlickQueue(window.rec.getKlick());
+  }
   console.log('Background: Replay recording');
-  this.stagedKlick = klickQueue.shift();
+  this.stagedKlick = this.klickQueue.shift();
   this.redirect(this.stagedKlick.ticks[0].url);
 };
 
@@ -45,7 +48,7 @@ BgPlayer.prototype.playKlick = function(){
     this.stagedKlick = this.klickQueue.shift();
     console.log(this.stagedKlick);
     helpers.activeTabSendMessage({action:'play', klick: this.stagedKlick});
-    //this.stagedKlick = undefined;
+    this.stagedKlick = undefined;
   }
 };
 
@@ -121,13 +124,13 @@ chrome.tabs.onUpdated.addListener(function(){
 // listener on saver box (replay, save, share) and recorder (stage)
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   // in multi-page recording, used to store the next klick object that will be given after the page changes to a new url
-  if (request.action === 'klickFinished') {  
+  if (request.action === 'klickFinished') {
     if (bgPlayer.klickQueue.length !== 0){
       bgPlayer.stagedKlick = bgPlayer.klickQueue.shift();
       bgPlayer.redirect(bgPlayer.stagedKlick.ticks[0].url);
       console.log('Background: Store recording in background');
       sendResponse({response: "Background: Processed storage message"});
-    } 
+    }
     else {
       console.log("Play Finished");
       sendResponse({response: "Background: Finished klick play"});

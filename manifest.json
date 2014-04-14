@@ -39,5 +39,9 @@
     "tabs",
     "storage",
     "unlimitedStorage"
+  ],
+
+  "web_accessible_resources": [
+    "img/klickr-pointer.png"
   ]
 } 
