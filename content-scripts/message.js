@@ -1,6 +1,6 @@
 /* ------------------------------------------------------------------------------------*/
 /* Message Class
-/* - Used by both recorder and player class
+/* - Used by Player class
 /* - Produces <div> element with text to display to user
 /* - Built-in functionality to fade out
 /* ------------------------------------------------------------------------------------*/

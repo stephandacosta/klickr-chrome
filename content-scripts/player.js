@@ -5,7 +5,6 @@
 
 var Player = function(){
   this.pause = false;
-
   chrome.runtime.sendMessage({action : "playerReady"});
 };
 
