@@ -18,7 +18,7 @@ angular.module('KlickrChromeApp', [])
     };
 
     $scope.canPlay = function(){
-      return bg.id !== '';
+      return bg.bgPlayer.id !== '';
     };
 
     $scope.showSaver = function(){
@@ -39,19 +39,19 @@ angular.module('KlickrChromeApp', [])
 
     $scope.playRecording = function(){
       window.close();
-      bg.playKlick();
+      bg.bgPlayer.playKlick();
     };
 
     $scope.replay = function(){
       $scope.isPaused = !$scope.isPaused;
       console.log("App.js: replay");
-      bg.replay();
+      bg.bgPlayer.replay();
     };
 
     $scope.pause = function(){
       $scope.isPaused = !$scope.isPaused;
       console.log("App.js: pause");
-      bg.pause();
+      bg.bgPlayer.pause();
     };
 
     $scope.toHome = function(){

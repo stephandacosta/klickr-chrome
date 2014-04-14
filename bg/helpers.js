@@ -33,7 +33,6 @@ helpers.parseUrl = function(url){
 /* Sends message to last focused tab */
 helpers.activeTabSendMessage = function(message, responseCallback) {
   responseCallback = responseCallback || function(){};
-
   chrome.tabs.query({active: true, lastFocusedWindow: true}, function(tabs) {
     chrome.tabs.sendMessage(tabs[0].id, message, responseCallback);
   });
