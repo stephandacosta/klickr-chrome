@@ -28,11 +28,12 @@ var Editor = function () {
  * within the ticks array of where pause is occurring. */
 Editor.prototype.pausePlayback = function () {
   console.log("In pausePlayback");
-  this.currentIndex = this.currentPlayer.pause();
+  // this.currentIndex = this.currentPlayer.pause();
+  this.currentPlayer.pause();
   this.isPaused = true;
 
-  console.log("About to enter addAnnotation");
-  this.addAnnotations();
+  // console.log("About to enter addAnnotation");
+  // this.addAnnotations();
 };
 
 /* Control bg-player instance and invoke its resume function, which takes an index within
@@ -77,3 +78,16 @@ Editor.prototype.updateKlick = function () {
   console.log("updateKlick is reached");
   this.currentRecorder.updateKlick(this.currentKlickObject);
 };
+
+/* ------------------------------------------------------------------------------------*/
+/* LISTENER
+/* ------------------------------------------------------------------------------------*/
+
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  // Comes from player.js's pausePlay function
+  if (request.action === 'klickPaused') {
+    window.editor.currentIndex = request.index;
+    console.log("About to enter addAnnotation");
+    window.editor.addAnnotations();
+  }
+});
