@@ -22,8 +22,11 @@ window.BgPlayer = BgPlayer;
 /* Replay: Send replay message */
 BgPlayer.prototype.replay = function(){
   // redirect to the first url in the ticks array
+  if(this.klickQueue.length === 0){
+    this.klickQueue = this.buildKlickQueue(window.rec.klick);
+  }
   console.log('Background: Replay recording');
-  this.stagedKlick = klickQueue.shift();
+  this.stagedKlick = this.klickQueue.shift();
   this.redirect(this.stagedKlick.ticks[0].url);
 };
 
@@ -47,7 +50,7 @@ BgPlayer.prototype.playKlick = function(){
     this.stagedKlick = this.klickQueue.shift();
     console.log(this.stagedKlick);
     helpers.activeTabSendMessage({action:'play', klick: this.stagedKlick});
-    //this.stagedKlick = undefined;
+    this.stagedKlick = undefined;
   }
 };
 
