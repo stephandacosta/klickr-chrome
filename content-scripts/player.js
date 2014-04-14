@@ -59,7 +59,7 @@ window.Player = Player;
 
   Player.prototype.setMessages = function(movement){
     for(var i = 0; i < movement.length; i++){
-      if(movement[i].annotation !== ''){
+      if(movement[i].annotation !== '' && movement[i].annotation !== undefined){
         movement[i].message = new Message(movement[i].annotation, 3000, {'top':movement[i].pageY, 'left':movement[i].pageX });
       }
     }
@@ -187,7 +187,7 @@ $(function(){
     }
 
     else if (request.action === 'resume'){
-      this.resumePlayController(request.klick, request.index);
+      player.resumePlayController(request.klick, request.index);
       console.log('Resuming Klick Play');
       sendResponse({response: "Player: Resuming Klick Play"});
     }

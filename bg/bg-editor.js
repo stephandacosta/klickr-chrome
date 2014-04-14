@@ -36,7 +36,6 @@ Editor.prototype.resumePlayback = function () {
   console.log("In resumePlayback");
   console.log("The current player", this.currentPlayer);
   this.currentPlayer.resume(this.currentIndex);
-  // }
 };
 
 /* Prompt users to input a String as their annotation. Append this annotation 
@@ -60,7 +59,7 @@ Editor.prototype.addClickAndKeypressAnnotations = function () {
   _.forEach(ticks, function (tick) { // Using lo-dash _.forEach
     if (tick.action === 'keypress') {
       tick.annotation = '[ ' + String.fromCharCode(tick.charCode) + ' ]';
-    } 
+    }
     else if (tick.action === 'click') {
       tick.annotation = '[ Click ]';
     }
