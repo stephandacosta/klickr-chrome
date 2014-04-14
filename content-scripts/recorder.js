@@ -38,7 +38,7 @@ Recorder.prototype.addListeners = function(){
   var self = this;
 
   $('html').click(function(event){
-    if (isRecording){
+    if (self.isRecording){
       var target = {};
       target.tagName = event.target.tagName;
       target.index = getIndexOf(target.tagName, event.target);
@@ -48,7 +48,7 @@ Recorder.prototype.addListeners = function(){
   });
 
   $('html').keypress(function(event){
-    if (isRecording){
+    if (self.isRecording){
       var target = {};
       target.tagName = event.target.tagName;
       target.index = getIndexOf(target.tagName, event.target);
