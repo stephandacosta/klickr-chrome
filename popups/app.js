@@ -51,7 +51,7 @@ angular.module('KlickrChromeApp', [])
     $scope.pause = function(){
       $scope.isPaused = !$scope.isPaused;
       console.log("App.js: pause");
-      bg.bgPlayer.pause();
+      bg.editor.pausePlayback();
     };
 
     $scope.toHome = function(){
