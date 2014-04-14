@@ -49,6 +49,7 @@ window.Player = Player;
         movement[i].t = movement[i].timestamp - movement[i-1].timestamp;
       }
     }
+    console.log('cool moves');
   };
 
   //changes the iso date object in timestamp to an integer of the Date.now() format
@@ -64,6 +65,7 @@ window.Player = Player;
         movement[i].message = new Message(movement[i].annotation, 3000, {'top':movement[i].pageY, 'left':movement[i].pageX });
       }
     }
+    console.log('well, setMessages ran');
   };
 
 /* ------------------------------------------------------------------------------------*/
@@ -73,12 +75,17 @@ window.Player = Player;
   // chains mouse moves together. also adds the scrolling logic. the pageX and pageY values of the movement object at index are passed to move.
   // function operates recursively, waiting the duration of the prior move in a setTimeout before calling the next move.
   Player.prototype.playRecording = function(movement, index){
+    console.log('and playRecording begins...');
+    console.log(movement);
+    console.log(index);
     if ( index === movement.length ) {
       this.endPlay();
     } else if (this.pause){
       this.pausePlay(index);
     } else {
       if(index === 0){
+        console.log('mouse X below');
+        console.log(movement[0].pageX);
         this.placeMouse(movement);
       } else {
         this.showPlay(movement, index);
@@ -106,7 +113,6 @@ window.Player = Player;
   //places the mouse in the dom and gives the mouse's initial position and characteristics
   Player.prototype.placeMouse = function(movement){
     $('body').append('<div class="mouse" style="position:absolute; background: blue; width: 15px; z-index: 9999; height:15px; border-radius: 7.5px; top: '+movement[0].pageY+'px; left:'+movement[0].pageX+'px;"></div>');
-    this.playRecording(movement, 1);
   };
 
 
@@ -152,13 +158,13 @@ window.Player = Player;
   
   Player.prototype.newPlayController = function(klick){
     this.formatKlick(klick);
-    this.playRecording(klick, 0);
+    this.playRecording(klick.ticks, 0);
   };
 
   Player.prototype.resumePlayController = function(klick, index){
     this.formatKlick(klick);
     this.pause = false;
-    this.playRecording(klick, index);
+    this.playRecording(klick.ticks, index);
   };
 
 
@@ -173,18 +179,20 @@ $(function(){
 
   // Listens to messages from background
   chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    console.log(request.action);
     if (request.action === 'play'){
-      player.newPlay(request.klick);
+      player.newPlayController(request.klick);
       console.log('Playing Klick');
       sendResponse({response: "Player: Playing Klick..."});
     }
 
     else if (request.action === 'pause'){
       player.pause = true;
+      console.log('paused');
     }
 
     else if (request.action === 'resume'){
-      this.resumePlay(request.index);
+      this.resumePlayController(request.index);
       console.log('Resuming Klick Play');
       sendResponse({response: "Player: Resuming Klick Play"});
     }

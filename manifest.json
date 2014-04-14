@@ -27,6 +27,7 @@
       "bower_components/jquery/dist/jquery.js",
       "bg/helpers.js",
       "bg/bg-recorder.js",
+      "bg/bg-player.js",
       "bg/background.js"
     ]
   },

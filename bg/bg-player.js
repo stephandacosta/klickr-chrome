@@ -8,6 +8,7 @@ var BgPlayer = function(){
   this.klickQueue = [];
   this.stagedKlick = undefined;
   this.currentIndex = -1;
+  console.log('bgPlayer initiated');
 
 };
 
@@ -44,13 +45,15 @@ BgPlayer.prototype.playKlick = function(){
   } else {
     console.log('Background -> Recorder: Play recording');
     this.stagedKlick = this.klickQueue.shift();
-    helpers.activeTabSendMessage({action: 'play', klick: this.stagedKlick});
+    console.log(this.stagedKlick);
+    helpers.activeTabSendMessage({action:'play', klick: this.stagedKlick});
+    //this.stagedKlick = undefined;
   }
 };
 
 
 /* ------------------------------------------------------------------------------------*/
-/* Helper Fnctions
+/* Helper Functions
 /* ------------------------------------------------------------------------------------*/
 
 BgPlayer.prototype.redirect = function(nextUrl){
@@ -60,12 +63,13 @@ BgPlayer.prototype.redirect = function(nextUrl){
 };
 
 BgPlayer.prototype.getKlick = function(id){
+  var that = this;
   $.ajax({
     url: Klickr.server + '/klicks/' + id,
     type: 'GET',
     contentType: 'application/json',
     success: function(rawKlick){
-      this.buildKlickQueue(rawKlick);
+      that.buildKlickQueue(rawKlick);
     }
   });
 };
@@ -74,7 +78,6 @@ BgPlayer.prototype.buildKlickQueue = function(rawKlick){
   var ticks = rawKlick.ticks;
   var index = 0;
   this.klickQueue[0] = this.buildSubKlick(rawKlick, ticks[0]);
-
   for(var i = 1; i < ticks.length; i++){
     if(ticks[i].url === ticks[i-1].url){
       this.klickQueue[index].ticks.push(ticks[i]);
@@ -88,10 +91,10 @@ BgPlayer.prototype.buildKlickQueue = function(rawKlick){
 BgPlayer.prototype.buildSubKlick = function(rawKlick, tickObj){
   var subKlick = {};
   for(var key in rawKlick){
-    if(rawKlick.key !== ticks){
-      subKlick.key = rawKlick.key;
+    if(key !== 'ticks'){
+      subKlick[key] = rawKlick[key];
     } else {
-      subKlick.key = [tickObj];
+      subKlick[key] = [tickObj];
     }
   }
   return subKlick;
@@ -112,7 +115,9 @@ chrome.tabs.onUpdated.addListener(function(){
     if ( params.host.match(Klickr.hostname) && params.query.hasOwnProperty('url') && params.query.hasOwnProperty('id') ){
       console.log('Background: Play recording with url', decodeURIComponent(params.query.url), 'and id', params.query.id);
       chrome.tabs.update(tabs[0].id, {url: decodeURIComponent(params.query.url)});
-      //this.playKlick(params.query.id);
+      bgPlayer.id = params.query.id;
+      bgPlayer.getKlick(bgPlayer.id);
+      console.log(bgPlayer.id);
     }
   });
 });
@@ -131,16 +136,16 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     window.rec.addDescription(request.description);
     window.rec.send();
     window.rec = undefined;
-    this.klickQueue = [];
+    bgPlayer.klickQueue = [];
     sendResponse({response: "Background: Processed save message"});
   }
 
   // in multi-page recording, used to store the next klick object that will be given after the page changes to a new url
   else if (request.action === 'klickFinished') {
     
-    if(this.klickQueue.length !== 0){
-      this.stagedKlick = this.klickQueue.shift();
-      this.redirect(this.stagedKlick.ticks[0].url);
+    if(bgPlayer.klickQueue.length !== 0){
+      bgPlayer.stagedKlick = bgPlayer.klickQueue.shift();
+      bgPlayer.redirect(bgPlayer.stagedKlick.ticks[0].url);
       console.log('Background: Store recording in background');
       sendResponse({response: "Background: Processed storage message"});
     }
@@ -155,27 +160,20 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   // event received from player when there has been a pause
   else if (request.action === 'klickPaused') {
     console.log('Background: store recording and index in background');
-    this.currentIndex = request.index;
+    bgPlayer.currentIndex = request.index;
   }
 
   // if the dom is ready and nextKlick is not false, then send the current page a new klick object to restart the player.
   else if (request.action === 'playerReady'){
   
-    if(!!this.stagedKlick){
+    if(!!bgPlayer.stagedKlick){
 
-      if(this.currentIndex === -1){
-        helpers.activeTabSendMessage({action: "play", klick: this.stagedKlick});
+      if(bgPlayer.currentIndex === -1){
+        helpers.activeTabSendMessage({action: "play", klick: bgPlayer.stagedKlick});
         sendResponse({response: "Background: Processed klickFinished message"});
+        bgPlayer.stagedKlick = undefined;
       }
-
-      else if (this.currentIndex !== -1) {
-
-      }
-      this.stagedKlick = undefined;
-    }
-
-    else if (this.id !== '') {
-      getKlick(this.id);
+      
     }
   }
 
