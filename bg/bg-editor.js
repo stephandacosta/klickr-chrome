@@ -16,7 +16,7 @@ var Editor = function () {
   /* Configurations for each new Editor instance */
   
   this.currentRecorder = window.rec; // reference to current recorder in background
-  this.currentPlayer = null; // reference to current player in background // NEED TO MODIFY 
+  this.currentPlayer = window.bgPlayer; // reference to current player in background
   this.currentIndex = 0; // Current tick object index within ticks array where playback should start at
   this.currentKlickObject = _.cloneDeep(this.currentRecorder.getKlick()); // Using lo-dash for _.cloneDeep
   this.isPaused = true; // when an editor is first created, the recording is not being played back - therefore it is initially paused
@@ -27,9 +27,8 @@ var Editor = function () {
 /* Control bg-player instance and invoke its pause function, which returns the index
  * within the ticks array of where pause is occurring. */
 Editor.prototype.pausePlayback = function () {
-  // this.currentIndex = this.currentPlayer.pause(); // NEED TO UNCOMMENT
   console.log("In pausePlayback");
-  this.currentIndex++;  // NEED TO MODIFY
+  this.currentIndex = this.currentPlayer.pause();
   this.isPaused = true;
 
   console.log("About to enter addAnnotation");
@@ -42,7 +41,7 @@ Editor.prototype.resumePlayback = function () {
   console.log("In resumePlayback");
   if (this.isPaused) {
     this.isPaused = false;
-    // this.currentPlayer.resume(this.currentIndex); // NEED TO UNCOMMENT
+    this.currentPlayer.resume(this.currentIndex);
   }
 };
 
