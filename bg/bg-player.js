@@ -6,7 +6,7 @@ var BgPlayer = function(){
   this.id = ''; // klick object id (corresponds to _id in mongodb)
   this.klickQueue = [];
   this.stagedKlick = undefined;
-  this.currentIndex = -1;
+  this.klickQueueIndex = -1;
   console.log('bgPlayer initiated');
 
 };
@@ -24,7 +24,8 @@ BgPlayer.prototype.replay = function(){
     this.klickQueue = this.buildKlickQueue(window.rec.getKlick());
   }
   console.log('Background: Replay recording');
-  this.stagedKlick = this.klickQueue.shift();
+  this.stagedKlick = this.klickQueue[0];
+  this.klickQueueIndex = 0;
   this.redirect(this.stagedKlick.ticks[0].url);
 };
 
@@ -34,22 +35,17 @@ BgPlayer.prototype.pause = function(){
   helpers.activeTabSendMessage({action: 'pause'});
 };
 
-BgPlayer.prototype.resume = function(){
-  helpers.activeTabSendMessage({action: "resume", klick: this.stagedKlick, index: this.currentIndex});
+BgPlayer.prototype.resume = function(num){
+  helpers.activeTabSendMessage({action: "resume", klick: this.stagedKlick, index: num});
   sendResponse({response: "Background: Resume player"});
 };
 
 BgPlayer.prototype.playKlick = function(){
-  if(this.id === ''){
-    console.log('please try using a klickr link.');
-    return;
-  } else {
-    console.log('Background -> Recorder: Play recording');
-    this.stagedKlick = this.klickQueue.shift();
-    console.log(this.stagedKlick);
-    helpers.activeTabSendMessage({action:'play', klick: this.stagedKlick});
-    this.stagedKlick = undefined;
-  }
+  console.log('Background -> Recorder: Play recording');
+  this.stagedKlick = this.klickQueue[0];
+  this.klickQueueIndex = 0;
+  helpers.activeTabSendMessage({action:'play', klick: this.stagedKlick});
+  this.stagedKlick = undefined;
 };
 
 /* ------------------------------------------------------------------------------------*/
@@ -125,26 +121,23 @@ chrome.tabs.onUpdated.addListener(function(){
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   // in multi-page recording, used to store the next klick object that will be given after the page changes to a new url
   if (request.action === 'klickFinished') {
-    if (bgPlayer.klickQueue.length !== 0){
-      bgPlayer.stagedKlick = bgPlayer.klickQueue.shift();
+    bgPlayer.klickQueueIndex++;
+    if (bgPlayer.klickQueueIndex < bgPlayer.klickQueue.length){
+      bgPlayer.stagedKlick = bgPlayer.klickQueue[bgPlayer.klickQueueIndex];
       bgPlayer.redirect(bgPlayer.stagedKlick.ticks[0].url);
       console.log('Background: Store recording in background');
       sendResponse({response: "Background: Processed storage message"});
     }
     else {
       console.log("Play Finished");
+      this.klickQueue = [];
+      this.klickQueueIndex = -1;
       sendResponse({response: "Background: Finished klick play"});
     }
   }
-  
-  // event received from player when there has been a pause
-  else if (request.action === 'klickPaused') {
-    console.log('Background: store recording and index in background');
-    bgPlayer.currentIndex = request.index;
-  }
 
   // if the dom is ready and nextKlick is not false, then send the current page a new klick object to restart the player.
-  else if (request.action === 'playerReady' && !!bgPlayer.stagedKlick && bgPlayer.currentIndex === -1) {
+  else if (request.action === 'playerReady' && !!bgPlayer.stagedKlick) {
     helpers.activeTabSendMessage({action: "play", klick: bgPlayer.stagedKlick});
     sendResponse({response: "Background: Processed klickFinished message"});
     bgPlayer.stagedKlick = undefined;
