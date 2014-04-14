@@ -36,6 +36,8 @@ BgPlayer.prototype.pause = function(){
 };
 
 BgPlayer.prototype.resume = function(num){
+  this.stagedKlick = this.klickQueue[this.klickQueueIndex];
+  console.log(this.stagedKlick);
   helpers.activeTabSendMessage({action: "resume", klick: this.stagedKlick, index: num});
 };
 
