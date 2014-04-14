@@ -1,9 +1,6 @@
 var Editor = function () {
-  // reference to current recorder in background
-  this.currentRecorder = window.rec;
-
-  // reference to current player in background
-  this.currentPlayer = null;
+  this.currentRecorder = window.rec; // reference to current recorder in background
+  this.currentPlayer = null; // NEED TO MODIFY // reference to current player in background
   this.isPaused = true;
 
   // current index of the tick object within ticks array that is being paused on
@@ -11,6 +8,10 @@ var Editor = function () {
 
   // create a deep copy of the current recorder's klick object using lo-dash
   this.currentKlickObject = _.cloneDeep(this.currentRecorder.getKlick());
+  
+  // add keypress and click annotations
+  this.addClickAndKeypressAnnotations();
+
   console.log("Current Klick:", this.currentKlickObject);
 };
 
@@ -19,7 +20,7 @@ Editor.prototype.pausePlayback = function () {
   
   // this.currentIndex = this.currentPlayer.pause();
   console.log("In pausePlayback");
-  this.currentIndex++;
+  this.currentIndex++;  // NEED TO MODIFY
   this.isPaused = true;
 
   // prompt user for annotation
@@ -50,7 +51,21 @@ Editor.prototype.addAnnotations = function () {
   this.resumePlayback();
 };
 
+// add annotations for click and keypress events within currentKlickObject
+Editor.prototype.addClickAndKeypressAnnotations = function () {
+  var ticks = this.currentKlickObject.ticks;
+  _.forEach(ticks, function (tick) {
+    if (tick.action === 'keypress') {
+      tick.annotation = '[ ' + String.fromCharCode(tick.charCode) + ' ]';
+    } 
+    else if (tick.action === 'click') {
+      tick.annotation = '[ Click ]';
+    }
+  });
+};
+
 // sends the modified klick object to bg-recorder
 Editor.prototype.updateKlick = function () {
+  console.log("updateKlick is reached");
   this.currentRecorder.updateKlick(this.currentKlickObject);
 };
