@@ -187,7 +187,7 @@ $(function(){
     }
 
     else if (request.action === 'resume'){
-      this.resumePlayController(request.index);
+      this.resumePlayController(request.klick, request.index);
       console.log('Resuming Klick Play');
       sendResponse({response: "Player: Resuming Klick Play"});
     }
