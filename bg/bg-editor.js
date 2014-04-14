@@ -19,7 +19,6 @@ var Editor = function () {
   this.currentPlayer = window.bgPlayer; // reference to current player in background // NEED TO CONFIRM WITH LUKE THAT THIS ISNT UNDEFINED
   this.currentIndex = 0; // Current tick object index within ticks array where playback should start at
   this.currentKlickObject = _.cloneDeep(this.currentRecorder.getKlick()); // Using lo-dash for _.cloneDeep
-  this.isPaused = true; // when an editor is first created, the recording is not being played back - therefore it is initially paused
   this.addClickAndKeypressAnnotations(); // automatically add annotations for keypress and click events within ticks array
   console.log("Current Klick:", this.currentKlickObject);
 };
@@ -28,22 +27,16 @@ var Editor = function () {
  * within the ticks array of where pause is occurring. */
 Editor.prototype.pausePlayback = function () {
   console.log("In pausePlayback");
-  // this.currentIndex = this.currentPlayer.pause();
   this.currentPlayer.pause();
-  this.isPaused = true;
-
-  // console.log("About to enter addAnnotation");
-  // this.addAnnotations();
 };
 
 /* Control bg-player instance and invoke its resume function, which takes an index within
  * the ticks array to resume on. */
 Editor.prototype.resumePlayback = function () {
   console.log("In resumePlayback");
-  if (this.isPaused) {
-    this.isPaused = false;
-    this.currentPlayer.resume(this.currentIndex);
-  }
+  console.log("The current player", this.currentPlayer);
+  this.currentPlayer.resume(this.currentIndex);
+  // }
 };
 
 /* Prompt users to input a String as their annotation. Append this annotation 
@@ -56,6 +49,7 @@ Editor.prototype.addAnnotations = function () {
     console.log("Added a new message");
     this.currentKlickObject.ticks[this.currentIndex].annotation = message;
   }
+  
   console.log("About to resumePlayback");
   this.resumePlayback();
 };
