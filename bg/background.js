@@ -18,46 +18,71 @@ window.Klickr = Klickr;
 
 Klickr.hostname = 'klickr.io';
 Klickr.server = 'http://www.klickr.io';
-Klickr.recorderStatus = 'ready';
 
 /* ------------------------------------------------------------------------------------*/
 /* RECORDER
 /* ------------------------------------------------------------------------------------*/
 
-// chrome.runtime.onMessage.addListener(function(req, sender, res){
-//   if (req.action === 'recorderReady'){
-//     chrome.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {
-//       if (tabs[0].id === sender.tab.id){
-//         Klickr.recorderStatus = 'ready';
-//       }
-//     });
-//   }
-// });
+// TODO: Refactor into BgRecorder
+
+// Update recorder status
+// loading -> ready -> recording -> processing -> saving
+window.recorderStatus = 'loading';
+
+window.refreshRecorderStatus = function(forced){
+  if (forced === undefined) forced = false;
+  if (forced || (window.recorderStatus === 'loading' || window.recorderStatus === 'ready') ){
+    chrome.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {
+      console.log('Background: Tab updated', tabs[0].url, tabs[0].status);
+      if (tabs[0].status === 'loading'){
+        window.recorderStatus = 'loading';
+      } else if (tabs[0].status === 'complete') {
+        window.recorderStatus = 'ready';
+      }
+    });
+  }
+};
+
+chrome.tabs.onUpdated.addListener(function(){
+  window.refreshRecorderStatus();
+});
 
 /* Background -> BgRecorder: Start recording */
 window.startRecording = function(){
-  if (Klickr.recorderStatus === 'ready'){
-    Klickr.recorderStatus = 'recording';
+  if (window.recorderStatus === 'ready'){
     console.log('Background: Start recording');
     bgPlayer.klickQueue = [];
+    window.recorderStatus = 'recording';
     window.rec = new BgRecorder();
+    helpers.activeTabSendMessage({action: 'showRecordMessage', message: 'Recording Now'});
   }
 };
 
 /* Background -> BgRecorder: Stop recording */
 window.stopRecording = function(){
-  if (Klickr.recorderStatus === 'recording'){
+  if (window.recorderStatus === 'recording'){
     console.log('Background: Stop recording');
+    window.recorderStatus = 'processing';
     window.rec.stop();
     bgPlayer.buildKlickQueue(window.rec.klick);
-    Klickr.recorderStatus = 'ready';
+    window.editor = new Editor();
+    helpers.activeTabSendMessage({action: 'removeRecordMessage'});
   }
 };
 
 /* Background -> BgRecorder: Save Klick */
 window.saveKlick = function(desc){
-  console.log('Background: Save recording');
-  window.rec.addDescription(desc);
-  window.rec.send();
+  if (window.recorderStatus === 'processing'){
+    console.log('Background: Save recording');
+    window.editor.updateKlick();
+    window.rec.addDescription(desc);
+    window.rec.send();
+    window.rec = undefined;
+    window.refreshRecorderStatus(true);
+  }
+};
+
+window.delete = function () {
   window.rec = undefined;
+  window.refreshRecorderStatus(true);
 };

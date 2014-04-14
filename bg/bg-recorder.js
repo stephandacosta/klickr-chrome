@@ -21,6 +21,16 @@ var BgRecorder = function(){
 
 window.BgRecorder = BgRecorder;
 
+/* Return Klick object */
+BgRecorder.prototype.getKlick = function(){
+  return this.klick;
+};
+
+/* Update Klick object */
+BgRecorder.prototype.updateKlick = function(klick){
+  this.klick = klick;
+};
+
 /* Display start recording message */
 BgRecorder.prototype.msgStart = function(){
   helpers.activeTabSendMessage({
@@ -109,7 +119,7 @@ BgRecorder.prototype.removeListeners = function(){
 BgRecorder.prototype.getWindowSize = function(){
   var self = this;
   helpers.activeTabSendMessage({action: 'getWindowSize'}, function(response){
-    if (response.innerWidth && response.innerHeight){
+    if (response && response.innerWidth && response.innerHeight){
       self.klick.width = response.innerWidth;
       self.klick.height = response.innerHeight;
     }
