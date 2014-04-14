@@ -38,20 +38,24 @@ Recorder.prototype.addListeners = function(){
   var self = this;
 
   $('html').click(function(event){
-    var target = {};
-    target.tagName = event.target.tagName;
-    target.index = getIndexOf(target.tagName, event.target);
+    if (isRecording){
+      var target = {};
+      target.tagName = event.target.tagName;
+      target.index = getIndexOf(target.tagName, event.target);
 
-    self.log(event.type, event.pageX, event.pageY, event.clientX, event.clientY, event.timeStamp, target, undefined, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey, document.URL);
+      self.log(event.type, event.pageX, event.pageY, event.clientX, event.clientY, event.timeStamp, target, undefined, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey, document.URL);
+    }
   });
 
   $('html').keypress(function(event){
-    var target = {};
-    target.tagName = event.target.tagName;
-    target.index = getIndexOf(target.tagName, event.target);
+    if (isRecording){
+      var target = {};
+      target.tagName = event.target.tagName;
+      target.index = getIndexOf(target.tagName, event.target);
 
-    var charCode = event.which || event.keyCode;
-    self.log(event.type, event.pageX, event.pageY, event.clientX, event.clientY, event.timeStamp, target, charCode, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey);
+      var charCode = event.which || event.keyCode;
+      self.log(event.type, event.pageX, event.pageY, event.clientX, event.clientY, event.timeStamp, target, charCode, event.altKey, event.ctrlKey, event.metaKey, event.shiftKey);
+    }
   });
 };
 
