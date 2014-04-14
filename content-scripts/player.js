@@ -24,7 +24,6 @@ window.Player = Player;
 
   //scales clientX, clientY, pageX, and pageY so different screen sizes will have the same display.
   Player.prototype.scaleXY = function(klick){
-    console.log('scaling in ' + document.URL);
     var xScale = $(window).width() / klick.width || 1;
     var yScale = $(window).height() / klick.height || 1;
     klick.width = $(window).width();
@@ -75,17 +74,12 @@ window.Player = Player;
   // chains mouse moves together. also adds the scrolling logic. the pageX and pageY values of the movement object at index are passed to move.
   // function operates recursively, waiting the duration of the prior move in a setTimeout before calling the next move.
   Player.prototype.playRecording = function(movement, index){
-    console.log('and playRecording begins...');
-    console.log(movement);
-    console.log(index);
     if ( index === movement.length ) {
       this.endPlay();
     } else if (this.pause){
       this.pausePlay(index);
     } else {
       if(index === 0){
-        console.log('mouse X below');
-        console.log(movement[0].pageX);
         this.placeMouse(movement);
       } else {
         this.showPlay(movement, index);
@@ -112,7 +106,9 @@ window.Player = Player;
 
   //places the mouse in the dom and gives the mouse's initial position and characteristics
   Player.prototype.placeMouse = function(movement){
-    $('body').append('<div class="mouse" style="position:absolute; background: blue; width: 15px; z-index: 9999; height:15px; border-radius: 7.5px; top: '+movement[0].pageY+'px; left:'+movement[0].pageX+'px;"></div>');
+    var cursor = chrome.extension.getURL("img/klickr-pointer.png");
+    console.log(cursor);
+    $('body').append('<div class="mouse" style="position:absolute; background: url('+cursor+'); width: 40px; z-index: 9999; height:40px; top: '+movement[0].pageY+'px; left:'+movement[0].pageX+'px;"></div>');
   };
 
 
