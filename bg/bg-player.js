@@ -9,6 +9,7 @@ var BgPlayer = function(){
   this.stagedKlick = undefined;
   this.klickQueueIndex = -1;
   console.log('bgPlayer initiated');
+  this.tabId = '';
 
 };
 
@@ -17,15 +18,6 @@ window.BgPlayer = BgPlayer;
 /* ------------------------------------------------------------------------------------*/
 /* Popup Button Functions
 /* ------------------------------------------------------------------------------------*/
-
-/* Replay: Send replay message */
-BgPlayer.prototype.replay = function(){
-  // redirect to the first url in the ticks array
-  console.log('Background: Replay recording');
-  this.stagedKlick = this.klickQueue[0];
-  this.klickQueueIndex = 0;
-  this.redirect(this.stagedKlick.ticks[0].url);
-};
 
 /* Pause: Send pause message */
 BgPlayer.prototype.pause = function(){
@@ -39,17 +31,32 @@ BgPlayer.prototype.resume = function(num){
   helpers.activeTabSendMessage({action: "resume", klick: this.stagedKlick, index: num});
 };
 
-BgPlayer.prototype.playKlick = function(){
+BgPlayer.prototype.play = function(){
   console.log('Background -> Recorder: Play recording');
   this.stagedKlick = this.klickQueue[0];
+  console.log(this.klickQueue);
   this.klickQueueIndex = 0;
-  helpers.activeTabSendMessage({action:'play', klick: this.stagedKlick});
-  this.stagedKlick = undefined;
+  var that = this;
+  chrome.tabs.query({active:true, lastFocusedWindow: true}, function(tabs){
+    that.tabId = tabs[0].id;
+    console.log(that.klickQueue);
+    console.log('which url');
+    if(tabs[0].url !== that.stagedKlick.ticks[0].url){
+      console.log('diff url');
+      that.redirect(that.stagedKlick.ticks[0].url);
+    } else {
+      console.log('same url');
+      chrome.tabs.sendMessage(that.tabId, {action:'play', klick: that.stagedKlick});
+      that.stagedKlick = undefined;
+    }
+  });
 };
 
 /* ------------------------------------------------------------------------------------*/
 /* Helper Functions
 /* ------------------------------------------------------------------------------------*/
+
+
 
 BgPlayer.prototype.redirect = function(nextUrl){
   chrome.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {
@@ -134,10 +141,27 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   // in multi-page recording, used to store the next klick object that will be given after the page changes to a new url
   if (request.action === 'klickFinished') {
     bgPlayer.klickQueueIndex++;
-    console.log(bgPlayer.klickQueueIndex);
+    console.log(bgPlayer.tabId);
     if (bgPlayer.klickQueueIndex < bgPlayer.klickQueue.length){
       bgPlayer.stagedKlick = bgPlayer.klickQueue[bgPlayer.klickQueueIndex];
       bgPlayer.redirect(bgPlayer.stagedKlick.ticks[0].url);
+      chrome.tabs.query({}, function(tabs){
+        var foundTab;
+        for(var i = 0; i < tabs.length; i++){
+          if(tabs[i].id === bgPlayer.tabId){
+            foundTab = tabs[i];
+            break;
+          }
+        }
+        if(foundTab.status === 'complete'){
+          console.log('status complete');
+          chrome.tabs.sendMessage(bgPlayer.tabId, {action:'play', klick: bgPlayer.stagedKlick});
+          bgPlayer.stagedKlick = undefined;
+        } else{
+          console.log('i hate you');
+          //return;
+        }
+      });
       console.log('Background: Store recording in background');
       sendResponse({response: "Background: Processed storage message"});
     }
@@ -155,8 +179,8 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   }
 
   // if the dom is ready and nextKlick is not false, then send the current page a new klick object to restart the player.
-  else if (request.action === 'playerReady' && !!bgPlayer.stagedKlick) {
-    helpers.activeTabSendMessage({action: "play", klick: bgPlayer.stagedKlick});
+  else if (request.action === 'playerReady' && !!bgPlayer.stagedKlick && sender.tab.id === bgPlayer.tabId) {
+    chrome.tabs.sendMessage(bgPlayer.tabId, {action:'play', klick: bgPlayer.stagedKlick});
     sendResponse({response: "Background: Processed klickFinished message"});
     bgPlayer.stagedKlick = undefined;
   }

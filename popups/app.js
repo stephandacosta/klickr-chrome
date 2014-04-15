@@ -39,13 +39,13 @@ angular.module('KlickrChromeApp', [])
 
     $scope.playRecording = function(){
       window.close();
-      bg.bgPlayer.playKlick();
+      bg.bgPlayer.play();
     };
 
     $scope.replay = function(){
       $scope.isPaused = !$scope.isPaused;
       console.log("App.js: replay");
-      bg.bgPlayer.replay();
+      bg.bgPlayer.play();
     };
 
     $scope.pause = function(){
