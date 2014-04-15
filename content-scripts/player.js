@@ -4,8 +4,34 @@
 /* ------------------------------------------------------------------------------------*/
 
 var Player = function(){
+  console.log('Initializing player...');
+
   this.pause = false;
-  chrome.runtime.sendMessage({action : "playerReady"});
+
+  var that = this;
+
+  // Listens to messages from background
+  chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    console.log(request.action);
+    if (request.action === 'play'){
+      that.newPlayController(request.klick);
+      console.log('Playing Klick');
+      sendResponse({response: "Player: Playing Klick..."});
+    }
+
+    else if (request.action === 'pause'){
+      that.pause = true;
+      console.log('paused');
+    }
+
+    else if (request.action === 'resume'){
+      that.resumePlayController(request.klick, request.index);
+      console.log('Resuming Klick Play');
+      sendResponse({response: "Player: Resuming Klick Play"});
+    }
+  });
+
+  chrome.runtime.sendMessage({action: 'playerReady'});
 };
 
 window.Player = Player;
@@ -171,26 +197,5 @@ $(function(){
 
   //helper for playing back mouse actions
   var player = new Player();
-
-  // Listens to messages from background
-  chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    console.log(request.action);
-    if (request.action === 'play'){
-      player.newPlayController(request.klick);
-      console.log('Playing Klick');
-      sendResponse({response: "Player: Playing Klick..."});
-    }
-
-    else if (request.action === 'pause'){
-      player.pause = true;
-      console.log('paused');
-    }
-
-    else if (request.action === 'resume'){
-      player.resumePlayController(request.klick, request.index);
-      console.log('Resuming Klick Play');
-      sendResponse({response: "Player: Resuming Klick Play"});
-    }
-  });
 
 });

@@ -28,8 +28,11 @@ var Editor = function () {
   chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.action === 'playerDone') {
       console.log('BgEditor: Received player done');
-      if (self.status !== 'playing') throw new Error('BgEditor: Expected playing status instead of ' + self.status + ' when player is done');
-      self.setStatus('ready');
+      if (self.status !== 'playing') {
+        throw new Error('BgEditor: Expected playing status instead of ' + self.status + ' when player is done');
+      } else {
+        self.setStatus('ready');
+      }
     }
   });
 
@@ -47,7 +50,7 @@ Editor.prototype.pausePlayback = function () {
 };
 
 Editor.prototype.replay = function(){
-  console.log('BgEditor: replay with status', this.status);
+  console.log('BgEditor: Replay with status', this.status);
   if (this.status === 'ready'){
     this.currentPlayer.reset();
     this.currentPlayer.buildKlickQueue(this.currentKlickObject);

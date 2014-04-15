@@ -62,10 +62,21 @@ BgPlayer.prototype.setStatus = function(status){
 /* Helper Functions
 /* ------------------------------------------------------------------------------------*/
 
+BgPlayer.prototype.getTabById = function(tabId, callback){
+  chrome.tabs.query({}, function (tabs) {
+    for (var i = 0; i < tabs.length; i++){
+      if (tabs[i].id === tabId) callback(tabs[i]);
+    }
+    callback(null);
+  });
+};
+
 BgPlayer.prototype.redirect = function(nextUrl, callback){
+  console.log('BgPlayer: Redirect', nextUrl, callback);
   callback = callback || function(){};
-  chrome.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {
-    chrome.tabs.update(tabs[0].id, {url: nextUrl}, callback);
+  this.getTabById(this.tabId, function(tab){
+    if (tab === null) return;
+    chrome.tabs.update(tab, {url: nextUrl}, callback);
   });
 };
 
@@ -109,21 +120,27 @@ BgPlayer.prototype.nextSubKlick = function(){
   if (that.klickQueueIndex < that.klickQueue.length){
     that.stagedKlick = that.klickQueue[that.klickQueueIndex];
     that.redirect(that.stagedKlick.ticks[0].url, function(){
-      // after redirect, find tab by ID
-      chrome.tabs.query({}, function(tabs){
-        var foundTab;
-        for(var i = 0; i < tabs.length; i++){
-          if(tabs[i].id === that.tabId){
-            foundTab = tabs[i];
-            break;
-          }
-        }
+      chrome.tabs.onUpdated.addListener(function nextSubKlickListener(){
 
-        // if tab status is complete, then resume playback; else, wait for playerReady for resume playback
-        if(foundTab.status === 'complete'){
-          console.log('BgPlayer: Status complete', foundTab);
-          that.playStagedKlick();
-        }
+        // after redirect, find tab by ID
+        chrome.tabs.query({}, function(tabs){
+          var foundTab;
+          for(var i = 0; i < tabs.length; i++){
+            if(tabs[i].id === that.tabId){
+              foundTab = tabs[i];
+              break;
+            }
+          }
+
+          console.log('BgPlayer: NextSubKlick', foundTab);
+
+          // if tab status is complete, then resume playback; else, wait for playerReady for resume playback
+          if(foundTab.status === 'complete'){
+            console.log('BgPlayer: Status complete', foundTab);
+            that.playStagedKlick();
+            chrome.tabs.onUpdated.removeListener(nextSubKlickListener);
+          }
+        });
       });
     });
   }
@@ -159,7 +176,11 @@ BgPlayer.prototype.getRawKlickIndex = function(queueIndex, playerIndex){
 };
 
 BgPlayer.prototype.playStagedKlick = function(){
-  chrome.tabs.sendMessage(this.tabId, {action:'play', klick: this.stagedKlick});
+  console.log('BgPlayer: playStagedKlick', this.stagedKlick);
+  chrome.tabs.sendMessage(this.tabId, {action:'play', klick: this.stagedKlick}, function(res){
+    console.log('BgPlayer: playStageKlick responded', res, chrome.runtime.lastError);
+    if (res === undefined || res.response === undefined) throw new Error('BgPlayer: Play message not received by Player');
+  });
   this.stagedKlick = undefined;
 };
 
@@ -203,11 +224,6 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   else if (request.action === 'klickPaused') {
     var rawKlickIndex = bgPlayer.getRawKlickIndex(bgPlayer.klickQueueIndex, request.index);
     chrome.runtime.sendMessage({action:'pauseIndex', index: rawKlickIndex});
-  }
-  // if the dom is ready and nextKlick is not false, then send the current page a new klick object to restart the player.
-  else if (request.action === 'playerReady' && !!bgPlayer.stagedKlick && sender.tab.id === bgPlayer.tabId) {
-    sendResponse({response: 'BgPlayer: Processed klickFinished message'});
-    bgPlayer.playStagedKlick();
   }
 
 });
