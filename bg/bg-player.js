@@ -101,6 +101,8 @@ BgPlayer.prototype.buildKlickQueue = function(rawKlick){
 BgPlayer.prototype.nextSubKlick = function(){
   var that = this;
   that.klickQueueIndex++;
+  console.log(that.klickQueueIndex);
+  console.log(that.klickQueue[that.klickQueueIndex]);
   if (that.klickQueueIndex < that.klickQueue.length){
     that.stagedKlick = that.klickQueue[that.klickQueueIndex];
     that.redirect(that.stagedKlick.ticks[0].url, function(){
@@ -120,12 +122,10 @@ BgPlayer.prototype.nextSubKlick = function(){
           that.playStagedKlick();
         }
       });
-      sendResponse({response: 'BgPlayer: klickFinished received'});
     });
   }
   else {
     that.reset();
-    sendResponse({response: 'BgPlayer: Reset'});
   }
 };
 
