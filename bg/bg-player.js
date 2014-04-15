@@ -151,12 +151,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
   else if (request.action === 'klickPaused') {
     var rawKlickIndex = bgPlayer.getRawKlickIndex(bgPlayer.klickQueueIndex, request.index);
-    console.log(bgPlayer.klickTickLengths);
-    console.log(bgPlayer.klickQueueIndex);
-    console.log(request.index);
-    console.log(rawKlickIndex);
-    helpers.activeTabSendMessage({action:'pauseIndex', index: rawKlickIndex});
-    console.log('index sent');
+    chrome.runtime.sendMessage({action:'pauseIndex', index: rawKlickIndex});
   }
 
   // if the dom is ready and nextKlick is not false, then send the current page a new klick object to restart the player.
