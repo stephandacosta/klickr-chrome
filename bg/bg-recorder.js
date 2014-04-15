@@ -5,6 +5,8 @@
 
 var BgRecorder = function(){
 
+  console.log('Initiating BgEditor...');
+
   // bind listeners so they can be removed later
   this.bindUpdateActiveTab = helpers.bind(this.updateActiveTab, this);
   this.bindMsgHandler = helpers.bind(this.msgHandler, this);

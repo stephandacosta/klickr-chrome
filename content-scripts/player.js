@@ -47,7 +47,7 @@ window.Player = Player;
         movement[i].t = movement[i].timestamp - movement[i-1].timestamp;
       }
     }
-    console.log('cool moves');
+    console.log('Player: Setting move intervals..');
   };
 
   //changes the iso date object in timestamp to an integer of the Date.now() format
@@ -63,7 +63,7 @@ window.Player = Player;
         movement[i].message = new Message(movement[i].annotation, 3000, {'top':movement[i].pageY, 'left':movement[i].pageX });
       }
     }
-    console.log('well, setMessages ran');
+    console.log('Player: Setting messages..');
   };
 
 /* ------------------------------------------------------------------------------------*/
@@ -100,7 +100,7 @@ window.Player = Player;
 
   Player.prototype.pausePlay = function(index){
     chrome.runtime.sendMessage({action : "klickPaused", index:index});
-    console.log('Player is paused');
+    console.log('Player: paused');
   };
 
   //places the mouse in the dom and gives the mouse's initial position and characteristics
@@ -150,7 +150,7 @@ window.Player = Player;
 /* ------------------------------------------------------------------------------------*/
 /* Play Controllers
 /* ------------------------------------------------------------------------------------*/
-  
+
   Player.prototype.newPlayController = function(klick){
     this.formatKlick(klick);
     this.playRecording(klick.ticks, 0);
