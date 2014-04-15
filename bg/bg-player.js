@@ -63,7 +63,8 @@ BgPlayer.prototype.setStatus = function(status){
 /* ------------------------------------------------------------------------------------*/
 
 BgPlayer.prototype.getTabById = function(tabId, callback){
-  chrome.tabs.query({}, function (tabs) {
+  console.log('BgPlayer: getTabById', tabId);
+  chrome.tabs.query({}, function(tabs){
     for (var i = 0; i < tabs.length; i++){
       if (tabs[i].id === tabId) callback(tabs[i]);
     }
@@ -72,11 +73,11 @@ BgPlayer.prototype.getTabById = function(tabId, callback){
 };
 
 BgPlayer.prototype.redirect = function(nextUrl, callback){
-  console.log('BgPlayer: Redirect', nextUrl, callback);
+  console.log('BgPlayer: Redirect', nextUrl);
   callback = callback || function(){};
   this.getTabById(this.tabId, function(tab){
     if (tab === null) return;
-    chrome.tabs.update(tab, {url: nextUrl}, callback);
+    chrome.tabs.update(tab.id, {url: nextUrl}, callback);
   });
 };
 
