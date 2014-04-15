@@ -5,6 +5,7 @@ var BgPlayer = function(){
 
   this.id = ''; // klick object id (corresponds to _id in mongodb)
   this.klickQueue = [];
+  this.klickTickLengths = [];
   this.stagedKlick = undefined;
   this.klickQueueIndex = -1;
   console.log('bgPlayer initiated');
@@ -80,6 +81,7 @@ BgPlayer.prototype.buildKlickQueue = function(rawKlick){
       this.klickQueue[index] = this.buildSubKlick(rawKlick, ticks[i]);
     }
   }
+  this.buildKlickTickLengths(this.klickQueue);
 };
 
 BgPlayer.prototype.buildSubKlick = function(rawKlick, tickObj){
@@ -92,6 +94,19 @@ BgPlayer.prototype.buildSubKlick = function(rawKlick, tickObj){
     }
   }
   return subKlick;
+};
+
+BgPlayer.prototype.buildKlickTickLengths = function(subKlicks){
+  for(var i = 0; i < subKlicks.length; i++){
+    this.klickTickLengths.push(subKlicks[i].ticks.length);
+  }
+};
+
+BgPlayer.prototype.getRawKlickIndex = function(queueIndex, playerIndex){
+  for(var i = 0; i < queueIndex; i++){
+    playerIndex += this.klickTickLengths[i]+1;
+  }
+  return playerIndex;
 };
 
 /* ------------------------------------------------------------------------------------*/
@@ -134,10 +149,21 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     }
   }
 
+  else if (request.action === 'klickPaused') {
+    var rawKlickIndex = bgPlayer.getRawKlickIndex(bgPlayer.klickQueueIndex, request.index);
+    console.log(bgPlayer.klickTickLengths);
+    console.log(bgPlayer.klickQueueIndex);
+    console.log(request.index);
+    console.log(rawKlickIndex);
+    helpers.activeTabSendMessage({action:'pauseIndex', index: rawKlickIndex});
+    console.log('index sent');
+  }
+
   // if the dom is ready and nextKlick is not false, then send the current page a new klick object to restart the player.
   else if (request.action === 'playerReady' && !!bgPlayer.stagedKlick) {
     helpers.activeTabSendMessage({action: "play", klick: bgPlayer.stagedKlick});
     sendResponse({response: "Background: Processed klickFinished message"});
     bgPlayer.stagedKlick = undefined;
   }
+
 });
