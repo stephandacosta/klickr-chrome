@@ -1,13 +1,28 @@
 angular.module('KlickrChromeApp', [])
 
   .controller('PopupCtrl', function ($scope) {
-
     var bg = chrome.extension.getBackgroundPage();
+
+    // chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    //   if (request.action === 'sendPauseMessage') {
+    //     $scope.isPaused = request.isPaused;
+    //     console.log("In app.js and $scope.isPaused is", $scope.isPaused);
+    //   }
+    // });
+
     $scope.showMessage = false;
     $scope.message = '';
-    $scope.isPaused = true;
+    $scope.showDelete = false;
 
-    $scope.recorderStatus = bg.recorderStatus;
+    // $scope.isPaused = bg.editor.isPaused;
+
+    $interval(function() {
+      $scope.recorderStatus = bg.recorderStatus;
+      if (bg.editor !== undefined) {
+        $scope.isPaused = bg.editor.isPaused;
+      }
+    }, 500);
+    // $scope.recorderStatus = bg.recorderStatus;
 
     $scope.canRecord = function(){
       return $scope.recorderStatus === 'ready';
@@ -30,28 +45,43 @@ angular.module('KlickrChromeApp', [])
       window.close();
       $scope.recorderStatus = 'recording';
       bg.startRecording();
+
+      // make delete button disappear
+      $scope.showDelete = false;
     };
 
     $scope.stopRecording = function(){
       $scope.recorderStatus = 'processing';
       bg.stopRecording();
+      $scope.isPaused = true;
+
+      // make delete button appear
+      $scope.showDelete = true;
     };
 
     $scope.playRecording = function(){
       window.close();
       bg.bgPlayer.play();
+      // make delete button disappear
+      $scope.showDelete = false;
     };
 
     $scope.replay = function(){
-      $scope.isPaused = !$scope.isPaused;
+      // $scope.isPaused = !$scope.isPaused;
       console.log("App.js: replay");
       bg.bgPlayer.play();
+
+      // make delete button disappear
+      $scope.showDelete = false;
     };
 
     $scope.pause = function(){
-      $scope.isPaused = !$scope.isPaused;
+      // $scope.isPaused = !$scope.isPaused;
       console.log("App.js: pause");
       bg.editor.pausePlayback();
+
+      // make delete button appear
+      $scope.showDelete = true;
     };
 
     $scope.toHome = function(){
