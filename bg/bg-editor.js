@@ -1,6 +1,6 @@
 /* ------------------------------------------------------------------------------------*/
 /* EDITOR
-/* - The purpose of editor is to control both the current bg-recorder and bg-player 
+/* - The purpose of editor is to control both the current bg-recorder and bg-player
  * instances.
  * - It contains a deep copy of the current klick object (from bg-recorder) and will use
  * this copy to add annotations with the ticks array.
@@ -14,13 +14,14 @@
 
 var Editor = function () {
   /* Configurations for each new Editor instance */
-  
+
   this.currentRecorder = window.rec; // reference to current recorder in background // NEED TO CONFIRM WITH JUSTIN THAT THIS ISNT UNDEFINED
   this.currentPlayer = window.bgPlayer; // reference to current player in background // NEED TO CONFIRM WITH LUKE THAT THIS ISNT UNDEFINED
   this.currentIndex = 0; // Current tick object index within ticks array where playback should start at
   this.isPaused = true; // when the editor is initially created, replay isn't happening so replay is paused
   this.currentKlickObject = _.cloneDeep(this.currentRecorder.getKlick()); // Using lo-dash for _.cloneDeep
   this.addClickAndKeypressAnnotations(); // automatically add annotations for keypress and click events within ticks array
+  console.log(this.currentKlickObject);
   this.currentPlayer.buildKlickQueue(this.currentKlickObject);
   console.log("Current Klick:", this.currentKlickObject);
 };
@@ -30,7 +31,7 @@ var Editor = function () {
 Editor.prototype.pausePlayback = function () {
   if (!this.isPaused) {
     console.log("Just got in pausePlayback and isPaused is", this.isPaused);
-    this.currentPlayer.pause();  
+    this.currentPlayer.pause();
     this.isPaused = !this.isPaused;
     console.log("About to leave pausePlayback and isPaused is", this.isPaused);
     // chrome.runtime.sendMessage({action : "sendPauseMessage", isPaused: this.isPaused});
@@ -43,14 +44,20 @@ Editor.prototype.resumePlayback = function () {
   // console.log("The current player", this.currentPlayer);
   if (this.isPaused) {
     console.log("Just got in resumePlayback and isPaused is", this.isPaused);
-    this.currentPlayer.resume(this.currentIndex);
+    if (this.currentIndex === 0){
+      // initial play
+      this.currentPlayer.play();
+    } else {
+      // subsequent plays
+      this.currentPlayer.resume(this.currentIndex);
+    }
     this.isPaused = !this.isPaused;
     console.log("About to leave resumePlayback and isPaused is", this.isPaused);
     // chrome.runtime.sendMessage({action : "sendPauseMessage", isPaused: this.isPaused});
   }
 };
 
-/* Prompt users to input a String as their annotation. Append this annotation 
+/* Prompt users to input a String as their annotation. Append this annotation
  * to the actual tick if the input is nonempty. */
 Editor.prototype.addAnnotations = function () {
   console.log("In addAnnotations");
@@ -60,7 +67,7 @@ Editor.prototype.addAnnotations = function () {
     console.log("Added a new message");
     this.currentKlickObject.ticks[this.currentIndex].annotation = message;
   }
-  
+
   console.log("About to resumePlayback");
   this.resumePlayback();
 };
