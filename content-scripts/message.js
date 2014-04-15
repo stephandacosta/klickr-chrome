@@ -12,7 +12,8 @@ var Message = function (text, duration, coords) {
     "color": "white",
     "border-radius": "5px",
     "padding": "15px",
-    "font-size": "48px"
+    "font-size": "48px",
+    "max-width": "50%"
   });
   this.$message.text(text);
   this.$message.css('z-index', 2147483647);
@@ -20,7 +21,7 @@ var Message = function (text, duration, coords) {
   this.showMessageOnScreen = function () {
     if (coords === undefined) {
       // place message in center, relative to viewport
-      this.$message.center();  
+      this.$message.center();
     } else {
       // place message relative to top and left of document
       this.$message.css('position', 'absolute');
@@ -37,9 +38,9 @@ var Message = function (text, duration, coords) {
 // Modify jQuery to have a center function
 jQuery.fn.center = function () {
   this.css('position','absolute');
-  this.css('top', Math.max(0, (($(window).height() - $(this).outerHeight()) / 2) + 
+  this.css('top', Math.max(0, (($(window).height() - $(this).outerHeight()) / 2) +
                                                 $(window).scrollTop()) + 'px');
-  this.css('left', Math.max(0, (($(window).width() - $(this).outerWidth()) / 2) + 
+  this.css('left', Math.max(0, (($(window).width() - $(this).outerWidth()) / 2) +
                                                 $(window).scrollLeft()) + 'px');
   return this;
 };
@@ -75,7 +76,7 @@ $(function () {
       if (window.recordingMessage !== undefined) {
         console.log("removeRecordMessage is received");
         window.recordingMessage.$message.fadeOut(3000);
-        sendResponse({response: "Message: Message has been displayed on screen"});  
+        sendResponse({response: "Message: Message has been displayed on screen"});
       }
     }
   });

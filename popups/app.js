@@ -29,7 +29,7 @@ angular.module('KlickrChromeApp', [])
     };
 
     $scope.canPlay = function(){
-      return bg.bgPlayer.id !== '';
+      return bg.bgPlayer.getStatus() === 'ready';
     };
 
     $scope.showSaver = function(){
@@ -63,7 +63,7 @@ angular.module('KlickrChromeApp', [])
     };
 
     $scope.replay = function(){
-      console.log("App.js: replay");
+      console.log("Popup: replay");
       if (bg.editor === undefined) throw new Error('Popup: BgEditor should be defined when replay is clicked');
       bg.editor.resumePlayback();
       $scope.refreshStatus();
@@ -71,7 +71,7 @@ angular.module('KlickrChromeApp', [])
 
     $scope.pause = function(){
       // $scope.isPaused = !$scope.isPaused;
-      console.log("App.js: pause");
+      console.log("Popup: pause");
       if (bg.editor === undefined) throw new Error('Popup: BgEditor should be defined when pause is clicked');
       bg.editor.pausePlayback();
       $scope.refreshStatus();
@@ -102,7 +102,7 @@ angular.module('KlickrChromeApp', [])
     // chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     //   if (request.action === 'sendPauseMessage') {
     //     $scope.isPaused = request.isPaused;
-    //     console.log("In app.js and $scope.isPaused is", $scope.isPaused);
+    //     console.log("In Popup and $scope.isPaused is", $scope.isPaused);
     //   }
     // });
 

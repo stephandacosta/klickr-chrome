@@ -51,7 +51,7 @@ chrome.tabs.onUpdated.addListener(function(){
 window.startRecording = function(){
   if (window.recorderStatus === 'ready'){
     console.log('Background: Start recording');
-    bgPlayer.klickQueue = [];
+    bgPlayer.reset();
     window.recorderStatus = 'recording';
     window.rec = new BgRecorder();
     helpers.activeTabSendMessage({action: 'showRecordMessage', message: 'Recording Now'});
