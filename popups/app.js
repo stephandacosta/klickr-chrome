@@ -6,8 +6,8 @@ angular.module('KlickrChromeApp', [])
     /* Status update loop */
     $scope.refreshStatus = function(){
       $scope.recorderStatus = bg.recorderStatus;
-      $scope.isPaused = bg.editor === undefined ? true : bg.editor.isPaused;
-      $scope.showDelete = bg.editor === undefined ? false : bg.editor.isPaused;
+      $scope.editorStatus = bg.editor === undefined ? 'inactive' : bg.editor.getStatus();
+      $scope.showDelete = $scope.editorStatus !== 'playing' && $scope.editorStatus !== 'inactive';
     };
 
     $scope.refreshStatus();
@@ -18,7 +18,9 @@ angular.module('KlickrChromeApp', [])
     $scope.showMessage = false;
     $scope.message = '';
 
-    /* Other methods */
+    /* ------------------------------------------------------------------------------------*/
+    /* TOP NAV
+    /* ------------------------------------------------------------------------------------*/
 
     $scope.canRecord = function(){
       return $scope.recorderStatus === 'ready';
@@ -62,23 +64,34 @@ angular.module('KlickrChromeApp', [])
       $scope.showDelete = false;
     };
 
+    $scope.toHome = function(){
+      chrome.tabs.create({url: 'http://www.klickr.io'});
+    };
+
+    /* ------------------------------------------------------------------------------------*/
+    /* POST-RECORDING PROCESSING
+    /* ------------------------------------------------------------------------------------*/
+
+    // $scope.resume = function(){
+    //   console.log('Popup: resume');
+    //   if (bg.editor === undefined) throw new Error('Popup: BgEditor should be defined when replay is clicked');
+    //   bg.editor.resumePlayback();
+    //   $scope.refreshStatus();
+    // };
+
     $scope.replay = function(){
-      console.log("Popup: replay");
+      console.log('Popup: replay');
       if (bg.editor === undefined) throw new Error('Popup: BgEditor should be defined when replay is clicked');
-      bg.editor.resumePlayback();
+      bg.editor.replay();
       $scope.refreshStatus();
     };
 
     $scope.pause = function(){
       // $scope.isPaused = !$scope.isPaused;
-      console.log("Popup: pause");
+      console.log('Popup: pause');
       if (bg.editor === undefined) throw new Error('Popup: BgEditor should be defined when pause is clicked');
       bg.editor.pausePlayback();
       $scope.refreshStatus();
-    };
-
-    $scope.toHome = function(){
-      chrome.tabs.create({url: 'http://www.klickr.io'});
     };
 
     $scope.save = function(){
@@ -97,7 +110,6 @@ angular.module('KlickrChromeApp', [])
       bg.delete();
       window.close();
     };
-
 
     // chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     //   if (request.action === 'sendPauseMessage') {

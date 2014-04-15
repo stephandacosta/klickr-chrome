@@ -82,6 +82,11 @@ BgPlayer.prototype.getKlick = function(id){
   });
 };
 
+/* Announce that playback is finished */
+BgPlayer.prototype.onPlayFinished = function(){
+  chrome.runtime.sendMessage({action:'playerDone'});
+};
+
 BgPlayer.prototype.buildKlickQueue = function(rawKlick){
   var ticks = rawKlick.ticks;
   var index = 0;
@@ -124,8 +129,8 @@ BgPlayer.prototype.nextSubKlick = function(){
     });
   }
   else {
+    that.onPlayFinished();
     that.reset();
-    sendResponse({response: 'BgPlayer: Reset'});
   }
 };
 

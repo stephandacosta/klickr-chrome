@@ -15,62 +15,70 @@
 var Editor = function () {
   /* Configurations for each new Editor instance */
 
-  console.log('Initiating BgEditor...');
-
   this.currentRecorder = window.rec; // reference to current recorder in background // NEED TO CONFIRM WITH JUSTIN THAT THIS ISNT UNDEFINED
   this.currentPlayer = window.bgPlayer; // reference to current player in background // NEED TO CONFIRM WITH LUKE THAT THIS ISNT UNDEFINED
   this.currentIndex = 0; // Current tick object index within ticks array where playback should start at
-  this.isPaused = true; // when the editor is initially created, replay isn't happening so replay is paused
+  this.setStatus('ready');
   this.currentKlickObject = _.cloneDeep(this.currentRecorder.getKlick()); // Using lo-dash for _.cloneDeep
   this.addClickAndKeypressAnnotations(); // automatically add annotations for keypress and click events within ticks array
   this.currentPlayer.buildKlickQueue(this.currentKlickObject);
-  console.log("BgEditor: klick is", this.currentKlickObject);
+
+  // add listener for player done
+  var self = this;
+  chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    if (request.action === 'playerDone') {
+      console.log('BgEditor: Received player done');
+      if (self.status !== 'playing') throw new Error('BgEditor: Expected playing status instead of ' + self.status + ' when player is done');
+      self.setStatus('ready');
+    }
+  });
+
+  console.log('Initating BgEditor with Klick', this.currentKlickObject);
 };
 
 /* Control bg-player instance and invoke its pause function, which returns the index
  * within the ticks array of where pause is occurring. */
 Editor.prototype.pausePlayback = function () {
-  if (!this.isPaused) {
-    console.log("BgEditor: Just got in pausePlayback and isPaused is", this.isPaused);
+  console.log('BgEditor: pausePlayback', this.status);
+  if (this.status === 'playing') {
     this.currentPlayer.pause();
-    this.isPaused = !this.isPaused;
-    console.log("BgEditor: About to leave pausePlayback and isPaused is", this.isPaused);
-    // chrome.runtime.sendMessage({action : "sendPauseMessage", isPaused: this.isPaused});
+    this.setStatus('paused');
+  }
+};
+
+Editor.prototype.replay = function(){
+  console.log('BgEditor: replay with status', this.status);
+  if (this.status === 'ready'){
+    this.currentPlayer.reset();
+    this.currentPlayer.buildKlickQueue(this.currentKlickObject);
+    this.currentPlayer.play();
+    this.setStatus('playing');
   }
 };
 
 /* Control bg-player instance and invoke its resume function, which takes an index within
  * the ticks array to resume on. */
 Editor.prototype.resumePlayback = function () {
-  // console.log("The current player", this.currentPlayer);
-  if (this.isPaused) {
-    console.log("BgEditr: Just got in resumePlayback and isPaused is", this.isPaused);
-    if (this.currentIndex === 0){
-      // initial play
-      this.currentPlayer.play();
-    } else {
-      // subsequent plays
-      this.currentPlayer.resume(this.currentIndex);
-    }
-    this.isPaused = !this.isPaused;
-    console.log("BgEditor: About to leave resumePlayback and isPaused is", this.isPaused);
-    // chrome.runtime.sendMessage({action : "sendPauseMessage", isPaused: this.isPaused});
+  if (this.status === 'paused') {
+    this.currentPlayer.resume(this.currentIndex);
+    this.setStatus('playing');
   }
 };
 
 /* Prompt users to input a String as their annotation. Append this annotation
  * to the actual tick if the input is nonempty. */
 Editor.prototype.addAnnotations = function () {
-  console.log("BgEditor: Adding annotations..");
-  var message = window.prompt("Please enter the annotation you'd like to add.");
+  console.log('BgEditor: Adding annotations, editor status is', this.status);
+  if (this.status === 'paused'){
+    var message = window.prompt('Please enter the annotation you\'d like to add.');
 
-  if (message && message.length !== 0) {
-    console.log("Added a new message");
-    this.currentKlickObject.ticks[this.currentIndex].annotation = message;
+    if (message && message.length !== 0) {
+      this.currentKlickObject.ticks[this.currentIndex].annotation = message;
+    }
+
+    console.log('BgEditor: Resuming playback..');
+    this.resumePlayback();
   }
-
-  console.log("BgEditor: Resuming playback..");
-  this.resumePlayback();
 };
 
 /* Add annotations for click and keypress events within currentKlickObject */
@@ -92,12 +100,20 @@ Editor.prototype.updateKlick = function () {
   this.currentRecorder.updateKlick(this.currentKlickObject);
 };
 
+Editor.prototype.setStatus = function(status){
+  this.status = status;
+};
+
+Editor.prototype.getStatus = function(){
+  return this.status;
+};
+
 /* ------------------------------------------------------------------------------------*/
 /* LISTENER
 /* ------------------------------------------------------------------------------------*/
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-  // Comes from player.js's pausePlay function
+  // Listening on bgPlayer's pausePlay function
   if (request.action === 'pauseIndex') {
     window.editor.currentIndex = request.index;
     console.log("About to enter addAnnotation");
