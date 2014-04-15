@@ -5,13 +5,8 @@ var BgPlayer = function(){
 
   console.log('Initiating BgPlayer...');
 
+  this.reset();
   this.id = ''; // klick object id (corresponds to _id in mongodb)
-  this.status = 'empty';
-  this.klickQueue = [];
-  this.klickTickLengths = [];
-  this.stagedKlick = undefined;
-  this.klickQueueIndex = -1;
-  this.tabId = '';
 
 };
 
@@ -24,13 +19,13 @@ window.BgPlayer = BgPlayer;
 /* Pause: Send pause message */
 BgPlayer.prototype.pause = function(){
   console.log('BgPlayer: Pause');
-  this.status = 'paused';
+  this.setStatus('paused');
   helpers.activeTabSendMessage({action: 'pause'});
 };
 
 BgPlayer.prototype.resume = function(num){
   console.log('BgPlayer: Resume');
-  this.status = 'playing';
+  this.setStatus('playing');
   this.stagedKlick = this.klickQueue[this.klickQueueIndex];
   console.log(this.stagedKlick);
   helpers.activeTabSendMessage({action: 'resume', klick: this.stagedKlick, index: num});
@@ -38,7 +33,7 @@ BgPlayer.prototype.resume = function(num){
 
 BgPlayer.prototype.play = function(){
   console.log('BgPlayer: Play with klickQueue', this.klickQueue);
-  this.status = 'playing';
+  this.setStatus('playing');
   this.stagedKlick = this.klickQueue[0];
   this.klickQueueIndex = 0;
   var that = this;
@@ -52,6 +47,15 @@ BgPlayer.prototype.play = function(){
       that.playStagedKlick();
     }
   });
+};
+
+BgPlayer.prototype.getStatus = function(){
+  return this.status;
+};
+
+/* Valid statuses: Empty, Ready, Playing, Paused */
+BgPlayer.prototype.setStatus = function(status){
+  this.status = status;
 };
 
 /* ------------------------------------------------------------------------------------*/
@@ -72,7 +76,7 @@ BgPlayer.prototype.getKlick = function(id){
     type: 'GET',
     contentType: 'application/json',
     success: function(rawKlick){
-      this.status = 'ready';
+      that.setStatus('ready');
       that.buildKlickQueue(rawKlick);
     }
   });
@@ -93,7 +97,7 @@ BgPlayer.prototype.buildKlickQueue = function(rawKlick){
   this.buildKlickTickLengths(this.klickQueue);
 };
 
-/* Plays next subclick. If no more subclicks, player is done */
+/* Plays next subclick. If no more subclicks, player is reset */
 BgPlayer.prototype.nextSubKlick = function(){
   var that = this;
   that.klickQueueIndex++;
@@ -120,8 +124,8 @@ BgPlayer.prototype.nextSubKlick = function(){
     });
   }
   else {
-    that.done();
-    sendResponse({response: 'BgPlayer: Done'});
+    that.reset();
+    sendResponse({response: 'BgPlayer: Reset'});
   }
 };
 
@@ -155,11 +159,14 @@ BgPlayer.prototype.playStagedKlick = function(){
   this.stagedKlick = undefined;
 };
 
-BgPlayer.prototype.done = function(){
-  console.log('BgPlayer: Play done');
-  this.status = 'ready';
+BgPlayer.prototype.reset = function(){
+  console.log('BgPlayer: Reset');
+  this.setStatus('empty');
   this.klickQueue = [];
+  this.klickTickLengths = [];
+  this.stagedKlick = undefined;
   this.klickQueueIndex = -1;
+  this.tabId = '';
 };
 
 /* ------------------------------------------------------------------------------------*/
