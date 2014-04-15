@@ -125,7 +125,6 @@ BgPlayer.prototype.nextSubKlick = function(){
           that.playStagedKlick();
         }
       });
-      sendResponse({response: 'BgPlayer: klickFinished received'});
     });
   }
   else {
