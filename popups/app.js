@@ -1,6 +1,6 @@
 angular.module('KlickrChromeApp', [])
 
-  .controller('PopupCtrl', function ($scope) {
+  .controller('PopupCtrl', function ($scope, $interval) {
 
     var bg = chrome.extension.getBackgroundPage();
     $scope.showMessage = false;
@@ -8,6 +8,18 @@ angular.module('KlickrChromeApp', [])
     $scope.isPaused = true;
 
     $scope.recorderStatus = bg.recorderStatus;
+
+    // stephan start
+    $interval(function(){
+      $scope.Links = bg.latestLinks;
+    },500);
+
+    $scope.redirect = function(url){
+      chrome.tabs.create({url: url});
+    };
+
+    //stephan end
+
 
     $scope.canRecord = function(){
       return $scope.recorderStatus === 'ready';
@@ -74,5 +86,6 @@ angular.module('KlickrChromeApp', [])
       bg.delete();
       window.close();
     };
+
 
   });
