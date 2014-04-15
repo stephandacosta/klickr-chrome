@@ -31,7 +31,7 @@
           <button ng-click="replay()" ng-show="isPaused" type="button" class="btn btn-default"><i class="fa fa-play-circle"></i> Replay</button>
           <button ng-click="pause()" ng-hide="isPaused" type="button" class="btn btn-default"><i class="fa fa-pause"></i> Pause</button>
           <button ng-click="save()" type="button" class="btn btn-primary">Save</button>
-          <button ng-click="delete()" type="button" class="btn btn-default">Delete</button>
+          <button ng-click="delete()" ng-show='showDelete' type="button" class="btn btn-default">Delete</button>
         </div>
       </div>
 

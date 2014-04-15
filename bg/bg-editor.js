@@ -18,6 +18,7 @@ var Editor = function () {
   this.currentRecorder = window.rec; // reference to current recorder in background // NEED TO CONFIRM WITH JUSTIN THAT THIS ISNT UNDEFINED
   this.currentPlayer = window.bgPlayer; // reference to current player in background // NEED TO CONFIRM WITH LUKE THAT THIS ISNT UNDEFINED
   this.currentIndex = 0; // Current tick object index within ticks array where playback should start at
+  this.isPaused = true; // when the editor is initially created, replay isn't happening so replay is paused
   this.currentKlickObject = _.cloneDeep(this.currentRecorder.getKlick()); // Using lo-dash for _.cloneDeep
   this.addClickAndKeypressAnnotations(); // automatically add annotations for keypress and click events within ticks array
   this.currentPlayer.buildKlickQueue(this.currentKlickObject);
@@ -27,16 +28,26 @@ var Editor = function () {
 /* Control bg-player instance and invoke its pause function, which returns the index
  * within the ticks array of where pause is occurring. */
 Editor.prototype.pausePlayback = function () {
-  console.log("In pausePlayback");
-  this.currentPlayer.pause();
+  if (!this.isPaused) {
+    console.log("Just got in pausePlayback and isPaused is", this.isPaused);
+    this.currentPlayer.pause();  
+    this.isPaused = !this.isPaused;
+    console.log("About to leave pausePlayback and isPaused is", this.isPaused);
+    // chrome.runtime.sendMessage({action : "sendPauseMessage", isPaused: this.isPaused});
+  }
 };
 
 /* Control bg-player instance and invoke its resume function, which takes an index within
  * the ticks array to resume on. */
 Editor.prototype.resumePlayback = function () {
-  console.log("In resumePlayback");
-  console.log("The current player", this.currentPlayer);
-  this.currentPlayer.resume(this.currentIndex);
+  // console.log("The current player", this.currentPlayer);
+  if (this.isPaused) {
+    console.log("Just got in resumePlayback and isPaused is", this.isPaused);
+    this.currentPlayer.resume(this.currentIndex);
+    this.isPaused = !this.isPaused;
+    console.log("About to leave resumePlayback and isPaused is", this.isPaused);
+    // chrome.runtime.sendMessage({action : "sendPauseMessage", isPaused: this.isPaused});
+  }
 };
 
 /* Prompt users to input a String as their annotation. Append this annotation 
@@ -45,7 +56,7 @@ Editor.prototype.addAnnotations = function () {
   console.log("In addAnnotations");
   var message = window.prompt("Please enter the annotation you'd like to add.");
 
-  if (message.length !== 0) {
+  if (message && message.length !== 0) {
     console.log("Added a new message");
     this.currentKlickObject.ticks[this.currentIndex].annotation = message;
   }
