@@ -1,28 +1,24 @@
 angular.module('KlickrChromeApp', [])
 
-  .controller('PopupCtrl', function ($scope) {
+  .controller('PopupCtrl', function ($scope, $interval) {
     var bg = chrome.extension.getBackgroundPage();
 
-    // chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    //   if (request.action === 'sendPauseMessage') {
-    //     $scope.isPaused = request.isPaused;
-    //     console.log("In app.js and $scope.isPaused is", $scope.isPaused);
-    //   }
-    // });
+    /* Status update loop */
+    $scope.refreshStatus = function(){
+      $scope.recorderStatus = bg.recorderStatus;
+      $scope.isPaused = bg.editor === undefined ? true : bg.editor.isPaused;
+      $scope.showDelete = bg.editor === undefined ? false : bg.editor.isPaused;
+    };
+
+    $scope.refreshStatus();
+    $interval(function() {
+      $scope.refreshStatus();
+    }, 500);
 
     $scope.showMessage = false;
     $scope.message = '';
-    $scope.showDelete = false;
 
-    // $scope.isPaused = bg.editor.isPaused;
-
-    $interval(function() {
-      $scope.recorderStatus = bg.recorderStatus;
-      if (bg.editor !== undefined) {
-        $scope.isPaused = bg.editor.isPaused;
-      }
-    }, 500);
-    // $scope.recorderStatus = bg.recorderStatus;
+    /* Other methods */
 
     $scope.canRecord = function(){
       return $scope.recorderStatus === 'ready';
@@ -67,21 +63,18 @@ angular.module('KlickrChromeApp', [])
     };
 
     $scope.replay = function(){
-      // $scope.isPaused = !$scope.isPaused;
       console.log("App.js: replay");
-      bg.bgPlayer.play();
-
-      // make delete button disappear
-      $scope.showDelete = false;
+      if (bg.editor === undefined) throw new Error('Popup: BgEditor should be defined when replay is clicked');
+      bg.editor.resumePlayback();
+      $scope.refreshStatus();
     };
 
     $scope.pause = function(){
       // $scope.isPaused = !$scope.isPaused;
       console.log("App.js: pause");
+      if (bg.editor === undefined) throw new Error('Popup: BgEditor should be defined when pause is clicked');
       bg.editor.pausePlayback();
-
-      // make delete button appear
-      $scope.showDelete = true;
+      $scope.refreshStatus();
     };
 
     $scope.toHome = function(){
@@ -104,5 +97,13 @@ angular.module('KlickrChromeApp', [])
       bg.delete();
       window.close();
     };
+
+
+    // chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    //   if (request.action === 'sendPauseMessage') {
+    //     $scope.isPaused = request.isPaused;
+    //     console.log("In app.js and $scope.isPaused is", $scope.isPaused);
+    //   }
+    // });
 
   });

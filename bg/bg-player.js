@@ -32,20 +32,17 @@ BgPlayer.prototype.resume = function(num){
 };
 
 BgPlayer.prototype.play = function(){
-  console.log('Background -> Recorder: Play recording');
+  console.log('BgPlayer: Play with klickQueue', this.klickQueue);
   this.stagedKlick = this.klickQueue[0];
-  console.log(this.klickQueue);
   this.klickQueueIndex = 0;
   var that = this;
   chrome.tabs.query({active:true, lastFocusedWindow: true}, function(tabs){
     that.tabId = tabs[0].id;
-    console.log(that.klickQueue);
-    console.log('which url');
     if(tabs[0].url !== that.stagedKlick.ticks[0].url){
-      console.log('diff url');
+      console.log('BgPlayer: Redirecting with stagedKlick', that.stagedKlick);
       that.redirect(that.stagedKlick.ticks[0].url);
     } else {
-      console.log('same url');
+      console.log('BgPlayer: Stay on page with stagedKlick', that.stagedKlick);
       chrome.tabs.sendMessage(that.tabId, {action:'play', klick: that.stagedKlick});
       that.stagedKlick = undefined;
     }
@@ -58,9 +55,10 @@ BgPlayer.prototype.play = function(){
 
 
 
-BgPlayer.prototype.redirect = function(nextUrl){
+BgPlayer.prototype.redirect = function(nextUrl, callback){
+  callback = callback || function(){};
   chrome.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {
-    chrome.tabs.update(tabs[0].id, {url: nextUrl});
+    chrome.tabs.update(tabs[0].id, {url: nextUrl}, callback);
   });
 };
 
@@ -141,29 +139,30 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   // in multi-page recording, used to store the next klick object that will be given after the page changes to a new url
   if (request.action === 'klickFinished') {
     bgPlayer.klickQueueIndex++;
-    console.log(bgPlayer.tabId);
+    console.log('BgPlayer: Klick finished from tab', bgPlayer.tabId);
     if (bgPlayer.klickQueueIndex < bgPlayer.klickQueue.length){
       bgPlayer.stagedKlick = bgPlayer.klickQueue[bgPlayer.klickQueueIndex];
-      bgPlayer.redirect(bgPlayer.stagedKlick.ticks[0].url);
-      chrome.tabs.query({}, function(tabs){
-        var foundTab;
-        for(var i = 0; i < tabs.length; i++){
-          if(tabs[i].id === bgPlayer.tabId){
-            foundTab = tabs[i];
-            break;
+      bgPlayer.redirect(bgPlayer.stagedKlick.ticks[0].url, function(){
+        // performed after redirect is completed
+        chrome.tabs.query({}, function(tabs){
+          var foundTab;
+          for(var i = 0; i < tabs.length; i++){
+            if(tabs[i].id === bgPlayer.tabId){
+              foundTab = tabs[i];
+              break;
+            }
           }
-        }
-        if(foundTab.status === 'complete'){
-          console.log('status complete');
-          chrome.tabs.sendMessage(bgPlayer.tabId, {action:'play', klick: bgPlayer.stagedKlick});
-          bgPlayer.stagedKlick = undefined;
-        } else{
-          console.log('i hate you');
-          //return;
-        }
+          if(foundTab.status === 'complete'){
+            console.log('BgPlayer: Status complete', foundTab);
+            chrome.tabs.sendMessage(bgPlayer.tabId, {action:'play', klick: bgPlayer.stagedKlick}, function(response){
+              console.log('BgPlayer: Received response', response);
+            });
+            bgPlayer.stagedKlick = undefined;
+          }
+        });
+        console.log('BgPlayer: Store recording in background');
+        sendResponse({response: "Background: Processed storage message"});
       });
-      console.log('Background: Store recording in background');
-      sendResponse({response: "Background: Processed storage message"});
     }
     else {
       console.log("Play Finished");
