@@ -79,7 +79,7 @@ Editor.prototype.updateKlick = function () {
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   // Comes from player.js's pausePlay function
-  if (request.action === 'klickPaused') {
+  if (request.action === 'pauseIndex') {
     window.editor.currentIndex = request.index;
     console.log("About to enter addAnnotation");
     window.editor.addAnnotations();
