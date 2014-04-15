@@ -8,11 +8,11 @@
 var Message = function (text, duration, coords) {
   this.$message = $("<div></div>");
   this.$message.css({
-    "background-color": "rgba(58, 73, 76, 0.7)",
-    "color": "white",
+    "background-color": "rgba(230, 230, 250, 0.9)",
+    "color": "black",
     "border-radius": "5px",
     "padding": "15px",
-    "font-size": "48px",
+    "font-size": "24px",
     "max-width": "50%"
   });
   this.$message.text(text);
@@ -25,7 +25,7 @@ var Message = function (text, duration, coords) {
     } else {
       // place message relative to top and left of document
       this.$message.css('position', 'absolute');
-      this.$message.css('top', coords.top + 'px');
+      this.$message.css('top', coords.top+ 45 + 'px');
       this.$message.css('left', coords.left + 'px');
     }
     this.$message.fadeOut(duration);
