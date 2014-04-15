@@ -21,6 +21,7 @@ var Editor = function () {
   this.isPaused = true; // when the editor is initially created, replay isn't happening so replay is paused
   this.currentKlickObject = _.cloneDeep(this.currentRecorder.getKlick()); // Using lo-dash for _.cloneDeep
   this.addClickAndKeypressAnnotations(); // automatically add annotations for keypress and click events within ticks array
+  this.currentPlayer.buildKlickQueue(this.currentKlickObject);
   console.log("Current Klick:", this.currentKlickObject);
 };
 

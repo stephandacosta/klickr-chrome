@@ -20,9 +20,6 @@ window.BgPlayer = BgPlayer;
 /* Replay: Send replay message */
 BgPlayer.prototype.replay = function(){
   // redirect to the first url in the ticks array
-  if(this.klickQueue.length === 0){
-    this.klickQueue = this.buildKlickQueue(window.rec.getKlick());
-  }
   console.log('Background: Replay recording');
   this.stagedKlick = this.klickQueue[0];
   this.klickQueueIndex = 0;
