@@ -12,6 +12,8 @@ angular.module('KlickrChromeApp', [])
 
     $scope.showMessage = false;
     $scope.message = '';
+    $scope.showDelete = false;
+
     // $scope.isPaused = bg.editor.isPaused;
 
     $interval(function() {
@@ -43,29 +45,44 @@ angular.module('KlickrChromeApp', [])
       window.close();
       $scope.recorderStatus = 'recording';
       bg.startRecording();
+
+      // make delete button disappear
+      $scope.showDelete = false;
     };
 
     $scope.stopRecording = function(){
       $scope.recorderStatus = 'processing';
       bg.stopRecording();
       $scope.isPaused = true;
+
+      // make delete button appear
+      $scope.showDelete = true;
     };
 
     $scope.playRecording = function(){
       window.close();
       bg.bgPlayer.playKlick();
+
+      // make delete button disappear
+      $scope.showDelete = false;
     };
 
     $scope.replay = function(){
       // $scope.isPaused = !$scope.isPaused;
       console.log("App.js: replay");
       bg.editor.resumePlayback();
+
+      // make delete button disappear
+      $scope.showDelete = false;
     };
 
     $scope.pause = function(){
       // $scope.isPaused = !$scope.isPaused;
       console.log("App.js: pause");
       bg.editor.pausePlayback();
+
+      // make delete button appear
+      $scope.showDelete = true;
     };
 
     $scope.toHome = function(){

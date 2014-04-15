@@ -56,7 +56,7 @@ Editor.prototype.addAnnotations = function () {
   console.log("In addAnnotations");
   var message = window.prompt("Please enter the annotation you'd like to add.");
 
-  if (message.length !== 0) {
+  if (message && message.length !== 0) {
     console.log("Added a new message");
     this.currentKlickObject.ticks[this.currentIndex].annotation = message;
   }
