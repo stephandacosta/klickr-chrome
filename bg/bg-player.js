@@ -3,12 +3,14 @@
 /* ------------------------------------------------------------------------------------*/
 var BgPlayer = function(){
 
+  console.log('Initiating BgPlayer...');
+
   this.id = ''; // klick object id (corresponds to _id in mongodb)
+  this.status = 'empty';
   this.klickQueue = [];
   this.klickTickLengths = [];
   this.stagedKlick = undefined;
   this.klickQueueIndex = -1;
-  console.log('bgPlayer initiated');
   this.tabId = '';
 
 };
@@ -21,30 +23,33 @@ window.BgPlayer = BgPlayer;
 
 /* Pause: Send pause message */
 BgPlayer.prototype.pause = function(){
-  console.log('Background: Pause recording');
+  console.log('BgPlayer: Pause');
+  this.status = 'paused';
   helpers.activeTabSendMessage({action: 'pause'});
 };
 
 BgPlayer.prototype.resume = function(num){
+  console.log('BgPlayer: Resume');
+  this.status = 'playing';
   this.stagedKlick = this.klickQueue[this.klickQueueIndex];
   console.log(this.stagedKlick);
-  helpers.activeTabSendMessage({action: "resume", klick: this.stagedKlick, index: num});
+  helpers.activeTabSendMessage({action: 'resume', klick: this.stagedKlick, index: num});
 };
 
 BgPlayer.prototype.play = function(){
   console.log('BgPlayer: Play with klickQueue', this.klickQueue);
+  this.status = 'playing';
   this.stagedKlick = this.klickQueue[0];
   this.klickQueueIndex = 0;
   var that = this;
   chrome.tabs.query({active:true, lastFocusedWindow: true}, function(tabs){
     that.tabId = tabs[0].id;
     if(tabs[0].url !== that.stagedKlick.ticks[0].url){
-      console.log('BgPlayer: Redirecting with stagedKlick', that.stagedKlick);
+      // console.log('BgPlayer: Redirecting with stagedKlick', that.stagedKlick);
       that.redirect(that.stagedKlick.ticks[0].url);
     } else {
-      console.log('BgPlayer: Stay on page with stagedKlick', that.stagedKlick);
-      chrome.tabs.sendMessage(that.tabId, {action:'play', klick: that.stagedKlick});
-      that.stagedKlick = undefined;
+      // console.log('BgPlayer: Stay on page with stagedKlick', that.stagedKlick);
+      that.playStagedKlick();
     }
   });
 };
@@ -52,8 +57,6 @@ BgPlayer.prototype.play = function(){
 /* ------------------------------------------------------------------------------------*/
 /* Helper Functions
 /* ------------------------------------------------------------------------------------*/
-
-
 
 BgPlayer.prototype.redirect = function(nextUrl, callback){
   callback = callback || function(){};
@@ -69,6 +72,7 @@ BgPlayer.prototype.getKlick = function(id){
     type: 'GET',
     contentType: 'application/json',
     success: function(rawKlick){
+      this.status = 'ready';
       that.buildKlickQueue(rawKlick);
     }
   });
@@ -87,6 +91,38 @@ BgPlayer.prototype.buildKlickQueue = function(rawKlick){
     }
   }
   this.buildKlickTickLengths(this.klickQueue);
+};
+
+/* Plays next subclick. If no more subclicks, player is done */
+BgPlayer.prototype.nextSubKlick = function(){
+  var that = this;
+  that.klickQueueIndex++;
+  if (that.klickQueueIndex < that.klickQueue.length){
+    that.stagedKlick = that.klickQueue[that.klickQueueIndex];
+    that.redirect(that.stagedKlick.ticks[0].url, function(){
+      // after redirect, find tab by ID
+      chrome.tabs.query({}, function(tabs){
+        var foundTab;
+        for(var i = 0; i < tabs.length; i++){
+          if(tabs[i].id === that.tabId){
+            foundTab = tabs[i];
+            break;
+          }
+        }
+
+        // if tab status is complete, then resume playback; else, wait for playerReady for resume playback
+        if(foundTab.status === 'complete'){
+          console.log('BgPlayer: Status complete', foundTab);
+          that.playStagedKlick();
+        }
+      });
+      sendResponse({response: 'BgPlayer: klickFinished received'});
+    });
+  }
+  else {
+    that.done();
+    sendResponse({response: 'BgPlayer: Done'});
+  }
 };
 
 BgPlayer.prototype.buildSubKlick = function(rawKlick, tickObj){
@@ -114,6 +150,18 @@ BgPlayer.prototype.getRawKlickIndex = function(queueIndex, playerIndex){
   return playerIndex;
 };
 
+BgPlayer.prototype.playStagedKlick = function(){
+  chrome.tabs.sendMessage(this.tabId, {action:'play', klick: this.stagedKlick});
+  this.stagedKlick = undefined;
+};
+
+BgPlayer.prototype.done = function(){
+  console.log('BgPlayer: Play done');
+  this.status = 'ready';
+  this.klickQueue = [];
+  this.klickQueueIndex = -1;
+};
+
 /* ------------------------------------------------------------------------------------*/
 /* Init and Player Listeners
 /* ------------------------------------------------------------------------------------*/
@@ -138,50 +186,17 @@ chrome.tabs.onUpdated.addListener(function(){
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   // in multi-page recording, used to store the next klick object that will be given after the page changes to a new url
   if (request.action === 'klickFinished') {
-    bgPlayer.klickQueueIndex++;
-    console.log('BgPlayer: Klick finished from tab', bgPlayer.tabId);
-    if (bgPlayer.klickQueueIndex < bgPlayer.klickQueue.length){
-      bgPlayer.stagedKlick = bgPlayer.klickQueue[bgPlayer.klickQueueIndex];
-      bgPlayer.redirect(bgPlayer.stagedKlick.ticks[0].url, function(){
-        // performed after redirect is completed
-        chrome.tabs.query({}, function(tabs){
-          var foundTab;
-          for(var i = 0; i < tabs.length; i++){
-            if(tabs[i].id === bgPlayer.tabId){
-              foundTab = tabs[i];
-              break;
-            }
-          }
-          if(foundTab.status === 'complete'){
-            console.log('BgPlayer: Status complete', foundTab);
-            chrome.tabs.sendMessage(bgPlayer.tabId, {action:'play', klick: bgPlayer.stagedKlick}, function(response){
-              console.log('BgPlayer: Received response', response);
-            });
-            bgPlayer.stagedKlick = undefined;
-          }
-        });
-        console.log('BgPlayer: Store recording in background');
-        sendResponse({response: "Background: Processed storage message"});
-      });
-    }
-    else {
-      console.log("Play Finished");
-      this.klickQueue = [];
-      this.klickQueueIndex = -1;
-      sendResponse({response: "Background: Finished klick play"});
-    }
+    bgPlayer.nextSubKlick();
   }
-
+  // TODO: Move into pause logic
   else if (request.action === 'klickPaused') {
     var rawKlickIndex = bgPlayer.getRawKlickIndex(bgPlayer.klickQueueIndex, request.index);
     chrome.runtime.sendMessage({action:'pauseIndex', index: rawKlickIndex});
   }
-
   // if the dom is ready and nextKlick is not false, then send the current page a new klick object to restart the player.
   else if (request.action === 'playerReady' && !!bgPlayer.stagedKlick && sender.tab.id === bgPlayer.tabId) {
-    chrome.tabs.sendMessage(bgPlayer.tabId, {action:'play', klick: bgPlayer.stagedKlick});
-    sendResponse({response: "Background: Processed klickFinished message"});
-    bgPlayer.stagedKlick = undefined;
+    sendResponse({response: 'BgPlayer: Processed klickFinished message'});
+    bgPlayer.playStagedKlick();
   }
 
 });
