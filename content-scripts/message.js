@@ -5,16 +5,30 @@
 /* - Built-in functionality to fade out
 /* ------------------------------------------------------------------------------------*/
 
+
+  var formatMessage = function(div){
+     div.css({
+      "background-color": "rgba(230, 230, 250, 0.9)",
+      "color": "black",
+      "border-radius": "5px",
+      "padding": "15px",
+      "font-size": "24px",
+      "max-width": "50%",
+      "z-index": 2147483647
+    });
+  };
+
 var Message = function (text, duration, coords) {
   this.$message = $("<div></div>");
-  this.$message.css({
-    "background-color": "rgba(230, 230, 250, 0.9)",
-    "color": "black",
-    "border-radius": "5px",
-    "padding": "15px",
-    "font-size": "24px",
-    "max-width": "50%"
-  });
+  formatMessage(this.$message);
+  // this.$message.css({
+  //   "background-color": "rgba(230, 230, 250, 0.9)",
+  //   "color": "black",
+  //   "border-radius": "5px",
+  //   "padding": "15px",
+  //   "font-size": "24px",
+  //   "max-width": "50%"
+  // });
   this.$message.text(text);
   this.$message.css('z-index', 2147483647);
 
