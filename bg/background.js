@@ -33,7 +33,7 @@ window.refreshRecorderStatus = function(forced){
   if (forced === undefined) forced = false;
   if (forced || (window.recorderStatus === 'loading' || window.recorderStatus === 'ready') ){
     chrome.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {
-      console.log('Background: Tab updated', tabs[0].url, tabs[0].status);
+      console.log('Background: Tab updated', tabs[0].url, tabs[0].id, tabs[0].status);
       if (tabs[0].status === 'loading'){
         window.recorderStatus = 'loading';
       } else if (tabs[0].status === 'complete') {
