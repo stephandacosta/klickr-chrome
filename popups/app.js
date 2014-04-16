@@ -23,7 +23,7 @@ angular.module('KlickrChromeApp', [])
     /* ------------------------------------------------------------------------------------*/
 
     $scope.canRecord = function(){
-      return $scope.recorderStatus === 'ready' && $scope.bgPlayer.getStatus() !== 'playing';
+      return $scope.recorderStatus === 'ready' && bg.bgPlayer.getStatus() !== 'playing';
     };
 
     $scope.canStop = function(){
