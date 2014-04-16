@@ -10,14 +10,14 @@ angular.module('KlickrChromeApp', [])
     $scope.recorderStatus = bg.recorderStatus;
 
     // stephan start
+    //****** NEED TO ADD $interval injection
     $interval(function(){
       $scope.Links = bg.latestLinks;
     },500);
 
-    $scope.redirect = function(url){
-      chrome.tabs.create({url: url});
+    $scope.showRecentLinks = function(){
+      return $scope.Links.length>0;
     };
-
     //stephan end
 
 
