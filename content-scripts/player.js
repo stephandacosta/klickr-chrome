@@ -25,6 +25,7 @@ var Player = function(){
     }
 
     else if (request.action === 'resume'){
+      console.log('Player: Resume', request.index, request.klick);
       that.resumePlayController(request.klick, request.index);
       console.log('Resuming Klick Play');
       sendResponse({response: "Player: Resuming Klick Play"});
