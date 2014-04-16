@@ -3,21 +3,21 @@
 /* Overall controller between BgEditor, BgPlayer and BgRecorder
 /* ------------------------------------------------------------------------------------*/
 
-console.log('Background initiated...');
+
 
 /* ------------------------------------------------------------------------------------*/
 /* CONFIG
 /* ------------------------------------------------------------------------------------*/
 
-var Klickr = {};
-window.Klickr = Klickr;
+var Klickr = function(){
+  this.hostname = 'klickr.io';
+  this.server = 'http://www.klickr.io';
+  this.latestLinks = [];
+  console.log('Background initiated...');
+};
 
-Klickr.hostname = 'klickr.io';
-Klickr.server = 'http://www.klickr.io';
+window.Klickr = new Klickr();
 
-  //stephan start
-  window.latestLinks = [];
-  //stehan send
 
 /* ------------------------------------------------------------------------------------*/
 /* RECORDER
@@ -48,7 +48,7 @@ chrome.tabs.onUpdated.addListener(function(){
 });
 
 /* Background -> BgRecorder: Start recording */
-window.startRecording = function(){
+Klickr.prototype.startRecording = function(){
   if (window.recorderStatus === 'ready'){
     console.log('Background: Start recording');
     bgPlayer.reset();
@@ -59,12 +59,12 @@ window.startRecording = function(){
 };
 
 /* Background -> BgRecorder: Stop recording */
-window.stopRecording = function(){
+Klickr.prototype.stopRecording = function(){
   if (window.recorderStatus === 'recording'){
     console.log('Background: Stop recording');
     window.recorderStatus = 'processing';
     window.rec.stop();
-    window.editor = new Editor();
+    window.editor = new BgEditor();
     helpers.activeTabSendMessage({action: 'removeRecordMessage'});
   }
 };

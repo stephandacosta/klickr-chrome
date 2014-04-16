@@ -67,14 +67,6 @@ window.Player = Player;
     }
   };
 
-  Player.prototype.targetSelectors = function(movement){
-    for(var i = 0; i < movement.length; i++){
-      if(movement[i].action === 'keypress' || movement[i].action === 'click'){
-        movement[i].selector = $($(movement[index].target.tagName)[movement[index].target.index]);
-      }
-    }
-  };
-
   //uses Date.parse to turn the timestamp value from a date to an integer.  Also establishes the t value of the movement array.
   // put movement[0].t === undefined so for multiple recordings, there would not be a lag between recordings
   Player.prototype.setMoveIntervals = function(movement){
