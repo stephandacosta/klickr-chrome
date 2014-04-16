@@ -17,6 +17,7 @@ var BgRecorder = function(){
   this.addListeners();
   this.msgStart();
   helpers.activeTabSendMessage({action: 'startRecording'});
+
 };
 
 window.BgRecorder = BgRecorder;
@@ -165,6 +166,10 @@ BgRecorder.prototype.send = function(){
     contentType: 'application/json',
     success: function(data) {
       console.log('BgRecorder -> Server: Klick sent', data);
+      // stephan start
+      var newLink = window.Klickr.server + data.linkUrl;
+      window.latestLinks.push({description: data.description, url: newLink});
+      // stephan end
     },
     error: function(data){
       console.log('BgRecorder -> Server: Klick send failed', data);
