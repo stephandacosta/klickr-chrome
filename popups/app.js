@@ -117,6 +117,9 @@ angular.module('KlickrChromeApp', [])
       return $scope.Links.length>0;
     };
 
+    $scope.encodedUrl = function(url){
+      return encodeURIComponent(url);
+    };
 
     // chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     //   if (request.action === 'sendPauseMessage') {
