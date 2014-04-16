@@ -13,7 +13,7 @@ angular.module('KlickrChromeApp', [])
     $scope.refreshStatus();
     $interval(function() {
       $scope.refreshStatus();
-      $scope.Links = bg.latestLinks;  //stephan add
+      $scope.Links = window.latestLinks;  //stephan add
       if ($scope.Links.length>0) {$scope.showRecentLinks = true;}  //stephan add
     }, 500);
 
@@ -97,12 +97,13 @@ angular.module('KlickrChromeApp', [])
         $scope.recorderStatus = 'saving';
         $scope.message = 'All\'s Good';
         $scope.showMessage = true;
-        bg.saveKlick($scope.desc);
+        bg.save($scope.desc);
+        bg.deleteRecorder();
       }
     };
 
     $scope.delete = function(){
-      bg.delete();
+      bg.deleteRecorder();
       window.close();
     };
 

@@ -8,7 +8,6 @@ var Player = function(){
   this.pause = false;
   this.window = $(window);
   this.body = $('body');
-  this.mouse = $('.mouse');
   var that = this;
 
   // Listens to messages from background
@@ -126,7 +125,7 @@ window.Player = Player;
   Player.prototype.endPlay = function(){
     console.log('Player: Sending to background');
     chrome.runtime.sendMessage({action : "klickFinished"});
-    this.mouse.detach();
+    $('.mouse').detach();
   };
 
 
