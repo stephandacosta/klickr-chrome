@@ -25,7 +25,9 @@ BgPlayer.prototype.play = function(){
   chrome.tabs.query({active:true, lastFocusedWindow: true}, function(tabs){
     that.tabId = tabs[0].id;
     if(tabs[0].url !== that.stagedKlick.ticks[0].url){
-      that.redirect(that.stagedKlick.ticks[0].url);
+      that.redirect(that.stagedKlick.ticks[0].url, function(){
+        that.playWhenPlayerReady();
+      });
     } else {
       that.playStagedKlick();
     }
@@ -73,7 +75,10 @@ BgPlayer.prototype.setStatus = function(status){
 BgPlayer.prototype.getTabById = function(tabId, callback){
   chrome.tabs.query({}, function(tabs){
     for (var i = 0; i < tabs.length; i++){
-      if (tabs[i].id === tabId) callback(tabs[i]);
+      if (tabs[i].id === tabId) {
+        callback(tabs[i]);
+        return;
+      }
     }
     callback(null);
   });
@@ -86,7 +91,7 @@ BgPlayer.prototype.getTabById = function(tabId, callback){
 BgPlayer.prototype.redirect = function(nextUrl, callback){
   callback = callback || function(){};
   this.getTabById(this.tabId, function(tab){
-    if (tab === null) return;
+    if (tab === null) throw new Error('Tab not found');
     chrome.tabs.update(tab.id, {url: nextUrl}, callback);
   });
 };
@@ -145,7 +150,7 @@ BgPlayer.prototype.playWhenPlayerReady = function(){
     // after redirect, find tab by ID
     that.getTabById(that.tabId, function(tab){
       if (tab === null) throw new Error('BgPlayer: Tab does not exist');
-      if(tab.status === 'complete'){
+      if (tab.status === 'complete'){
         console.log('BgPlayer: Status complete', tab);
         that.playStagedKlick();
         chrome.tabs.onUpdated.removeListener(nextSubKlickListener);
@@ -204,11 +209,16 @@ BgPlayer.prototype.getRawKlickIndex = function(queueIndex, playerIndex){
 
 /* Tell player to play klick */
 BgPlayer.prototype.playStagedKlick = function(){
-  console.log('BgPlayer: playStagedKlick', this.stagedKlick);
+  console.log('BgPlayer: playStagedKlick', this.stagedKlick, this.tabId);
+  var that = this;
   chrome.tabs.sendMessage(this.tabId, {action:'play', klick: this.stagedKlick}, function(res){
-    if (res === undefined || res.response === undefined) throw new Error('BgPlayer: Play message not received by Player');
+    if (res === undefined || res.response === undefined) {
+      // if no response, try again
+      that.playStagedKlick();
+      return;
+    }
+    this.stagedKlick = undefined;
   });
-  this.stagedKlick = undefined;
 };
 
 /* Reset BgPlayer variables to initial state */

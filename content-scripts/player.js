@@ -16,7 +16,7 @@ var Player = function(){
     if (request.action === 'play'){
       that.newPlayController(request.klick);
       console.log('Playing Klick');
-      sendResponse({response: "Player: Playing Klick..."});
+      sendResponse({response: 'Player: Playing Klick...'});
     }
 
     else if (request.action === 'pause'){
@@ -29,9 +29,13 @@ var Player = function(){
       console.log('Resuming Klick Play');
       sendResponse({response: "Player: Resuming Klick Play"});
     }
+
+    else if (request.action === 'ready'){
+      sendResponse({response: 'ready'});
+    }
+
   });
 
-  chrome.runtime.sendMessage({action: 'playerReady'});
 };
 
 window.Player = Player;

@@ -7,7 +7,6 @@ angular.module('KlickrChromeApp', [])
     $scope.refreshStatus = function(){
       $scope.recorderStatus = bg.recorderStatus;
       $scope.editorStatus = bg.editor === undefined ? 'inactive' : bg.editor.getStatus();
-      $scope.showDelete = $scope.editorStatus !== 'playing' && $scope.editorStatus !== 'inactive';
     };
 
     $scope.refreshStatus();
@@ -43,25 +42,17 @@ angular.module('KlickrChromeApp', [])
       window.close();
       $scope.recorderStatus = 'recording';
       bg.startRecording();
-
-      // make delete button disappear
-      $scope.showDelete = false;
     };
 
     $scope.stopRecording = function(){
       $scope.recorderStatus = 'processing';
       bg.stopRecording();
       $scope.isPaused = true;
-
-      // make delete button appear
-      $scope.showDelete = true;
     };
 
     $scope.playRecording = function(){
       window.close();
       bg.bgPlayer.play();
-      // make delete button disappear
-      $scope.showDelete = false;
     };
 
     $scope.toHome = function(){
