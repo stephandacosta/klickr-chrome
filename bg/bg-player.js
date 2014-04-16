@@ -37,12 +37,12 @@ BgPlayer.prototype.play = function(){
 /* Resume playing from tick index
  * @tickIndex: index to resume play from
  */
-BgPlayer.prototype.resume = function(tickIndex){
+BgPlayer.prototype.resume = function(resumeIndex){
   console.log('BgPlayer: Resume');
   this.setStatus('playing');
   this.stagedKlick = this.klickQueue[this.klickQueueIndex];
   console.log(this.stagedKlick);
-  helpers.activeTabSendMessage({action: 'resume', klick: this.stagedKlick, index: tickIndex});
+  helpers.activeTabSendMessage({action: 'resume', klick: this.stagedKlick, index: resumeIndex});
 };
 
 /* Pause */
@@ -261,7 +261,7 @@ BgPlayer.prototype.addPlayerListeners = function(){
     // Player --> BgPlayer: Returns index that is paused at upon pause
     else if (request.action === 'klickPaused') {
       var rawKlickIndex = that.getRawKlickIndex(that.klickQueueIndex, request.index);
-      chrome.runtime.sendMessage({action:'pauseIndex', index: rawKlickIndex});
+      chrome.runtime.sendMessage({action:'pauseIndex', rawIndex: rawKlickIndex, resumeIndex: request.index});
     }
   });
 };

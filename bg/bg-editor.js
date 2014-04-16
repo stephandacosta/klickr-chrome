@@ -18,6 +18,7 @@ var Editor = function () {
   this.currentRecorder = window.rec; // reference to current recorder in background // NEED TO CONFIRM WITH JUSTIN THAT THIS ISNT UNDEFINED
   this.currentPlayer = window.bgPlayer; // reference to current player in background // NEED TO CONFIRM WITH LUKE THAT THIS ISNT UNDEFINED
   this.currentIndex = 0; // Current tick object index within ticks array where playback should start at
+  this.resumeIndex = 0;
   this.setStatus('ready');
   this.currentKlickObject = _.cloneDeep(this.currentRecorder.getKlick()); // Using lo-dash for _.cloneDeep
   this.addClickAndKeypressAnnotations(); // automatically add annotations for keypress and click events within ticks array
@@ -63,7 +64,7 @@ Editor.prototype.replay = function(){
  * the ticks array to resume on. */
 Editor.prototype.resumePlayback = function () {
   if (this.status === 'paused') {
-    this.currentPlayer.resume(this.currentIndex);
+    this.currentPlayer.resume(this.resumeIndex);
     this.setStatus('playing');
   }
 };
@@ -118,7 +119,8 @@ Editor.prototype.getStatus = function(){
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   // Listening on bgPlayer's pausePlay function
   if (request.action === 'pauseIndex') {
-    window.editor.currentIndex = request.index;
+    window.editor.currentIndex = request.rawIndex;
+    window.editor.resumeIndex = request.resumeIndex;
     console.log("About to enter addAnnotation");
     window.editor.addAnnotations();
   }
