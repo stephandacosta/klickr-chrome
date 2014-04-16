@@ -5,9 +5,10 @@
 
 var Player = function(){
   console.log('Initializing player...');
-
   this.pause = false;
-
+  this.window = $(window);
+  this.body = $('body');
+  this.mouse = $('.mouse');
   var that = this;
 
   // Listens to messages from background
@@ -54,15 +55,23 @@ window.Player = Player;
 
   //scales clientX, clientY, pageX, and pageY so different screen sizes will have the same display.
   Player.prototype.scaleXY = function(klick){
-    var xScale = $(window).width() / klick.width || 1;
-    var yScale = $(window).height() / klick.height || 1;
-    klick.width = $(window).width();
-    klick.height = $(window).height();
+    var xScale = this.window.width() / klick.width || 1;
+    var yScale = this.window.height() / klick.height || 1;
+    klick.width = this.window.width();
+    klick.height = this.window.height();
     for(var i = 0; i < klick.ticks.length; i++){
       klick.ticks[i].clientX = klick.ticks[i].clientX*xScale;
       klick.ticks[i].clientY = klick.ticks[i].clientY*yScale;
       klick.ticks[i].pageX = klick.ticks[i].pageX*xScale;
       klick.ticks[i].pageY = klick.ticks[i].pageY*yScale;
+    }
+  };
+
+  Player.prototype.targetSelectors = function(movement){
+    for(var i = 0; i < movement.length; i++){
+      if(movement[i].action === 'keypress' || movement[i].action === 'click'){
+        movement[i].selector = $($(movement[index].target.tagName)[movement[index].target.index]);
+      }
     }
   };
 
@@ -125,7 +134,7 @@ window.Player = Player;
   Player.prototype.endPlay = function(){
     console.log('Player: Sending to background');
     chrome.runtime.sendMessage({action : "klickFinished"});
-    $('.mouse').detach();
+    this.mouse.detach();
   };
 
 
@@ -138,7 +147,8 @@ window.Player = Player;
   Player.prototype.placeMouse = function(movement){
     var cursor = chrome.extension.getURL("img/klickr-pointer.png");
     console.log(cursor);
-    $('body').append('<div class="mouse" style="position:absolute; background: url('+cursor+'); width: 40px; z-index: 9999; height:40px; top: '+movement[0].pageY+'px; left:'+movement[0].pageX+'px;"></div>');
+    this.body.append('<div class="mouse" style="position:absolute; background: url('+cursor+'); width: 40px;' +
+             'z-index: 9999; height:40px; top: '+movement[0].pageY+'px; left:'+movement[0].pageX+'px;"></div>');
   };
 
 
@@ -157,8 +167,8 @@ window.Player = Player;
 
 // moves mouse to given destination with duration
   Player.prototype.move = function (movement, index){
-    $(window).scrollLeft(movement[index].pageX-movement[index].clientX);
-    $(window).scrollTop(movement[index].pageY-movement[index].clientY);
+    this.window.scrollLeft(movement[index].pageX-movement[index].clientX);
+    this.window.scrollTop(movement[index].pageY-movement[index].clientY);
     d3.select('.mouse')
       .transition()
       .duration(movement[index].t)
