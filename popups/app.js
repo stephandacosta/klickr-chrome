@@ -14,11 +14,13 @@ angular.module('KlickrChromeApp', [])
     $scope.refreshStatus();
     $interval(function() {
       $scope.refreshStatus();
-      $scope.Links = bg.latestLinks;
+      $scope.Links = bg.latestLinks;  //stephan add
+      if ($scope.Links.length>0) {$scope.showRecentLinks = true;}  //stephan add
     }, 500);
 
     $scope.showMessage = false;
     $scope.message = '';
+    $scope.showRecentLinks = false;
 
     /* ------------------------------------------------------------------------------------*/
     /* TOP NAV
@@ -113,10 +115,11 @@ angular.module('KlickrChromeApp', [])
       window.close();
     };
 
-    $scope.showRecentLinks = function(){
-      return $scope.Links.length>0;
+    //stephan start
+    $scope.encodedUrl = function(url){
+      return encodeURIComponent(url);
     };
-
+    //stephan end
 
     // chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     //   if (request.action === 'sendPauseMessage') {
