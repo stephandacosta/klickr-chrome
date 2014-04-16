@@ -4,7 +4,6 @@
 /* ------------------------------------------------------------------------------------*/
 
 var BgRecorder = function(){
-
   console.log('Initiating BgEditor...');
 
   // bind listeners so they can be removed later
@@ -19,7 +18,6 @@ var BgRecorder = function(){
   this.msgStart();
   helpers.activeTabSendMessage({action: 'startRecording'});
 
-
 };
 
 window.BgRecorder = BgRecorder;
@@ -29,7 +27,9 @@ BgRecorder.prototype.getKlick = function(){
   return this.klick;
 };
 
-/* Update Klick object */
+/* Update Klick object
+ * @klick: KLick object to replace existing one
+ */
 BgRecorder.prototype.updateKlick = function(klick){
   this.klick = klick;
 };
@@ -64,7 +64,9 @@ BgRecorder.prototype.createKlick = function(){
   this.getWindowSize();
 };
 
-/* Add description */
+/* Add description to Klick
+ * @desc: description of Klick
+ */
 BgRecorder.prototype.addDescription = function(desc){
   this.klick.description = desc;
 };
@@ -91,17 +93,19 @@ BgRecorder.prototype.updateActiveTab = function(){
   }
 };
 
-/* Handles messages from content scripts */
-BgRecorder.prototype.msgHandler = function(request, sender, sendResponse){
+/* Handles messages from content scripts
+ * @request: message sent
+ * @sender: chrome tab that sent message
+ * @res: response
+ */
+BgRecorder.prototype.msgHandler = function(req, sender, res){
   var self = this;
-
   // appends tick to Klick
-  if (request.action === 'appendTick') {
-    self.appendTick(request.tick, sender.tab);
+  if (req.action === 'appendTick') {
+    self.appendTick(req.tick, sender.tab);
   }
-
   // when any recorder script is loaded, refresh the active tab
-  else if (request.action === 'recorderReady') {
+  else if (req.action === 'recorderReady') {
     self.bindUpdateActiveTab();
   }
 };
@@ -129,7 +133,10 @@ BgRecorder.prototype.getWindowSize = function(){
   });
 };
 
-/* Append tick to Klick object */
+/* Append tick to Klick object
+ * @tick: single tick object
+ * @fromTab: chrome tab that sent tick
+ */
 BgRecorder.prototype.appendTick = function(tick, fromTab){
   // if sent from active tab
   if (this.isRecording && this.activeTabId === fromTab.id){
@@ -137,7 +144,7 @@ BgRecorder.prototype.appendTick = function(tick, fromTab){
     this.klick.ticks.push(tick);
   } else {
     // for debugging
-    console.log('BgRecorder: REJECT', this.activeUrl, tick.url, tick.pageX, tick.pageY);
+    console.log('BgRecorder: Reject', this.activeUrl, tick.url, tick.pageX, tick.pageY);
   }
 };
 

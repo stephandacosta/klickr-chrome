@@ -110,6 +110,14 @@ BgPlayer.prototype.getKlick = function(id){
 /* Announce that playback is finished */
 BgPlayer.prototype.onPlayFinished = function(){
   chrome.runtime.sendMessage({action:'playerDone'});
+
+  // sends message to listeners in message.js
+  helpers.activeTabSendMessage({
+    action: 'createMessage',
+    message: 'Playback Finished',
+    duration: 2000,
+    coords: undefined
+  });
 };
 
 /* Breaks klick up into subklicks and queue them up for playback
