@@ -3,6 +3,7 @@
 /*
 /* ------------------------------------------------------------------------------------*/
 
+
 var Player = function(){
   console.log('Initializing player...');
   this.pause = false;
@@ -47,7 +48,6 @@ Player.prototype.formatKlick = function(klick) {
   var movement = klick.ticks;
   this.scaleXY(klick);
   this.setMoveIntervals(movement);
-  this.setMessages(movement);
 };
 
 //scales clientX, clientY, pageX, and pageY so different screen sizes will have the same display.
@@ -87,15 +87,6 @@ Player.prototype.parseDate = function(movement){
   }
 };
 
-// adds annotations
-Player.prototype.setMessages = function(movement){
-  for(var i = 0; i < movement.length; i++){
-    if(movement[i].annotation !== '' && movement[i].annotation !== undefined){
-      movement[i].message = new Message(movement[i].annotation, 'klickr_Annotations', {'top':movement[i].pageY, 'left':movement[i].pageX }, 3000);
-    }
-  }
-  console.log('Player: Setting messages..');
-};
 
 /* ------------------------------------------------------------------------------------*/
 /* Play Recording Methods
@@ -128,12 +119,13 @@ Player.prototype.endPlay = function(){
   this.mouse.detach();
 };
 
-
+// function to pause playback
 Player.prototype.pausePlay = function(index){
   chrome.runtime.sendMessage({action : "klickPaused", index:index});
   console.log('Player: paused');
 };
 
+// NEEDS REFACTOR !!
 //places the mouse in the dom and gives the mouse's initial position and characteristics
 Player.prototype.placeMouse = function(movement){
   var cursor = chrome.extension.getURL("img/klickr-pointer.png");
@@ -142,7 +134,7 @@ Player.prototype.placeMouse = function(movement){
            'z-index: 9999; height:40px; top: '+movement[0].pageY+'px; left:'+movement[0].pageX+'px;"></div>');
 };
 
-
+// function to display in DOM the various elements of a playback
 Player.prototype.showPlay = function(movement, index){
   if (movement[index].action === 'move'){
     this.move(movement, index);
@@ -151,8 +143,11 @@ Player.prototype.showPlay = function(movement, index){
   } else if (movement[index].action === 'click'){
     this.click(movement, index);
   }
-  if (!!movement[index].message){
-    positionMessage(movement[index].message.$message);
+  if (movement[index].annotation !== '' && movement[index].annotation !== undefined){
+    var message = new Message(movement[index].annotation,
+                              'klickr_Annotations',
+                              {'top':movement[index].pageY, 'left':movement[index].pageX },
+                              3000);
   }
 };
 
@@ -166,6 +161,7 @@ Player.prototype.move = function (movement, index){
     .style({'top': movement[index].pageY + 'px', 'left': movement[index].pageX + 'px'});
 };
 
+// shows key presses during recording
 Player.prototype.keypress =function(movement, index) {
   var $element = $($(movement[index].target.tagName)[movement[index].target.index]);
   var key = String.fromCharCode(movement[index].charCode);
@@ -173,6 +169,7 @@ Player.prototype.keypress =function(movement, index) {
   $element.val(text + key);
 };
 
+// shows clicks during recording
 Player.prototype.click = function(movement, index) {
   var $clickElement = $($(movement[index].target.tagName)[movement[index].target.index]);
   $clickElement.trigger('click');
@@ -183,11 +180,13 @@ Player.prototype.click = function(movement, index) {
 /* Play Controllers
 /* ------------------------------------------------------------------------------------*/
 
+// generate new playback
 Player.prototype.newPlayController = function(klick){
   this.formatKlick(klick);
   this.playRecording(klick.ticks, 0);
 };
 
+// resume playback after pause
 Player.prototype.resumePlayController = function(klick, index){
   this.formatKlick(klick);
   this.pause = false;

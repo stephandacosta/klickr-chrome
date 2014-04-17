@@ -21,17 +21,19 @@ var formatMessage = function(div){
 
 // function used in constructor to position message box
 var positionMessage = function (div, coords) {
-  div.css('position','absolute');
   // "Recording Now" message at bottom-right corner
   if (div.hasClass('klickr_Recording_Now')){
+    div.css('position','fixed');
     div.css('bottom', 0);
     div.css('right', 0);
   // Other recorder or player messages at center
   } else if (coords === undefined) {
+    div.css('position','fixed');
     div.css('top', window.innerHeight/2 - div.outerHeight(true)/2);
     div.css('left', window.innerWidth/2 - div.outerWidth(true)/2);
   } else {
     // annotations, clicks, keypresses at coordinates of the event
+    div.css('position','absolute');
     div.css('top', coords.top+ 45);
     div.css('left', coords.left);
   }
@@ -41,10 +43,13 @@ var positionMessage = function (div, coords) {
 var displayMessage = function(div, duration){
   // add this Message object's $message property onto DOM
   $(document.body).append(div);
+  console.log('should have displayed', div.text(), 'duration', duration, 'top', div.css('top'), 'left', div.css('left'));
 
   // fade out message
   if (duration !== undefined){
-    div.fadeOut(duration);
+    div.fadeOut(duration, function(){
+        div.remove();
+    });
   }
 
 };
@@ -57,10 +62,6 @@ var Message = function (text, messageClass, coords, duration) {
   formatMessage(this.$message);
   displayMessage(this.$message, duration);
   positionMessage(this.$message, coords);
-  console.log(text, '  this.$message.width()',this.$message.width());
-  console.log(text, '  this.$message.outerWidth(true)',this.$message.outerWidth(true));
-  console.log(text, '  this.$message.height()',this.$message.height());
-  console.log(text, '  this.$message.outerHeight(true)',this.$message.outerHeight(true));
 };
 
 
