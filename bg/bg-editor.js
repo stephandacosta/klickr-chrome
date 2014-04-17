@@ -37,19 +37,29 @@ BgEditor.prototype.addEditorListeners = function(){
   chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     // listens for playerDone action sent by bgPlayer
     if (request.action === 'playerDone') {
-      if (self.status !== 'playing') {
-        throw new Error('BgEditor: Expected playing status instead of ' + self.status + ' when player is done');
-      } else {
-        self.setStatus('ready');
-      }
+      self.playerDone();
     }
     //listens for the pauseIndex action sent by bgPlayer
     else if(request.action === 'pauseIndex') {
-      window.Klickr.editor.currentIndex = request.rawIndex;
-      window.Klickr.editor.resumeIndex = request.resumeIndex;
-      window.Klickr.editor.addAnnotations();
+      self.pauseIndex();
     }
   });
+};
+
+// 
+BgEditor.prototype.playerDone = function(){
+  if (this.status !== 'playing') {
+    throw new Error('BgEditor: Expected playing status instead of ' + this.status + ' when player is done');
+  } else {
+    this.setStatus('ready');
+  }
+};
+
+// 
+BgEditor.prototype.pauseIndex = function(){
+  window.Klickr.editor.currentIndex = request.rawIndex;
+  window.Klickr.editor.resumeIndex = request.resumeIndex;
+  window.Klickr.editor.addAnnotations();
 };
 
 /* ------------------------------------------------------------------------------------*/
@@ -65,6 +75,7 @@ BgEditor.prototype.pausePlayback = function () {
   }
 };
 
+// begins replay after replay button click
 BgEditor.prototype.replay = function(){
   if (this.status === 'ready'){
     this.currentPlayer.reset();

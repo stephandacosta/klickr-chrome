@@ -230,8 +230,11 @@ BgRecorder.prototype.send = function(){
 // loading -> ready -> recording -> processing -> saving
 window.Klickr.recorderStatus = 'loading';
 
+// refresh re
 window.Klickr.refreshRecorderStatus = function(forced){
-  if (forced === undefined) forced = false;
+  if (forced === undefined){
+    forced = false;
+  }
   if (forced || (window.Klickr.recorderStatus === 'loading' || window.Klickr.recorderStatus === 'ready') ){
     chrome.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {
       if (tabs[0].status === 'loading'){
@@ -247,12 +250,14 @@ chrome.tabs.onUpdated.addListener(function(){
   window.Klickr.refreshRecorderStatus();
 });
 
+// creates BgRecorder if the recorder status is ready
 window.Klickr.startRecording = function(){
   if (window.Klickr.recorderStatus === 'ready'){
     window.Klickr.bgRecorder = new BgRecorder();
   }
 };
 
+// deletes the recorder on Klickr
 window.Klickr.deleteRecorder = function () {
   window.Klickr.bgRecorder = undefined;
   window.Klickr.refreshRecorderStatus(true);
