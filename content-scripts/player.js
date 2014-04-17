@@ -91,7 +91,7 @@ Player.prototype.parseDate = function(movement){
 Player.prototype.setMessages = function(movement){
   for(var i = 0; i < movement.length; i++){
     if(movement[i].annotation !== '' && movement[i].annotation !== undefined){
-      movement[i].message = new Message(movement[i].annotation, 3000, {'top':movement[i].pageY, 'left':movement[i].pageX });
+      movement[i].message = new Message(movement[i].annotation, 'klickr_Annotations', {'top':movement[i].pageY, 'left':movement[i].pageX }, 3000);
     }
   }
   console.log('Player: Setting messages..');
@@ -152,7 +152,7 @@ Player.prototype.showPlay = function(movement, index){
     this.click(movement, index);
   }
   if (!!movement[index].message){
-    showMessageOnScreen(movement[index].message.$message);
+    positionMessage(movement[index].message.$message);
   }
 };
 
