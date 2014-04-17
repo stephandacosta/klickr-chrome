@@ -152,7 +152,7 @@ Player.prototype.showPlay = function(movement, index){
     this.click(movement, index);
   }
   if (!!movement[index].message){
-    movement[index].message.showMessageOnScreen();
+    showMessageOnScreen(movement[index].message.$message);
   }
 };
 
