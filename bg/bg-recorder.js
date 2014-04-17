@@ -178,8 +178,8 @@ BgRecorder.prototype.getWindowSize = function(){
 BgRecorder.prototype.stopRecording = function(){
   if (window.Klickr.recorderStatus === 'recording'){
     window.Klickr.recorderStatus = 'processing';
-    window.Klickr.bgRecorder.stop();
-    window.editor = new BgEditor();
+    this.stop();
+    window.Klickr.editor = new BgEditor();
     helpers.activeTabSendMessage({action: 'removeRecordMessage'});
   }
 };
@@ -195,11 +195,11 @@ BgRecorder.prototype.stop = function(){
 };
 
 /* Background -> BgRecorder: Save Klick */
-window.save = function(desc){
+BgRecorder.prototype.save = function(desc){
   if (window.Klickr.recorderStatus === 'processing'){
-    window.editor.updateKlick();
-    window.Klickr.bgRecorder.addDescription(desc);
-    window.Klickr.bgRecorder.send();
+    window.Klickr.editor.updateKlick();
+    this.addDescription(desc);
+    this.send();
   }
 };
 

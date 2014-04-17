@@ -45,9 +45,9 @@ BgEditor.prototype.addEditorListeners = function(){
     }
     //listens for the pauseIndex action sent by bgPlayer
     else if(request.action === 'pauseIndex') {
-      window.editor.currentIndex = request.rawIndex;
-      window.editor.resumeIndex = request.resumeIndex;
-      window.editor.addAnnotations();
+      window.Klickr.editor.currentIndex = request.rawIndex;
+      window.Klickr.editor.resumeIndex = request.resumeIndex;
+      window.Klickr.editor.addAnnotations();
     }
   });
 };
