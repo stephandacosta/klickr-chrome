@@ -15,8 +15,8 @@
 var BgEditor = function () {
   /* Configurations for each new BgEditor instance */
 
-  this.currentRecorder = window.rec; // reference to current recorder in background // NEED TO CONFIRM WITH JUSTIN THAT THIS ISNT UNDEFINED
-  this.currentPlayer = window.bgPlayer; // reference to current player in background // NEED TO CONFIRM WITH LUKE THAT THIS ISNT UNDEFINED
+  this.currentRecorder = window.Klickr.bgRecorder; // reference to current recorder in background // NEED TO CONFIRM WITH JUSTIN THAT THIS ISNT UNDEFINED
+  this.currentPlayer = window.Klickr.bgPlayer; // reference to current player in background // NEED TO CONFIRM WITH LUKE THAT THIS ISNT UNDEFINED
   this.currentIndex = 0; // Current tick object index within ticks array where playback should start at
   this.resumeIndex = 0;  // index which will be sent back to the context player in the bgPlayer.resume function
   this.status = 'ready';

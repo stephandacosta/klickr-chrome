@@ -10,20 +10,29 @@ var BgRecorder = function(){
   this.bindMsgHandler = helpers.bind(this.msgHandler, this);
 
   // init
-  this.isRecording = true;
-  this.createKlick();
-  this.bindUpdateActiveTab();
-  this.addListeners();
-  this.startMessage();
-  helpers.activeTabSendMessage({action: 'startRecording'});
+  this.init();
 
 };
 
 window.BgRecorder = BgRecorder;
 
 /* ------------------------------------------------------------------------------------*/
-/* Listeners
+/* Init and Listeners
 /* ------------------------------------------------------------------------------------*/
+
+/* Background -> BgRecorder: Start recording */
+BgRecorder.prototype.init = function(){
+  window.Klickr.bgPlayer.reset();
+  helpers.activeTabSendMessage({action: 'startRecording'});
+  window.Klickr.recorderStatus = 'recording';
+  this.isRecording = true;
+  this.createKlick();
+  this.bindUpdateActiveTab();
+  this.addListeners();
+  this.startMessage();
+  helpers.activeTabSendMessage({action: 'showRecordMessage', message: 'Recording Now'});
+};
+
 
 
 /* Add listeners */
@@ -161,8 +170,21 @@ BgRecorder.prototype.getWindowSize = function(){
 
 
 /* ------------------------------------------------------------------------------------*/
-/* End Record
+/*  End Recording
 /* ------------------------------------------------------------------------------------*/
+
+
+/* Background -> BgRecorder: Stop recording */
+BgRecorder.prototype.stopRecording = function(){
+  if (window.Klickr.recorderStatus === 'recording'){
+    window.Klickr.recorderStatus = 'processing';
+    window.Klickr.bgRecorder.stop();
+    window.editor = new BgEditor();
+    helpers.activeTabSendMessage({action: 'removeRecordMessage'});
+  }
+};
+
+
 
 /* Append tick to Klick object */
 BgRecorder.prototype.stop = function(){
@@ -170,6 +192,15 @@ BgRecorder.prototype.stop = function(){
   helpers.sendMessage({action: 'stopRecording'});
   this.removeListeners();
   this.stopMessage();
+};
+
+/* Background -> BgRecorder: Save Klick */
+window.save = function(desc){
+  if (window.Klickr.recorderStatus === 'processing'){
+    window.editor.updateKlick();
+    window.Klickr.bgRecorder.addDescription(desc);
+    window.Klickr.bgRecorder.send();
+  }
 };
 
 /* Background -> Server: Send current klick object to the server to save */
@@ -182,7 +213,7 @@ BgRecorder.prototype.send = function(){
     success: function(data) {
       // stephan start
       var newLink = window.Klickr.server + data.linkUrl;
-      window.latestLinks.push({description: data.description, url: newLink});
+      window.Klickr.latestLinks.push({description: data.description, url: newLink});
       // stephan end
     },
     error: function(data){
@@ -192,66 +223,39 @@ BgRecorder.prototype.send = function(){
 
 
 /* ------------------------------------------------------------------------------------*/
-/* RECORDER Status
+/* RECORDER Set Up
 /* ------------------------------------------------------------------------------------*/
 
 // Update recorder status
 // loading -> ready -> recording -> processing -> saving
-window.recorderStatus = 'loading';
+window.Klickr.recorderStatus = 'loading';
 
-window.refreshRecorderStatus = function(forced){
+window.Klickr.refreshRecorderStatus = function(forced){
   if (forced === undefined) forced = false;
-  if (forced || (window.recorderStatus === 'loading' || window.recorderStatus === 'ready') ){
+  if (forced || (window.Klickr.recorderStatus === 'loading' || window.Klickr.recorderStatus === 'ready') ){
     chrome.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {
       if (tabs[0].status === 'loading'){
-        window.recorderStatus = 'loading';
+        window.Klickr.recorderStatus = 'loading';
       } else if (tabs[0].status === 'complete') {
-        window.recorderStatus = 'ready';
+        window.Klickr.recorderStatus = 'ready';
       }
     });
   }
 };
 
 chrome.tabs.onUpdated.addListener(function(){
-  window.refreshRecorderStatus();
+  window.Klickr.refreshRecorderStatus();
 });
 
-/* ------------------------------------------------------------------------------------*/
-/* RECORDER Status
-/* ------------------------------------------------------------------------------------*/
-
-/* Background -> BgRecorder: Start recording */
-window.startRecording = function(){
-  if (window.recorderStatus === 'ready'){
-    bgPlayer.reset();
-    window.recorderStatus = 'recording';
-    window.rec = new BgRecorder();
-    helpers.activeTabSendMessage({action: 'showRecordMessage', message: 'Recording Now'});
+window.Klickr.startRecording = function(){
+  if (window.Klickr.recorderStatus === 'ready'){
+    window.Klickr.bgRecorder = new BgRecorder();
   }
 };
 
-/* Background -> BgRecorder: Stop recording */
-window.stopRecording = function(){
-  if (window.recorderStatus === 'recording'){
-    window.recorderStatus = 'processing';
-    window.rec.stop();
-    window.editor = new BgEditor();
-    helpers.activeTabSendMessage({action: 'removeRecordMessage'});
-  }
-};
-
-/* Background -> BgRecorder: Save Klick */
-window.save = function(desc){
-  if (window.recorderStatus === 'processing'){
-    window.editor.updateKlick();
-    window.rec.addDescription(desc);
-    window.rec.send();
-  }
-};
-
-window.deleteRecorder = function () {
-  window.rec = undefined;
-  window.refreshRecorderStatus(true);
+window.Klickr.deleteRecorder = function () {
+  window.Klickr.bgRecorder = undefined;
+  window.Klickr.refreshRecorderStatus(true);
 };
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
@@ -262,15 +266,15 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
   // Save recording: staged recording is sent to recorder to be pushed to server
   else if (request.action === 'save') {
-    window.rec.addDescription(request.description);
-    window.rec.send();
-    window.rec = undefined;
-    bgPlayer.klickQueue = [];
+    window.Klickr.bgRecorder.addDescription(request.description);
+    window.Klickr.bgRecorder.send();
+    window.Klickr.bgRecorder = undefined;
+    window.Klickr.bgPlayer.klickQueue = [];
     sendResponse({response: 'Background: Processed save message'});
   }
 
   // If DOM is ready and window.recorderStatus = 'recording', then send message to message.js
-  else if (request.action === 'recorderReady' && window.recorderStatus === 'recording') {
+  else if (request.action === 'recorderReady' && window.Klickr.recorderStatus === 'recording') {
     helpers.activeTabSendMessage({action: 'showRecordMessage', message: 'Recording Now'});
   }
 });

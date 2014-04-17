@@ -275,5 +275,4 @@ BgPlayer.prototype.addPlayerListeners = function(){
 /* INIT
 /* ------------------------------------------------------------------------------------*/
 
-var bgPlayer = new BgPlayer();
-window.bgPlayer = bgPlayer;
+window.Klickr.bgPlayer = new BgPlayer();

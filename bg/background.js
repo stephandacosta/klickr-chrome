@@ -3,13 +3,10 @@
 /* Overall controller between BgEditor, BgPlayer and BgRecorder
 /* ------------------------------------------------------------------------------------*/
 
-var Klickr = function(){
-  this.hostname = 'klickr.io';
-  this.server = 'http://www.klickr.io';
-  
-  this.bgRecorder = undefined;
-};
+var Klickr = {};
 
-window.Klickr = new Klickr();
+Klickr.hostname = 'klickr.io';
+Klickr.server = 'http://www.klickr.io';
+Klickr.latestLinks = [];
+window.Klickr = Klickr;
 
-window.latestLinks = [];
