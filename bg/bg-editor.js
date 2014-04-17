@@ -41,7 +41,7 @@ BgEditor.prototype.addEditorListeners = function(){
     }
     //listens for the pauseIndex action sent by bgPlayer
     else if(request.action === 'pauseIndex') {
-      self.pauseIndex();
+      self.pauseIndex(request);
     }
   });
 };
@@ -56,7 +56,7 @@ BgEditor.prototype.playerDone = function(){
 };
 
 // 
-BgEditor.prototype.pauseIndex = function(){
+BgEditor.prototype.pauseIndex = function(request){
   window.Klickr.editor.currentIndex = request.rawIndex;
   window.Klickr.editor.resumeIndex = request.resumeIndex;
   window.Klickr.editor.addAnnotations();
